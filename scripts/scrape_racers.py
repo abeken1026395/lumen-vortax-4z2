@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-出走表スクレイパー (GitHub Actions自動実行版)
-今日開催している全場・全レースの出走表から、各選手の
-全国勝率・当地勝率・モーター成績などを取得する。
+出走表スクレイパー (GitHub Actions自動実行版) v3
+各選手は1つの<tr>に横並び。tdの位置で項目を特定する。
+td構成: [枠, 写真, 登録番号/級別/氏名/支部/年齢体重, F/L/平均ST,
+         全国(勝率/2連/3連), 当地(勝率/2連/3連), モーター, ボート, ...]
 docs/racers/ に index.html と racers_today.csv を出力。
 """
 
@@ -35,87 +36,94 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(SCRIPT_DIR, "template_racers.html")
 
 
-def num(s):
-    """文字列から数値部分を抽出。失敗したら空文字"""
-    s = s.strip()
-    m = re.search(r"-?\d+\.?\d*", s)
-    return m.group(0) if m else ""
+def cell_decimals(td):
+    """td内の小数(X.XX)を出現順に返す"""
+    return re.findall(r"\d+\.\d+", td.get_text(" ", strip=True))
 
 
 def parse_racelist(html, jcd, venue, hd, rno):
-    """1レースの出走表をパースして6艇分のレコードを返す"""
     soup = BeautifulSoup(html, "html.parser")
     records = []
 
-    # 出走表テーブル: class に is-w に近いものや、tbody が選手ごと
-    # 各選手は1つの tbody にまとまっている
-    tbodies = soup.find_all("tbody")
-    for tb in tbodies:
-        # 登録番号/級別が入った行を探す
-        text = tb.get_text(" ", strip=True)
-        # 登録番号(4桁) と 級別(A1/A2/B1/B2) が両方あるブロックのみ対象
-        m_toban = re.search(r"(\d{4})\s*/\s*(A1|A2|B1|B2)", text)
-        if not m_toban:
+    for tr in soup.find_all("tr"):
+        tds = tr.find_all("td")
+        if len(tds) < 8:
+            continue
+        tr_text = tr.get_text(" ", strip=True)
+        m = re.search(r"(\d{4})\s*/\s*(A1|A2|B1|B2)", tr_text)
+        if not m:
             continue
 
-        toban = m_toban.group(1)
-        rank = m_toban.group(2)
+        toban = m.group(1)
+        rank = m.group(2)
 
-        # 枠番: tbody内の最初のtdに 1〜6 が入っている
-        waku = ""
-        first_td = tb.find("td")
-        if first_td:
-            wt = first_td.get_text(strip=True)
-            if wt in ("1", "2", "3", "4", "5", "6"):
-                waku = wt
-
-        # 氏名: profileリンクのテキスト
+        # 氏名: profileリンクのうち、テキストが数字でない(=写真リンクでない)もの
         name = ""
-        a = tb.find("a", href=re.compile(r"toban=\d+"))
-        if a:
-            name = a.get_text(strip=True)
+        for a in tr.find_all("a", href=re.compile(r"toban=\d+")):
+            txt = a.get_text(strip=True)
+            if txt and not txt.isdigit():
+                name = txt
+                break
 
-        # 数値群を順に拾う: 全国勝率/2連/3連, 当地勝率/2連/3連, モーターNo/2連/3連, ボートNo/2連/3連
-        # tbody内の数値セルを順番に集める
-        cell_texts = [td.get_text(strip=True) for td in tb.find_all("td")]
+        # 枠番: 最初のtdが 1〜6
+        waku = ""
+        first = tds[0].get_text(strip=True)
+        if first in ("1", "2", "3", "4", "5", "6"):
+            waku = first
 
-        # 小数(X.XX) と パーセント的な数値を抽出
-        floats = []
-        for ct in cell_texts:
-            if re.match(r"^\d{1,2}\.\d{2}$", ct):
-                floats.append(ct)
+        # F数/L数/平均ST
+        f_match = re.search(r"F\s*(\d+)", tr_text)
+        l_match = re.search(r"L\s*(\d+)", tr_text)
+        f_num = f_match.group(1) if f_match else ""
+        l_num = l_match.group(1) if l_match else ""
 
-        # 全国: 勝率,2連率,3連率 / 当地: 勝率,2連率,3連率 の最初の6個を期待
+        # 「登録番号/級別/氏名」のtdを探す → その次から F/L, 全国, 当地 と並ぶ
+        # tobanを含むtdのindexを特定
+        info_idx = None
+        for i, td in enumerate(tds):
+            if re.search(r"\d{4}\s*/\s*(A1|A2|B1|B2)", td.get_text(" ", strip=True)):
+                info_idx = i
+                break
+
+        zen = ["", "", ""]   # 全国 勝率/2連/3連
+        toti = ["", "", ""]  # 当地 勝率/2連/3連
+        avg_st = ""
+        if info_idx is not None:
+            # info_idx+1 = F/L/平均ST列, +2 = 全国, +3 = 当地 を期待
+            if info_idx + 1 < len(tds):
+                fl_dec = cell_decimals(tds[info_idx + 1])
+                # 平均STは 0.XX
+                for d in fl_dec:
+                    if re.match(r"^0\.\d+$", d) or re.match(r"^\d\.\d{2}$", d):
+                        avg_st = d
+                        break
+            if info_idx + 2 < len(tds):
+                zd = cell_decimals(tds[info_idx + 2])
+                for j in range(min(3, len(zd))):
+                    zen[j] = zd[j]
+            if info_idx + 3 < len(tds):
+                td_ = cell_decimals(tds[info_idx + 3])
+                for j in range(min(3, len(td_))):
+                    toti[j] = td_[j]
+
         rec = {
             "場名": venue, "場コード": jcd, "開催日": hd, "レース": "{}R".format(rno),
             "枠": waku, "登録番号": toban, "級別": rank, "氏名": name,
+            "F数": f_num, "L数": l_num, "平均ST": avg_st,
+            "全国勝率": zen[0], "全国2連率": zen[1], "全国3連率": zen[2],
+            "当地勝率": toti[0], "当地2連率": toti[1], "当地3連率": toti[2],
         }
-
-        # F数/L数/平均ST を抽出
-        f_match = re.search(r"F(\d+)", text)
-        l_match = re.search(r"L(\d+)", text)
-        rec["F数"] = f_match.group(1) if f_match else ""
-        rec["L数"] = l_match.group(1) if l_match else ""
-
-        # 全国・当地の勝率群（最初に出てくる X.XX 系を割り当て）
-        # ページ構造上: 全国勝率,全国2連,全国3連,当地勝率,当地2連,当地3連 の順
-        labels = ["全国勝率", "全国2連率", "全国3連率", "当地勝率", "当地2連率", "当地3連率"]
-        for i, lab in enumerate(labels):
-            rec[lab] = floats[i] if i < len(floats) else ""
-
         records.append(rec)
 
     return records
 
 
 def find_open_date_and_scrape(jcd, venue):
-    """開催日を探し、その日の全レースをスクレイプ"""
     today = datetime.date.today()
     candidates = [0, -1, 1, -2, 2, -3, 3]
     for sign in candidates:
         d = today + datetime.timedelta(days=sign)
         hd = d.strftime("%Y%m%d")
-        # まず1Rで開催確認
         url = "https://www.boatrace.jp/owpc/pc/race/racelist?rno=1&jcd={}&hd={}".format(jcd, hd)
         try:
             resp = requests.get(url, headers=HEADERS, timeout=12)
@@ -124,15 +132,13 @@ def find_open_date_and_scrape(jcd, venue):
             recs = parse_racelist(resp.text, jcd, venue, hd, 1)
             if not recs:
                 continue
-            # 開催確認OK → 全12レース取得
             all_recs = list(recs)
             for rno in range(2, 13):
                 u = "https://www.boatrace.jp/owpc/pc/race/racelist?rno={}&jcd={}&hd={}".format(rno, jcd, hd)
                 try:
                     r = requests.get(u, headers=HEADERS, timeout=12)
                     if r.status_code == 200:
-                        rr = parse_racelist(r.text, jcd, venue, hd, rno)
-                        all_recs.extend(rr)
+                        all_recs.extend(parse_racelist(r.text, jcd, venue, hd, rno))
                 except Exception:
                     pass
                 time.sleep(0.4)
@@ -144,10 +150,9 @@ def find_open_date_and_scrape(jcd, venue):
 
 
 def main():
-    print("出走表スクレイパー (自動実行)")
+    print("出走表スクレイパー v3 (自動実行)")
     print("実行日時:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     print()
-
     all_records = []
     for jcd, name in VENUES.items():
         print("[{}] {} ...".format(jcd, name), end=" ", flush=True)
@@ -159,7 +164,6 @@ def main():
         print("OK ({} 名 / {})".format(len(records), hd))
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-
     if not all_records:
         print("\n本日開催の出走表が取得できませんでした。")
         if os.path.exists(os.path.join(OUTPUT_DIR, "index.html")):
@@ -176,11 +180,9 @@ def main():
         {"columns": cols, "data": data, "venues": dict(VENUES), "updated": updated},
         ensure_ascii=False, default=str,
     )
-
     with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
         template = f.read()
     html = template.replace("__DATA_PLACEHOLDER__", data_json)
-
     with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
         f.write(html)
     print("ビューワー保存: {}/index.html".format(OUTPUT_DIR))
