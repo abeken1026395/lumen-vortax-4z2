@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本日の見どころ｜BOATRACE データ攻め</title>
+<style>
+:root{
+  --bg:#0b1219; --panel:#111c27; --panel2:#0e1822; --line:#1e2d3c;
+  --txt:#e6edf3; --sub:#8aa0b4; --acc:#ffd166; --acc2:#4aa8ff;
+  --w1:#ffffff; --w2:#2b2b2b; --w3:#e23b3b; --w4:#2f7be2; --w5:#f2c200; --w6:#3aab5a;
+  --hot:#ff6b5b; --firm:#4aa8ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 60px}
+header{padding:8px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.eyebrow{color:var(--acc);font-size:12px;letter-spacing:.18em;font-weight:700}
+h1{font-size:22px;font-weight:800;margin-top:4px}
+.date{color:var(--sub);font-size:13px;margin-top:4px}
+.lead{color:var(--sub);font-size:12.5px;margin-top:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.lead b{color:var(--txt)}
+.tabs{display:flex;gap:6px;margin:16px 0 14px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.tab{flex:1;text-align:center;padding:9px 4px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--sub);font-size:13px;font-weight:700;cursor:pointer}
+.tab.on{color:var(--bg);background:var(--acc);border-color:var(--acc)}
+.tab.on.firm{background:var(--firm);border-color:var(--firm);color:#04121f}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:11px}
+.chead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rname{font-weight:800;font-size:15.5px}
+.deadline{color:var(--sub);font-size:12px;margin-left:auto}
+.badge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px}
+.b-hot{background:rgba(255,107,91,.16);color:var(--hot);border:1px solid rgba(255,107,91,.4)}
+.b-firm{background:rgba(74,168,255,.16);color:var(--firm);border:1px solid rgba(74,168,255,.4)}
+.b-mid{background:rgba(255,209,102,.14);color:var(--acc);border:1px solid rgba(255,209,102,.35)}
+.b-in{background:var(--panel2);color:var(--sub);border:1px solid var(--line)}
+.boats{margin:11px 0 4px;display:flex;flex-direction:column;gap:4px}
+.boat{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:3px 2px}
+.wk{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
+.wk1{background:var(--w1);color:#000}.wk2{background:var(--w2);color:#fff}.wk3{background:var(--w3);color:#fff}.wk4{background:var(--w4);color:#fff}.wk5{background:var(--w5);color:#000}.wk6{background:var(--w6);color:#fff}
+.lv{font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;flex-shrink:0}
+.lvA1{background:#c0392b;color:#fff}.lvA2{background:#e07b39;color:#fff}.lvB1{background:#33485c;color:#cfe}.lvB2{background:#26333f;color:#9ab}
+.nm{font-weight:700;min-width:58px}
+.flag{font-size:10px;font-weight:800;margin-left:3px}
+.fF{color:var(--hot)}.fST{color:#4aa8ff}
+.mtr{font-size:10.5px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);color:var(--sub);flex-shrink:0}
+.mtr.hi{color:#3aab5a;border-color:rgba(58,171,90,.5)}
+.mtr.lo{color:#ff8a7a;border-color:rgba(255,138,122,.45)}
+.stat{color:var(--sub);font-size:11.5px;margin-left:auto;text-align:right;white-space:nowrap}
+.stat .up{color:var(--acc);font-weight:800}
+.headline{margin-top:10px;font-size:13.5px;font-weight:800;color:var(--acc);line-height:1.45;display:flex;gap:6px;align-items:baseline}
+.headline .lbl{font-size:9.5px;font-weight:800;color:var(--bg);background:var(--acc);padding:2px 5px;border-radius:4px;flex-shrink:0;letter-spacing:.04em;position:relative;top:-1px}
+.tenkai{margin-top:9px;border-top:1px dashed var(--line);padding-top:9px}
+.tenkai .t{font-size:11px;color:var(--acc);font-weight:800;letter-spacing:.05em;margin-bottom:4px}
+.tenkai p{font-size:12.5px;color:#cdd9e4;margin-bottom:3px}
+.tenkai p::before{content:"▸ ";color:var(--sub)}
+.suji{font-size:11.5px;color:var(--sub);margin-top:6px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 9px}
+.suji b{color:var(--acc2)}
+.warn{font-size:10.5px;color:var(--sub);margin-top:6px;font-style:italic}
+.note{color:var(--sub);font-size:11px;text-align:center;margin-top:18px;line-height:1.7}
+.loading,.empty{text-align:center;color:var(--sub);padding:34px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">TODAY'S FOCUS</div>
+  <h1>本日の見どころ</h1>
+  <div class="date" id="date">読み込み中…</div>
+  <div class="lead">
+    出走表＋モーターのデータから<b>機械的に拾える条件だけ</b>を並べています。買い目・確率・勝者予想は出しません。
+    展開文はコース別の役割（①逃げ／②差し／③④まくり）に沿った<b>複数の筋の併置</b>。最後の一歩は読み手が埋めてください。
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab on" data-v="hot" onclick="sw('hot')">⚡ 波乱注目</div>
+  <div class="tab firm" data-v="firm" onclick="sw('firm')">🛡 堅め注目</div>
+  <div class="tab" data-v="all" onclick="sw('all')">📋 場別すべて</div>
+</div>
+
+<div id="list"><div class="loading">データを読み込み中…</div></div>
+<div class="note" id="note"></div>
+</div>
+
+<script>
+let RACES=[], VIEW='hot';
+
+function boatRow(b){
+  let fl=''; if(b['F']) fl+='<span class="flag fF">F</span>'; if(b['鋭ST']) fl+='<span class="flag fST">ST</span>';
+  const mc = b['機力評価']==='hi'?' hi':b['機力評価']==='lo'?' lo':'';
+  const mtxt = (b['機力']!=null)?Math.round(b['機力']):'－';
+  const up=b['当地優位'];
+  return `<div class="boat">
+    <span class="wk wk${b['枠']}">${b['枠']}</span>
+    <span class="lv lv${b['級別']}">${b['級別']}</span>
+    <span class="nm">${b['氏名']}${fl}</span>
+    <span class="mtr${mc}">機${mtxt}</span>
+    <span class="stat">全${b['全国勝率'].toFixed(2)}／当${up?'<span class="up">':''}${b['当地勝率']>0?b['当地勝率'].toFixed(2):'－'}${up?'▲</span>':''}</span>
+  </div>`;
+}
+
+function badge(r){
+  if(VIEW==='firm') return `<span class="badge b-firm">イン堅め</span>`;
+  if(r['波乱']>=4) return `<span class="badge b-hot">波乱 ${r['波乱']}</span>`;
+  if(r['波乱']>=2) return `<span class="badge b-mid">波乱 ${r['波乱']}</span>`;
+  return `<span class="badge b-in">波乱 ${r['波乱']}</span>`;
+}
+
+function renderCard(r){
+  return `<div class="card">
+    <div class="chead"><span class="rname">${r['場名']} ${r['レース']}</span>${badge(r)}
+      ${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}</div>
+    <div class="boats">${r['艇'].map(boatRow).join('')}</div>
+    <div class="headline"><span class="lbl">見立て</span><span>${r['見立て']}</span></div>
+    <div class="tenkai"><div class="t">展開の筋</div>${r['展開'].map(p=>`<p>${p}</p>`).join('')}</div>
+    <div class="suji"><b>波及の連鎖</b>：${r['波及']}</div>
+    ${!r['モーター使用']?`<div class="warn">※当節モーター成績は集計前のため、機力は判定から除外しています。</div>`:''}
+  </div>`;
+}
+
+function sw(v){VIEW=v;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));render();}
+
+function render(){
+  const el=document.getElementById('list');
+  let arr=[...RACES];
+  if(VIEW==='hot'){
+    arr=arr.filter(r=>r['波乱']>=2).sort((x,y)=>y['波乱']-x['波乱']||x['場名'].localeCompare(y['場名'],'ja'));
+    if(!arr.length){el.innerHTML='<div class="empty">本日は波乱条件が2つ以上揃うレースがありません。</div>';return;}
+  }else if(VIEW==='firm'){
+    arr=arr.filter(r=>r['イン堅']).sort((x,y)=>x['波乱']-y['波乱']||y['イン1着率']-x['イン1着率']);
+    if(!arr.length){el.innerHTML='<div class="empty">本日はイン堅め条件のレースがありません。</div>';return;}
+  }else{
+    arr.sort((x,y)=>x['場名'].localeCompare(y['場名'],'ja')||(parseInt(x['レース'])-parseInt(y['レース'])));
+  }
+  el.innerHTML=arr.map(renderCard).join('');
+}
+
+fetch('highlights.json?_='+Date.now())
+.then(r=>{if(!r.ok)throw 0;return r.json();})
+.then(doc=>{
+  RACES=doc['レース']||[];
+  const d=doc['開催日']||'';
+  if(d.length===8) document.getElementById('date').textContent=`${d.slice(0,4)}年${+d.slice(4,6)}月${+d.slice(6,8)}日 ${doc['レース数']}レース`;
+  const conf=(doc['確定イン率場']||[]).join('・');
+  document.getElementById('note').innerHTML=`イン1着率は目安値（${conf}は公式実数、他は暫定）。機＝モーター2連率（その節の機力目安で、選手の調子とは別物）。<br>波乱＝外枠A級・当地巧者アウト・イン不安・機力ちぐはぐ等の条件数。買い目・確率・勝者予想は出していません。<br><span style="opacity:.7">生成：${(doc['生成時刻']||'').replace('T',' ').slice(0,16)}</span>`;
+  render();
+})
+.catch(()=>{document.getElementById('list').innerHTML='<div class="empty">見どころデータを読み込めませんでした。highlights.json を確認してください。</div>';});
+</script>
+</body>
+</html>
