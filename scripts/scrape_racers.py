@@ -143,8 +143,10 @@ def parse_racelist(html, jcd, venue, hd, rno):
 
 
 def find_open_date_and_scrape(jcd, venue):
+    # 本日のみを対象にする。非開催場の前回/次節データを誤って拾わないため、
+    # 過去日(-1等)や先の日付は探さない。本日のページに出走表が無ければ「開催なし」。
     today = datetime.date.today()
-    candidates = [0, -1, 1, -2, 2, -3, 3]
+    candidates = [0]
     for sign in candidates:
         d = today + datetime.timedelta(days=sign)
         hd = d.strftime("%Y%m%d")
