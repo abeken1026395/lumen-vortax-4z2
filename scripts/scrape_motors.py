@@ -33,6 +33,32 @@ OUTPUT_DIR = os.path.join("docs", "motor")
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(SCRIPT_DIR, "template.html")
 
+JST = datetime.timezone(datetime.timedelta(hours=9))
+
+
+def target_date():
+    """対象開催日。GitHub ActionsはUTCなのでJSTに直して判定。
+    出走表と揃える：JST18時以降の夜実行は翌日分、日中は当日分。"""
+    now = datetime.datetime.now(JST)
+    if now.hour >= 18:
+        return now.date() + datetime.timedelta(days=1)
+    return now.date()
+
+
+def get_open_venues(hd):
+    """本日（対象日）開催している場コードの集合。非開催場の前節データ混入を防ぐ。
+    取得できなければ None（呼び出し側は全場試行にフォールバック）。"""
+    url = "https://www.boatrace.jp/owpc/pc/race/index?hd={}".format(hd)
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=12)
+        if resp.status_code != 200:
+            return None
+        # 生HTMLでは & が &amp; になるため両対応
+        found = set(re.findall(r"jcd=(\d{2})&(?:amp;)?hd=" + re.escape(hd), resp.text))
+        return found if found else None
+    except Exception:
+        return None
+
 
 def parse_motor_table(soup):
     records = []
@@ -71,11 +97,9 @@ def parse_motor_table(soup):
 
 
 def find_open_date(jcd):
-    today = datetime.date.today()
+    # 対象日のみ。前後日(-9〜9)を探すと非開催場が前節データを拾うため[0]に限定。
+    today = target_date()
     candidates = [0]
-    for d in range(1, 10):
-        candidates.append(-d)
-        candidates.append(d)
     for sign in candidates:
         d = today + datetime.timedelta(days=sign)
         hd = d.strftime("%Y%m%d")
@@ -99,8 +123,19 @@ def main():
     print("実行日時:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     print()
 
+    today_hd = target_date().strftime("%Y%m%d")
+    open_venues = get_open_venues(today_hd)
+    if open_venues:
+        print("対象日 {} の開催場: {} 場 ({})".format(today_hd, len(open_venues), " ".join(sorted(open_venues))))
+    else:
+        print("対象日 {} 開催場リスト取得失敗 → 全場を試行".format(today_hd))
+    print()
+
     all_records = []
     for jcd, name in VENUES.items():
+        if open_venues is not None and jcd not in open_venues:
+            print("[{}] {} ... 非開催（スキップ）".format(jcd, name))
+            continue
         print("[{}] {} ...".format(jcd, name), end=" ", flush=True)
         hd, records = find_open_date(jcd)
         if not records:
