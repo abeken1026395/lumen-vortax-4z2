@@ -1,0 +1,30 @@
+{
+  "_note": "各場のスタート→第1ターンマーク方向の方位。head=向かい風になる風向(=スタート→1M方向)。weather.jsonのdeg(風が吹いてくる方位)と突合し、headに近い風=向かい風、反対=追い風、直角=横風。出典: ひつじのボートレース分析(公式データ2014-2022, スタート→第1ターンマークまでの風向きで判定) https://hitsuzi-boatrace.com/wind-direction-no1-win/",
+  "_dir_deg": {"北":0,"北東":45,"東":90,"南東":135,"南":180,"南西":225,"西":270,"北西":315},
+  "stadiums": {
+    "01": {"name": "桐生",   "head": "南",   "head_deg": 180},
+    "02": {"name": "戸田",   "head": "南東", "head_deg": 135},
+    "03": {"name": "江戸川", "head": "北東", "head_deg": 45},
+    "04": {"name": "平和島", "head": "北",   "head_deg": 0},
+    "05": {"name": "多摩川", "head": "西",   "head_deg": 270},
+    "06": {"name": "浜名湖", "head": "北",   "head_deg": 0},
+    "07": {"name": "蒲郡",   "head": "南西", "head_deg": 225},
+    "08": {"name": "常滑",   "head": "北西", "head_deg": 315},
+    "09": {"name": "津",     "head": "北西", "head_deg": 315},
+    "10": {"name": "三国",   "head": "南",   "head_deg": 180},
+    "11": {"name": "びわこ", "head": "南",   "head_deg": 180},
+    "12": {"name": "住之江", "head": "南",   "head_deg": 180},
+    "13": {"name": "尼崎",   "head": "南西", "head_deg": 225},
+    "14": {"name": "鳴門",   "head": "南東", "head_deg": 135},
+    "15": {"name": "丸亀",   "head": "北",   "head_deg": 0},
+    "16": {"name": "児島",   "head": "南",   "head_deg": 180},
+    "17": {"name": "宮島",   "head": "南西", "head_deg": 225},
+    "18": {"name": "徳山",   "head": "北西", "head_deg": 315},
+    "19": {"name": "下関",   "head": "西",   "head_deg": 270},
+    "20": {"name": "若松",   "head": "西",   "head_deg": 270},
+    "21": {"name": "芦屋",   "head": "東",   "head_deg": 90},
+    "22": {"name": "福岡",   "head": "東",   "head_deg": 90},
+    "23": {"name": "唐津",   "head": "南西", "head_deg": 225},
+    "24": {"name": "大村",   "head": "東",   "head_deg": 90}
+  }
+}
