@@ -40,6 +40,14 @@ h1{font-size:22px;font-weight:800;margin-top:4px}
 .lv{font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;flex-shrink:0}
 .lvA1{background:#c0392b;color:#fff}.lvA2{background:#e07b39;color:#fff}.lvB1{background:#33485c;color:#cfe}.lvB2{background:#26333f;color:#9ab}
 .nm{font-weight:700;min-width:58px}
+.fem{color:#ff6fae;font-size:11px;margin-left:2px}
+.venue{margin-bottom:8px}
+.vhead{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 14px;cursor:pointer}
+.vhead.open{border-color:var(--acc);background:#16222e}
+.vname{font-weight:800;font-size:15px}
+.vmeta{color:var(--sub);font-size:12px}
+.varrow{margin-left:auto;color:var(--acc);font-size:12px}
+.vbody{margin-top:8px;padding-left:2px}
 .flag{font-size:10px;font-weight:800;margin-left:3px}
 .fF{color:var(--hot)}.fST{color:#4aa8ff}
 .mtr{font-size:10.5px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);color:var(--sub);flex-shrink:0}
@@ -75,7 +83,7 @@ h1{font-size:22px;font-weight:800;margin-top:4px}
 <div class="tabs">
   <div class="tab on" data-v="hot" onclick="sw('hot')">⚡ 波乱注目</div>
   <div class="tab firm" data-v="firm" onclick="sw('firm')">🛡 堅め注目</div>
-  <div class="tab" data-v="all" onclick="sw('all')">📋 場別すべて</div>
+  <div class="tab" data-v="all" onclick="sw('all')">📋 場別</div>
 </div>
 
 <div id="list"><div class="loading">データを読み込み中…</div></div>
@@ -83,6 +91,7 @@ h1{font-size:22px;font-weight:800;margin-top:4px}
 </div>
 
 <script>
+const FEMALE=new Set(['3175','3207','3232','3289','3302','3334','3355','3357','3435','3470','3474','3509','3518','3528','3551','3579','3580','3604','3611','3618','3645','3704','3778','3801','3845','3871','3900','3932','3943','3993','3994','3999','4011','4014','4017','4045','4050','4065','4071','4098','4117','4123','4183','4190','4208','4224','4225','4240','4243','4244','4246','4275','4283','4286','4289','4300','4304','4313','4317','4347','4349','4372','4373','4385','4387','4399','4400','4408','4414','4419','4433','4443','4447','4450','4456','4464','4473','4478','4479','4482','4484','4499','4501','4502','4510','4519','4525','4530','4534','4536','4546','4548','4556','4569','4589','4590','4611','4627','4642','4678','4680','4689','4690','4694','4714','4720','4726','4730','4733','4738','4744','4746','4758','4764','4765','4773','4775','4781','4784','4791','4804','4819','4823','4825','4843','4844','4845','4853','4854','4874','4878','4882','4884','4885','4891','4893','4897','4900','4901','4909','4924','4927','4936','4938','4940','4941','4947','4961','4963','4964','4965','4974','4984','4987','4990','4994','4997','4998','5003','5013','5019','5030','5045','5052','5056','5057','5069','5072','5078','5079','5088','5108','5113','5117','5118','5123','5129','5140','5144','5146','5148','5151','5153','5155','5156','5162','5163','5164','5165','5171','5173','5174','5180','5182','5184','5188','5189','5192','5193','5194','5195','5198','5200','5203','5204','5205','5213','5215','5218','5227','5230','5231','5241','5248','5250','5251','5254','5264','5265','5272','5277','5281','5283','5287','5291','5295','5296','5297','5305','5306','5310','5314','5317','5320','5322','5324','5326','5327','5334','5335','5340','5342','5346','5347','5357','5358','5360','5361','5362','5365','5367','5370','5373','5380','5387','5389','5390','5391','5397','5399','5406','5410','5412','5413','5414','5415','5416','5418','5428','5435','5436','5437','5438','5439','5440','5442','5444','5446','5447','5451','5454','5459','5461','5462','5464','5471','5472']);
 let RACES=[], VIEW='hot';
 
 function boatRow(b){
@@ -93,7 +102,7 @@ function boatRow(b){
   return `<div class="boat">
     <span class="wk wk${b['枠']}">${b['枠']}</span>
     <span class="lv lv${b['級別']}">${b['級別']}</span>
-    <span class="nm">${b['氏名']}${fl}</span>
+    <span class="nm">${b['氏名']}${FEMALE.has(String(b['登録番号']))?'<span class="fem">♥</span>':''}${fl}</span>
     <span class="mtr${mc}">機${mtxt}</span>
     <span class="stat">全${b['全国勝率'].toFixed(2)}／当${up?'<span class="up">':''}${b['当地勝率']>0?b['当地勝率'].toFixed(2):'－'}${up?'▲</span>':''}</span>
   </div>`;
@@ -120,19 +129,45 @@ function renderCard(r){
 
 function sw(v){VIEW=v;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));render();}
 
+let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
+function toggleVenue(ba){OPEN_VENUE = (OPEN_VENUE===ba)? null : ba; render();}
+
+function renderVenues(){
+  // その日のjsonにある場だけを、場コード順に並べてアコーディオン表示
+  const byVenue={};
+  RACES.forEach(r=>{(byVenue[r['場名']]=byVenue[r['場名']]||{code:r['場コード'],list:[]}).list.push(r);});
+  const venues=Object.keys(byVenue).sort((a,b)=>byVenue[a].code.localeCompare(byVenue[b].code));
+  if(!venues.length) return '<div class="empty">本日のデータがありません。</div>';
+  return venues.map(ba=>{
+    const v=byVenue[ba];
+    const hot=v.list.filter(r=>r['波乱']>=4).length;  // 波乱の多いレース数
+    const open=OPEN_VENUE===ba;
+    const races=v.list.slice().sort((x,y)=>parseInt(x['レース'])-parseInt(y['レース']));
+    return `<div class="venue">
+      <div class="vhead${open?' open':''}" onclick="toggleVenue('${ba}')">
+        <span class="vname">${ba}</span>
+        <span class="vmeta">${v.list.length}R${hot?` ・波乱${hot}`:''}</span>
+        <span class="varrow">${open?'▲':'▼'}</span>
+      </div>
+      ${open?`<div class="vbody">${races.map(renderCard).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
 function render(){
   const el=document.getElementById('list');
   let arr=[...RACES];
   if(VIEW==='hot'){
     arr=arr.filter(r=>r['波乱']>=2).sort((x,y)=>y['波乱']-x['波乱']||x['場名'].localeCompare(y['場名'],'ja'));
     if(!arr.length){el.innerHTML='<div class="empty">本日は波乱条件が2つ以上揃うレースがありません。</div>';return;}
+    el.innerHTML=arr.map(renderCard).join('');
   }else if(VIEW==='firm'){
     arr=arr.filter(r=>r['イン堅']).sort((x,y)=>x['波乱']-y['波乱']||y['イン1着率']-x['イン1着率']);
     if(!arr.length){el.innerHTML='<div class="empty">本日はイン堅め条件のレースがありません。</div>';return;}
+    el.innerHTML=arr.map(renderCard).join('');
   }else{
-    arr.sort((x,y)=>x['場名'].localeCompare(y['場名'],'ja')||(parseInt(x['レース'])-parseInt(y['レース'])));
+    el.innerHTML=renderVenues();
   }
-  el.innerHTML=arr.map(renderCard).join('');
 }
 
 fetch('highlights.json?_='+Date.now())
