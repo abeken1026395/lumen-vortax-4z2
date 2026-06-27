@@ -149,7 +149,7 @@ def main():
             if use_m and mv > 0:
                 mev = 'hi' if hi(mv) else 'lo' if lo(mv) else 'mid'
             boats.append({
-                '枠': w, '級別': b['級別'], '氏名': nm(b['氏名']),
+                '枠': w, '登録番号': b['登録番号'], '支部': b.get('支部',''), '級別': b['級別'], '氏名': nm(b['氏名']),
                 '全国勝率': round(nat, 2), '当地勝率': round(loc, 2),
                 '機力': round(mv, 1) if (use_m and mv > 0) else None, '機力評価': mev,
                 'F': int(b['F数']) >= 1, '鋭ST': st > 0 and st <= 0.15,
