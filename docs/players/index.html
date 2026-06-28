@@ -146,7 +146,10 @@ function App() {
                       </div>
                     ))}
                   </div>
-                  {pf&&pf.hobby&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:-4,marginBottom:14}}>🎣 趣味：{pf.hobby}</div>}
+                  {pf&&pf.hobby&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:-4}}>🎣 趣味：{pf.hobby}</div>}
+                  {pf&&pf.food&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:4}}>🍴 好物：{pf.food}</div>}
+                  {pf&&pf.note&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:4,lineHeight:1.5}}>💬 {pf.note}</div>}
+                  {pf&&(pf.hobby||pf.food||pf.note)&&<div style={{height:14}}></div>}
                   <div style={{fontSize:11,color:"#8faabe",fontWeight:700,marginBottom:6}}>■ 成績</div>
                   <div style={{display:"flex",gap:14,flexWrap:"wrap",marginBottom:14,background:"#0b1219",borderRadius:8,padding:"10px 12px"}}>
                     {[["出走",p.syutsu],["1着",p.win1],["2着",p.win2],["優勝",p.yusyo],["優出",p.yusyutsu],["平均ST",p.avgst],["F数",p.f]].map(([l,v],i)=>(
