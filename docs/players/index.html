@@ -16,54 +16,52 @@ body { background:#0b1219; font-family:'Helvetica Neue',Arial,sans-serif; color:
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useMemo, useEffect } = React;
+const R = window.__D || {players:[]};
+
+const RANK_BADGE = { "A1":"#e5484d", "A2":"#4593e5", "B1":"#7d8da0", "B2":"#5a6878" };
+const RANK_LINE  = { "A1":"#e5484d", "A2":"#4593e5", "B1":"#7d8da0", "B2":"#3a4550" };
 
 function App() {
-  const [players, setPlayers] = useState([]);
-  const [prof, setProf] = useState({});
-  const [search, setSearch] = useState("");
+  const [q, setQ] = useState("");
+  const [rankF, setRankF] = useState("ALL");
+  const [branchF, setBranchF] = useState("ALL");
   const [femaleOnly, setFemaleOnly] = useState(false);
+  const [sortKey, setSortKey] = useState("win");
   const [open, setOpen] = useState(null);
+  const [kim, setKim] = useState({});
+  const [prof, setProf] = useState({});
 
-  useEffect(() => {
-    fetch('./profile.json')
-      .then(r => r.json())
-      .then(data => setProf(data));
-  }, []);
+  useEffect(()=>{
+    fetch("profile.json").then(r=>r.json()).then(j=>{
+      setProf(j||{});
+    }).catch(()=>{});
+  },[]);
 
-  // 簡易選手リスト（実際はCSVから読むロジックを維持したい場合は教えて）
-  const samplePlayers = []; // ここは既存ロジックに置き換え
+  const filtered = useMemo(()=>{
+    let rows = R.players.filter(p=>{
+      if (rankF!=="ALL" && p.rank!==rankF) return false;
+      if (branchF!=="ALL" && p.branch!==branchF) return false;
+      if (femaleOnly && !p.female) return false;
+      if (q) {
+        const ql=q.trim();
+        if (!(p.name.includes(ql)||p.no.includes(ql)||p.branch.includes(ql)||(p.kana&&p.kana.includes(ql)))) return false;
+      }
+      return true;
+    });
+    rows=[...rows].sort((a,b)=>b.win - a.win);
+    return rows;
+  }, [q, rankF, branchF, sortKey, femaleOnly]);
 
   return (
-    <div style={{padding:"16px",maxWidth:"600px",margin:"0 auto"}}>
-      <h1 style={{color:"#ffd166",textAlign:"center",marginBottom:"20px"}}>BOATRACE 選手図鑑</h1>
-      {/* 検索・フィルタ部分は省略可 */}
-
-      <div style={{display:"flex",flexDirection:"column",gap:12}}>
-        {/* 選手カード例 */}
-        {Object.keys(prof).slice(0,20).map(no => {
-          const p = prof[no];
-          return (
-            <div key={no} style={{background:"#0f1923",borderRadius:12,padding:"14px",borderLeft:"4px solid #4a90e2"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div>
-                  <div style={{fontSize:"18px",fontWeight:"800"}}>{p.name || "選手"}</div>
-                  {p.nickname && <div style={{color:"#ff7eb6",fontSize:"13px",marginTop:"2px"}}>♥ {p.nickname}</div>}
-                  {p.tagline && <div style={{color:"#ffd166",fontSize:"12px"}}>{p.tagline}</div>}
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:"20px",color:"#ffd166",fontWeight:"800"}}>7.XX</div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+    <div style={{minHeight:"100vh",padding:"14px 12px 40px",maxWidth:760,margin:"0 auto"}}>
+      <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:14}}>
+        <span style={{fontSize:24,fontWeight:900,letterSpacing:1,color:"#ffd166"}}>BOATRACE</span>
+        <span style={{fontSize:12,color:"#6b7f95"}}>2026前期 全{R.players.length}選手</span>
       </div>
-    </div>
-  );
-}
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-</script>
-</body>
-</html>
+      <input placeholder="選手名 / ふりがな / 登番 / 支部で検索..." value={q} onChange={e=>setQ(e.target.value)} style={{width:"100%",padding:"12px 14px",background:"#162232",color:"#e0e6ed",border:"1px solid #1e2d3d",borderRadius:10,fontSize:14,marginBottom:10}}/>
+
+      <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+        {["ALL","A1","A2","B1","B2"].map(rk=>(
+          <button key={rk} onClick={()=>setRankF(rk)} style={{padding:"7px 16px",fontSize:13,fontWeight:700,borderRadius:8,cursor:"pointer",border:"1px solid "+(rankF===rk?"#ffd166":"#2a3d52"),background:rankF===rk?"#ffd16622":"#162232",color:rankF===rk?"#ffd166":"#8faabe"}}>{rk==="
