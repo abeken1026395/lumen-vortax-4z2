@@ -206,6 +206,79 @@ def find_open_date_and_scrape(jcd, venue):
     return None, []
 
 
+CSV_COLUMNS = [
+    "場名", "場コード", "開催日", "レース", "枠", "登録番号", "級別", "氏名",
+    "F数", "L数", "平均ST", "全国勝率", "全国2連率", "全国3連率",
+    "当地勝率", "当地2連率", "当地3連率", "支部", "出身", "年齢", "締切時刻",
+]
+
+
+def load_existing_csv(path):
+    """既存CSVを文字列で読み込む。無ければ None。"""
+    if not os.path.exists(path):
+        return None
+    try:
+        df = pd.read_csv(path, dtype=str, encoding="utf-8-sig").fillna("")
+        if "開催日" not in df.columns or "場コード" not in df.columns:
+            return None
+        return df
+    except Exception:
+        return None
+
+
+def _race_num(v):
+    """'7R' → 7。ソート用。失敗時は0。"""
+    m = re.search(r"\d+", str(v))
+    return int(m.group()) if m else 0
+
+
+def merge_with_existing(new_df, csv_path):
+    """同一開催日なら既存CSVに新規取得分をマージ。開催日が進んだら作り直す。
+    - 新規データの最新開催日(base_date)を採用
+    - 既存データのうち base_date と一致する行だけ残す(古い日付は破棄=溜め込まない)
+    - キー「場コード+レース+枠」で重複排除し、新規取得を優先(keep='last')
+    """
+    # 新規データの基準日(通常は単一。混在時は最新を採用)
+    new_dates = sorted([d for d in new_df["開催日"].astype(str).unique() if d])
+    if not new_dates:
+        return new_df
+    base_date = new_dates[-1]
+    new_same = new_df[new_df["開催日"].astype(str) == base_date].copy()
+
+    old_df = load_existing_csv(csv_path)
+    if old_df is not None:
+        old_same = old_df[old_df["開催日"].astype(str) == base_date].copy()
+    else:
+        old_same = new_same.iloc[0:0].copy()
+
+    # 旧→新の順に連結し、同一キーは後勝ち(新規優先)で残す
+    combined = pd.concat([old_same, new_same], ignore_index=True)
+    combined["__key"] = (
+        combined["場コード"].astype(str) + "_"
+        + combined["レース"].astype(str) + "_"
+        + combined["枠"].astype(str)
+    )
+    combined = combined.drop_duplicates(subset="__key", keep="last").drop(columns="__key")
+
+    # カラム順を固定し、欠けは空文字で補完
+    for c in CSV_COLUMNS:
+        if c not in combined.columns:
+            combined[c] = ""
+    combined = combined[CSV_COLUMNS]
+
+    # 見やすさのため 場コード→レース番号→枠 でソート
+    combined["__r"] = combined["レース"].map(_race_num)
+    combined["__w"] = pd.to_numeric(combined["枠"], errors="coerce").fillna(0).astype(int)
+    combined = combined.sort_values(
+        ["場コード", "__r", "__w"], kind="stable"
+    ).drop(columns=["__r", "__w"]).reset_index(drop=True)
+
+    kept_venues = sorted(combined["場コード"].astype(str).unique())
+    print("マージ後 開催日={} / {}場 ({}件)".format(
+        base_date, len(kept_venues), len(combined)))
+    return combined
+
+
 def main():
     print("出走表スクレイパー v3 (自動実行)")
     print("実行日時:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -232,13 +305,20 @@ def main():
         print("OK ({} 名 / {})".format(len(records), hd))
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    if not all_records:
-        print("\n本日開催の出走表が取得できませんでした。")
-        if os.path.exists(os.path.join(OUTPUT_DIR, "index.html")):
-            return
+    csv_path = os.path.join(OUTPUT_DIR, "racers_today.csv")
 
-    df = pd.DataFrame(all_records)
-    df.to_csv(os.path.join(OUTPUT_DIR, "racers_today.csv"), index=False, encoding="utf-8-sig")
+    if not all_records:
+        # 1場も取れなかった回は既存CSVを保持して終了（消さない）
+        print("\n本日開催の出走表が取得できませんでした。既存CSVを保持します。")
+        if os.path.exists(csv_path) or os.path.exists(os.path.join(OUTPUT_DIR, "index.html")):
+            return
+        df = pd.DataFrame(columns=CSV_COLUMNS)
+    else:
+        new_df = pd.DataFrame(all_records)
+        # 既存CSVと同一開催日ならマージ（ナイター等、取れなかった場を消さない）
+        df = merge_with_existing(new_df, csv_path)
+
+    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
     print("\nCSV保存: {}/racers_today.csv ({}件)".format(OUTPUT_DIR, len(df)))
 
     cols = [str(c) for c in df.columns.tolist()]
