@@ -240,7 +240,7 @@ function bProfHTML(no, boat){
   const c1=(p.c1||[0,0,0,0,0,0]).map(v=>typeof v==='number'?v:0);
   const cmax=Math.max(...c1,1);
   let bars='';
-  c1.forEach((v,idx)=>{const col=idx<2?'#ffd166':'#5f9fd6';bars+=`<div class="bp-row"><div class="lb">${idx+1}号</div><div class="br"><i style="width:${v/cmax*100}%;background:${col}"></i></div><div class="vl">${v.toFixed(1)}%</div></div>`;});
+  c1.forEach((v,idx)=>{const col=idx<2?'#ffd166':'#5f9fd6';bars+=`<div class="bp-row"><div class="lb">${idx+1}号</div><div class="br"><i style="width:${Math.min(v,100)}%;background:${col}"></i></div><div class="vl">${v.toFixed(1)}%</div></div>`;});
   // 当地優位（出走表由来の当地勝率と全国勝率）
   const loc=boat['当地勝率'], nat=boat['全国勝率'];
   const locHi = loc>0 && loc>nat;
