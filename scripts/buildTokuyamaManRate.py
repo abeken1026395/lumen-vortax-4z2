@@ -7,13 +7,15 @@ import json
 CSV_PATH = os.path.join("docs", "payouts", "tokuyamaPayouts.csv")
 OUT = os.path.join("docs", "payouts", "tokuyamaManRate.json")
 
-MAN = 10000  # 万舟しきい値（10000円超）
+MAN = 10000
 
 
 def main():
-    # rno -> [total, man_count, sum_payout, max_payout]
     stats = {}
     total_races = 0
+    all_rows = []
+    win_lane = {}
+    man_total = 0
 
     with io.open(CSV_PATH, "r", encoding="utf-8") as f:
         reader = csv.reader(f)
@@ -21,12 +23,19 @@ def main():
         for row in reader:
             if len(row) < 4:
                 continue
+            hd = row[0]
             rno = int(row[1])
+            combo = row[2]
             payout = int(row[3])
+            all_rows.append((hd, rno, combo, payout))
+
             s = stats.setdefault(rno, [0, 0, 0, 0])
             s[0] += 1
             if payout > MAN:
                 s[1] += 1
+                man_total += 1
+                lane = combo.split("-")[0]
+                win_lane[lane] = win_lane.get(lane, 0) + 1
             s[2] += payout
             if payout > s[3]:
                 s[3] = payout
@@ -46,19 +55,48 @@ def main():
             "maxPayout": smax,
         })
 
+    top = sorted(all_rows, key=lambda x: x[3], reverse=True)[:5]
+    top_payouts = []
+    for hd, rno, combo, payout in top:
+        ymd = hd[0:4] + "/" + hd[4:6] + "/" + hd[6:8]
+        top_payouts.append({
+            "date": ymd, "rno": rno, "combo": combo, "payout": payout,
+        })
+
+    lane_share = []
+    for lane in ["1", "2", "3", "4", "5", "6"]:
+        c = win_lane.get(lane, 0)
+        lane_share.append({
+            "lane": int(lane),
+            "count": c,
+            "share": round(c / man_total * 100, 1) if man_total else 0.0,
+        })
+
+    calm = wild = None
+    if races:
+        calm = min(races, key=lambda r: r["manRate"])
+        wild = max(races, key=lambda r: r["manRate"])
+
     out = {
         "stadium": "徳山",
         "jcd": 18,
         "threshold": MAN,
         "totalRaces": total_races,
+        "manTotal": man_total,
         "races": races,
+        "topPayouts": top_payouts,
+        "laneShare": lane_share,
+        "calmRace": {"rno": calm["rno"], "manRate": calm["manRate"],
+                     "avgPayout": calm["avgPayout"]} if calm else None,
+        "wildRace": {"rno": wild["rno"], "manRate": wild["manRate"],
+                     "avgPayout": wild["avgPayout"]} if wild else None,
     }
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with io.open(OUT, "w", encoding="utf-8") as f:
         f.write(json.dumps(out, ensure_ascii=False, indent=2))
 
-    print("total races:", total_races)
+    print("total races:", total_races, "man:", man_total)
 
 
 if __name__ == "__main__":
