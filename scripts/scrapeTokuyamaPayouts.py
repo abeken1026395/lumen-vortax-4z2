@@ -10,7 +10,7 @@ import urllib.request
 JCD = 18  # tokuyama
 BASE = "https://www.boatrace.jp/owpc/pc/race/raceresult"
 OUT = os.path.join("docs", "payouts", "tokuyamaPayouts.csv")
-SLEEP = 1.0
+SLEEP = 0.5
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
 
@@ -83,17 +83,19 @@ def main():
         writer.writerow(["hd", "rno", "combo", "payout"])
 
     today = datetime.date.today()
-    start = today - datetime.timedelta(days=365)
+    start = today - datetime.timedelta(days=35)
 
     d = start
     collected = 0
-    fetched_ok = 0      # HTMLが取れた回数
-    parse_fail = 0      # 取れたがパース失敗した回数
+    fetched_ok = 0
+    parse_fail = 0
     sample_dumped = False
     while d <= today:
         hd = d.strftime("%Y%m%d")
+        day_hit = 0
         for rno in range(1, 13):
             if (hd, str(rno)) in done:
+                day_hit += 1
                 continue
             html = fetch(hd, rno)
             time.sleep(SLEEP)
@@ -101,20 +103,23 @@ def main():
                 fetched_ok += 1
             res = parse_payout(html)
             if res is None:
-                # 取れているのにパース不能な最初の1件だけHTML冒頭を出す
                 if html and not sample_dumped and ("3\u9023\u5358" in html):
-                    print("=== SAMPLE (3rentan found but parse failed) hd=%s rno=%d ===" % (hd, rno))
+                    print("=== SAMPLE hd=%s rno=%d ===" % (hd, rno))
                     idx = html.find("3\u9023\u5358")
                     print(html[idx:idx + 300])
                     print("=== END SAMPLE ===")
                     sample_dumped = True
                 if html:
                     parse_fail += 1
+                # 1R・2Rとも取れなければ非開催日とみなし残りを飛ばす
+                if rno == 2 and day_hit == 0:
+                    break
                 continue
             combo, yen = res
             writer.writerow([hd, rno, combo, yen])
             out.flush()
             collected += 1
+            day_hit += 1
         d += datetime.timedelta(days=1)
 
     out.close()
