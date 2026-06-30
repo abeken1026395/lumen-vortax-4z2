@@ -19,6 +19,93 @@ const R = window.__D;
 const RANK_BADGE = { "A1":"#e5484d", "A2":"#4593e5", "B1":"#7d8da0", "B2":"#5a6878" };
 const RANK_LINE  = { "A1":"#e5484d", "A2":"#4593e5", "B1":"#7d8da0", "B2":"#3a4550" };
 
+const KIM=[["nige","逃げ","#ffd166"],["makuri","まくり","#4593e5"],["sashi","差し","#3fb950"],["makurizashi","まくり差し","#d29922"],["nuki","抜き","#8957e5"],["megumare","恵まれ","#56607a"]];
+function BranchPanel({bsort,setBsort,kim}){
+  const stat = useMemo(()=>{
+    const B={};
+    R.players.forEach(p=>{(B[p.branch]=B[p.branch]||[]).push(p);});
+    const a=xs=>{xs=xs.filter(v=>v!=null&&!isNaN(v));return xs.length?xs.reduce((s,v)=>s+v,0)/xs.length:0;};
+    const hasKim=kim&&Object.keys(kim).length>0;
+    const natK={}; KIM.forEach(([k])=>natK[k]=0); let natTot=0;
+    if(hasKim){ R.players.forEach(p=>{const o=kim[p.no]; if(o){KIM.forEach(([k])=>natK[k]+=o[k]||0); natTot+=KIM.reduce((s,[k])=>s+(o[k]||0),0);}}); }
+    const all={
+      win:a(R.players.map(p=>p.win)),
+      out:a(R.players.map(p=>p.out)),
+      st:a(R.players.map(p=>parseFloat(p.avgst))),
+      makuriR:natTot?natK.makuri/natTot*100:0,
+      sashiR:natTot?natK.sashi/natTot*100:0
+    };
+    const rows=Object.keys(B).map(b=>{
+      const m=B[b];
+      const c1=[0,1,2,3,4,5].map(i=>a(m.map(p=>p.c1&&p.c1[i])));
+      const kc={}; KIM.forEach(([k])=>kc[k]=0); let kt=0;
+      if(hasKim){ m.forEach(p=>{const o=kim[p.no]; if(o){KIM.forEach(([k])=>kc[k]+=o[k]||0); kt+=KIM.reduce((s,[k])=>s+(o[k]||0),0);}}); }
+      return {b,n:m.length,
+        a1:m.filter(p=>p.rank==="A1").length/m.length*100,
+        win:a(m.map(p=>p.win)),
+        out:a(m.map(p=>p.out)),
+        st:a(m.map(p=>parseFloat(p.avgst))),
+        c1, kc, kt,
+        makuriR:kt?kc.makuri/kt*100:0,
+        sashiR:kt?kc.sashi/kt*100:0};
+    });
+    return {rows,all,hasKim};
+  },[kim]);
+  const {rows,all,hasKim}=stat;
+  const key=bsort==="makuri"?"makuriR":bsort==="sashi"?"sashiR":bsort;
+  const sorted=[...rows].sort((x,y)=> bsort==="st" ? x.st-y.st : (y[key]-x[key]));
+  const diff=(v,base,inv,suf)=>{const d=v-base;const up=inv?d<0:d>0;return <span style={{fontSize:11,fontWeight:700,color:up?"#ffd166":"#6b7f95",marginLeft:4}}>{(d>=0?"+":"")+d.toFixed(suf?1:2)+(suf||"")}</span>;};
+  const sk=[["win","勝率"],["out","アウト戦"],["makuri","まくり率"],["sashi","差し率"],["st","平均ST"],["a1","A1率"],["n","人数"]];
+  return (
+   <div>
+    <div style={{fontSize:11,color:"#6b7f95",margin:"2px 2px 10px",lineHeight:1.5}}>支部所属者の集計（2026前期fan2604）。決まり手は所属選手の1着実数を合算した比率。数値右は全国平均との差分。母数の少ない支部はブレやすく、個々の選手が従うわけではない目安。</div>
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+     {sk.map(([k,l])=>(
+      <button key={k} onClick={()=>setBsort(k)} style={{padding:"6px 13px",fontSize:12,fontWeight:700,borderRadius:8,cursor:"pointer",border:"1px solid "+(bsort===k?"#ffd166":"#1e2d3d"),background:bsort===k?"#ffd166":"#162232",color:bsort===k?"#0b1219":"#8faabe"}}>{l}</button>
+     ))}
+    </div>
+    <div style={{display:"flex",flexWrap:"wrap",gap:"4px 12px",marginBottom:12,fontSize:11,color:"#8faabe"}}>
+     {KIM.map(([k,l,c])=>(<span key={k} style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:c,borderRadius:2,display:"inline-block"}}></span>{l}</span>))}
+    </div>
+    <div style={{display:"flex",flexDirection:"column",gap:9}}>
+     {sorted.map((r,idx)=>(
+      <div key={r.b} style={{background:"#0f1923",borderRadius:12,padding:"13px 15px",borderLeft:"4px solid #ffd166"}}>
+       <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:10}}>
+        <span style={{fontSize:14,fontWeight:900,color:"#ffd166",minWidth:22}}>{idx+1}</span>
+        <span style={{fontSize:17,fontWeight:900,color:"#e0e6ed"}}>{r.b}</span>
+        <span style={{fontSize:11,color:"#6b7f95",marginLeft:"auto"}}>{r.n}名 ・ A1 {r.a1.toFixed(0)}%</span>
+       </div>
+       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"6px 8px",fontSize:13,marginBottom:11}}>
+        <div><span style={{color:"#6b7f95",fontSize:11}}>勝率 </span><b style={{color:"#ffd166"}}>{r.win.toFixed(2)}</b>{diff(r.win,all.win)}</div>
+        <div><span style={{color:"#6b7f95",fontSize:11}}>アウト戦 </span><b style={{color:"#e0e6ed"}}>{r.out.toFixed(1)}</b>{diff(r.out,all.out)}</div>
+        <div><span style={{color:"#6b7f95",fontSize:11}}>平均ST </span><b style={{color:"#e0e6ed"}}>{r.st.toFixed(3)}</b>{diff(r.st,all.st,true)}</div>
+       </div>
+       <div style={{display:"flex",gap:4,alignItems:"flex-end",height:40,marginBottom:12}}>
+        {r.c1.map((v,i)=>(
+         <div key={i} style={{flex:1,textAlign:"center"}}>
+          <div style={{fontSize:9,color:"#8faabe",marginBottom:2}}>{v.toFixed(0)}</div>
+          <div style={{height:Math.max(2,v*0.28)+"px",background:i<2?"#ffd166":"#4593e5",borderRadius:"2px 2px 0 0"}}></div>
+          <div style={{fontSize:9,color:"#6b7f95",marginTop:2}}>{i+1}</div>
+         </div>
+        ))}
+       </div>
+       {!hasKim ? <div style={{fontSize:11,color:"#6b7f95"}}>決まり手データ読み込み中…</div> : r.kt===0 ? <div style={{fontSize:11,color:"#6b7f95"}}>決まり手データなし</div> : (
+        <div>
+         <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#6b7f95",marginBottom:4}}>
+          <span>決まり手（1着 {r.kt}本）</span>
+          <span>まくり率 <b style={{color:"#4593e5"}}>{r.makuriR.toFixed(1)}%</b>{diff(r.makuriR,all.makuriR,false,"%")}　差し率 <b style={{color:"#3fb950"}}>{r.sashiR.toFixed(1)}%</b>{diff(r.sashiR,all.sashiR,false,"%")}</span>
+         </div>
+         <div style={{display:"flex",height:14,borderRadius:7,overflow:"hidden",background:"#162232"}}>
+          {KIM.map(([k,l,c])=>{const w=r.kc[k]/r.kt*100; return w>0?<div key={k} title={l+" "+w.toFixed(1)+"%"} style={{width:w+"%",background:c}}></div>:null;})}
+         </div>
+        </div>
+       )}
+      </div>
+     ))}
+    </div>
+   </div>
+  );
+}
 function App() {
   const [q, setQ] = useState("");
   const [rankF, setRankF] = useState("ALL");
@@ -26,6 +113,7 @@ function App() {
   const [femaleOnly, setFemaleOnly] = useState(false);
   const [sortKey, setSortKey] = useState("win");
   const [tab, setTab] = useState("list");
+  const [bsort, setBsort] = useState("win");
   const [open, setOpen] = useState(null);
   const [kim, setKim] = useState({});
   const [prof, setProf] = useState({});
@@ -91,7 +179,7 @@ function App() {
       <input placeholder="選手名 / ふりがな / 登番 / 支部で検索..." value={q} onChange={e=>setQ(e.target.value)} style={{width:"100%",padding:"12px 14px",background:"#162232",color:"#e0e6ed",border:"1px solid #1e2d3d",borderRadius:10,fontSize:14,marginBottom:10}}/>
 
       <div style={{display:"flex",gap:6,marginBottom:10}}>
-        {[["list","一覧"],["makuri","まくり屋"],["sashi","差し屋"]].map(([tv,tl])=>(
+        {[["list","一覧"],["makuri","まくり屋"],["sashi","差し屋"],["branch","支部傾向"]].map(([tv,tl])=>(
           <button key={tv} onClick={()=>{setTab(tv);setOpen(null);}} style={{flex:1,padding:"9px 0",fontSize:13,fontWeight:800,borderRadius:8,cursor:"pointer",border:"1px solid "+(tab===tv?"#ffd166":"#2a3d52"),background:tab===tv?"#ffd16622":"#162232",color:tab===tv?"#ffd166":"#8faabe"}}>{tl}</button>
         ))}
       </div>
@@ -113,11 +201,12 @@ function App() {
           <option value="yusyo">優勝数順</option>
         </select>}
         <button onClick={()=>setFemaleOnly(v=>!v)} style={{padding:"7px 14px",fontSize:13,fontWeight:700,borderRadius:8,cursor:"pointer",border:"1px solid "+(femaleOnly?"#ff7eb6":"#2a3d52"),background:femaleOnly?"#ff7eb622":"#162232",color:femaleOnly?"#ff7eb6":"#8faabe"}}>♥ 女子</button>
-        <span style={{marginLeft:"auto",fontSize:12,color:"#6b7f95"}}>{tab!=="list"&&<span style={{color:"#8faabe"}}>1着10本以上・{tab==="makuri"?"まくり":"差し"}率順　</span>}{filtered.length}名</span>
+        <span style={{marginLeft:"auto",fontSize:12,color:"#6b7f95"}}>{(tab==="makuri"||tab==="sashi")&&<span style={{color:"#8faabe"}}>1着10本以上・{tab==="makuri"?"まくり":"差し"}率順　</span>}{tab==="branch"?"18支部":filtered.length+"名"}</span>
       </div>
 
+      {tab==="branch" && <BranchPanel bsort={bsort} setBsort={setBsort} kim={kim}/>}
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
-        {filtered.slice(0,300).map((p,idx)=>{
+        {tab!=="branch" && filtered.slice(0,300).map((p,idx)=>{
           const isOpen = open===p.no;
           const k = kim[p.no];
           const pf = prof[p.no];
