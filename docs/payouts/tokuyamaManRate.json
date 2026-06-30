@@ -1,0 +1,43 @@
+{
+  "stadium": "徳山",
+  "jcd": 18,
+  "threshold": 10000,
+  "totalRaces": 0,
+  "manTotal": 0,
+  "races": [],
+  "topPayouts": [],
+  "laneShare": [
+    {
+      "lane": 1,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "lane": 2,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "lane": 3,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "lane": 4,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "lane": 5,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "lane": 6,
+      "count": 0,
+      "share": 0.0
+    }
+  ],
+  "calmRace": null,
+  "wildRace": null
+}
