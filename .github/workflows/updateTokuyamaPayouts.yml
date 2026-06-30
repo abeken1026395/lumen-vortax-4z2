@@ -2,8 +2,8 @@ name: update tokuyama payouts
 
 on:
   schedule:
-    - cron: '20 0 * * *'   # JST 9:20頃（前日のレース確定後）
-    - cron: '20 1 * * *'   # 予備
+    - cron: '20 0 * * *'
+    - cron: '20 1 * * *'
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,13 +26,19 @@ jobs:
         with:
           python-version: '3.12'
 
+      # scrape は最大300分で打ち切る。打ち切られてもCSVはそこまで保存済み。
       - name: scrape payouts
+        continue-on-error: true
+        timeout-minutes: 300
         run: python scripts/scrapeTokuyamaPayouts.py
 
+      # scrape が途中で切れても、ここから先は必ず走る
       - name: build man rate json
+        if: always()
         run: python scripts/buildTokuyamaManRate.py
 
       - name: commit
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
