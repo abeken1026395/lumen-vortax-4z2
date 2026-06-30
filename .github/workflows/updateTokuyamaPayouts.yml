@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       ym:
-        description: '回収する月 (例 202604)。空欄なら直近12ヶ月ぶん巡回。'
+        description: '回収する月 (例 202605)。空欄なら過去1年。'
         required: false
         default: ''
 
@@ -30,6 +30,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: install deps
+        run: pip install lhafile
 
       - name: scrape payouts
         continue-on-error: true
