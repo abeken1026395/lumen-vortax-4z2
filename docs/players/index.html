@@ -67,7 +67,7 @@ function App() {
     });
     if (tab==="makuri" || tab==="sashi") {
       const rk = tab==="makuri" ? "makuriRate" : "sashiRate";
-      rows = rows.filter(p=>{ const k=kim[p.no]; return k && k.races>=50 && k[rk]!=="" && k[rk]!=null; });
+      rows = rows.filter(p=>{ const k=kim[p.no]; return k && k.wins>=10 && k[rk]!=="" && k[rk]!=null; });
       rows = [...rows].sort((a,b)=>(+kim[b.no][rk])-(+kim[a.no][rk]));
       return rows;
     }
@@ -113,7 +113,7 @@ function App() {
           <option value="yusyo">優勝数順</option>
         </select>}
         <button onClick={()=>setFemaleOnly(v=>!v)} style={{padding:"7px 14px",fontSize:13,fontWeight:700,borderRadius:8,cursor:"pointer",border:"1px solid "+(femaleOnly?"#ff7eb6":"#2a3d52"),background:femaleOnly?"#ff7eb622":"#162232",color:femaleOnly?"#ff7eb6":"#8faabe"}}>♥ 女子</button>
-        <span style={{marginLeft:"auto",fontSize:12,color:"#6b7f95"}}>{tab!=="list"&&<span style={{color:"#8faabe"}}>出走数50以上・{tab==="makuri"?"まくり":"差し"}率順　</span>}{filtered.length}名</span>
+        <span style={{marginLeft:"auto",fontSize:12,color:"#6b7f95"}}>{tab!=="list"&&<span style={{color:"#8faabe"}}>1着10本以上・{tab==="makuri"?"まくり":"差し"}率順　</span>}{filtered.length}名</span>
       </div>
 
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
