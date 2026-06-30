@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# 徳山(jcd=18) 3連単払戻 収集スクレイパー（完成版）
-# 1) 過去12ヶ月の月間スケジュールから徳山の開催初日を自動抽出
-# 2) 各節を初日+6日展開して開催候補日を作る
-# 3) 候補日の各レース結果を取得。返ってきたページが徳山(jcd=18)か検証してから採用
-# 環境変数 YM 指定でその月だけ処理も可能（手動回収用）
+# 徳山(jcd=18) 3連単払戻 収集スクレイパー（公式競走成績配布版）
+# mbrace.or.jp の競走成績配布(LZH)を1日1ファイル取得・解凍し、徳山の払戻金を抽出。
+# スクレイピング不要。1日1ファイルなので安定。徳山非開催日は自動スキップ。
+# 環境変数 YM 指定でその月のみ、DAYS 指定で遡る日数を変更可。
 import io
 import os
 import re
@@ -12,67 +11,56 @@ import time
 import datetime
 import urllib.request
 
-JCD = 18
-RESULT = "https://www.boatrace.jp/owpc/pc/race/raceresult"
-SCHED = "https://www.boatrace.jp/owpc/pc/race/monthlyschedule"
+BASE = "http://www1.mbrace.or.jp/od2/K/"
 OUT = os.path.join("docs", "payouts", "tokuyamaPayouts.csv")
-SLEEP = 0.4
-MONTHS_BACK = 12
+SLEEP = 3.0  # サーバ負荷軽減のため3秒
+DAYS_BACK = 365
 
-UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) boatrace-data-collector"
+
+TOKU = "\u5fb3\u3000\u5c71\uff3b\u6210\u7e3e\uff3d"   # 徳　山［成績］
+SEISEKI = "\uff3b\u6210\u7e3e\uff3d"                  # ［成績］
+PAY = "\u6255\u623b\u91d1"                            # 払戻金
+PAYLINE = re.compile(r"\s*(\d{1,2})R\s+(\d)-(\d)-(\d)\s+(\d+)")
 
 
-def get(url):
+def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     for attempt in range(2):
         try:
-            with urllib.request.urlopen(req, timeout=10) as r:
-                return r.read().decode("utf-8", "ignore")
+            with urllib.request.urlopen(req, timeout=20) as r:
+                return r.read()
         except Exception:
             if attempt == 0:
-                time.sleep(0.6)
+                time.sleep(2.0)
     return None
 
 
-SCHED_HD = re.compile(r"jcd=18&hd=(\d{8})")
-
-
-def kaisai_first_days(ym):
-    html = get("{0}?ym={1}".format(SCHED, ym))
-    if not html:
-        return []
-    return sorted(set(SCHED_HD.findall(html)))
-
-
-def normalize(html):
-    return html.replace("&yen;", "\uffe5").replace("&#165;", "\uffe5").replace("\uff13", "3")
-
-
-COMBO = re.compile(r"3\u9023\u5358(.*?)(\d)-(\d)-(\d)(.*)", re.S)
-MONEY = re.compile(r"([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,})")
-# 返ってきたページが徳山のものか判定（徳山リンクが本文にあるか）
-IS_TOKUYAMA = re.compile(r"jcd=18&hd=")
-
-
-def parse_payout(html, hd):
-    if html is None:
-        return None
-    html = normalize(html)
-    # 別場ページが返ってきた場合を弾く: 徳山(jcd=18)のページか
-    # 結果ページのパンくず/ナビに jcd=18 が含まれる。日付一致までは求めない。
-    if "jcd=18" not in html:
-        return None
-    m = COMBO.search(html)
-    if not m:
-        return None
-    combo = m.group(2) + "-" + m.group(3) + "-" + m.group(4)
-    mm = MONEY.search(m.group(5))
-    if not mm:
-        return None
-    yen = int(mm.group(1).replace(",", ""))
-    if yen < 100 or yen > 9999999:
-        return None
-    return combo, yen
+def extract_tokuyama(txt):
+    """SJISデコード済みテキストから徳山の (rno, combo, payout) を返す"""
+    out = []
+    in_toku = False
+    in_pay = False
+    for ln in txt.split("\n"):
+        if SEISEKI in ln:
+            in_toku = TOKU in ln
+            in_pay = False
+            continue
+        if not in_toku:
+            continue
+        if PAY in ln:
+            in_pay = True
+            continue
+        if in_pay:
+            m = PAYLINE.match(ln)
+            if m:
+                rno = int(m.group(1))
+                combo = m.group(2) + "-" + m.group(3) + "-" + m.group(4)
+                payout = int(m.group(5))
+                out.append((rno, combo, payout))
+            elif out and not re.search(r"\d", ln):
+                in_pay = False
+    return out
 
 
 def load_done():
@@ -87,23 +75,29 @@ def load_done():
     return done
 
 
-def months_list():
+def date_list():
     ym = os.environ.get("YM", "").strip()
-    if ym:
-        return [ym]
     today = datetime.date.today()
+    if ym:
+        y, m = int(ym[0:4]), int(ym[4:6])
+        d = datetime.date(y, m, 1)
+        out = []
+        while d.month == m and d <= today:
+            out.append(d)
+            d += datetime.timedelta(days=1)
+        return out
+    days = int(os.environ.get("DAYS", str(DAYS_BACK)))
+    start = today - datetime.timedelta(days=days)
     out = []
-    y, m = today.year, today.month
-    for _ in range(MONTHS_BACK + 1):
-        out.append("%04d%02d" % (y, m))
-        m -= 1
-        if m == 0:
-            m = 12
-            y -= 1
+    d = start
+    while d <= today:
+        out.append(d)
+        d += datetime.timedelta(days=1)
     return out
 
 
 def main():
+    import lhafile
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     done = load_done()
     new_file = not os.path.exists(OUT)
@@ -112,52 +106,42 @@ def main():
     if new_file:
         writer.writerow(["hd", "rno", "combo", "payout"])
 
-    today = datetime.date.today()
-
-    # 開催候補日を作る
-    candidates = set()
-    for ym in months_list():
-        for s in kaisai_first_days(ym):
-            time.sleep(SLEEP)
-            d0 = datetime.date(int(s[0:4]), int(s[4:6]), int(s[6:8]))
-            for off in range(0, 7):  # 初日+6日
-                d = d0 + datetime.timedelta(days=off)
-                if d <= today:
-                    candidates.add(d.strftime("%Y%m%d"))
-
     collected = 0
-    dbg = 0
-    for hd in sorted(candidates):
-        day_hit = 0
-        for rno in range(1, 13):
+    days_with_data = 0
+    for d in date_list():
+        hd = d.strftime("%Y%m%d")
+        # この日が既に全レース取得済みならスキップ
+        if (hd, "1") in done and (hd, "12") in done:
+            continue
+        yyyymm = d.strftime("%Y%m")
+        yymmdd = d.strftime("%y%m%d")
+        url = "{0}{1}/k{2}.lzh".format(BASE, yyyymm, yymmdd)
+        raw = fetch(url)
+        time.sleep(SLEEP)
+        if not raw or len(raw) < 100:
+            continue
+        # LZH解凍
+        tmp = "/tmp/k%s.lzh" % yymmdd
+        open(tmp, "wb").write(raw)
+        try:
+            a = lhafile.Lhafile(tmp)
+            name = a.infolist()[0].filename
+            data = a.read(name)
+        except Exception:
+            continue
+        txt = data.decode("shift_jis", "ignore")
+        rows = extract_tokuyama(txt)
+        if rows:
+            days_with_data += 1
+        for rno, combo, payout in rows:
             if (hd, str(rno)) in done:
-                day_hit += 1
                 continue
-            html = get("{0}?rno={1}&jcd={2}&hd={3}".format(RESULT, rno, JCD, hd))
-            time.sleep(SLEEP)
-            # 最初の8リクエストの状況をログ
-            if dbg < 8:
-                if html is None:
-                    print("DBG hd=%s rno=%d : html=None(取得失敗)" % (hd, rno))
-                else:
-                    has18 = "jcd=18" in html
-                    has3 = "3\u9023\u5358" in html
-                    print("DBG hd=%s rno=%d : len=%d jcd18=%s 3rentan=%s" % (hd, rno, len(html), has18, has3))
-                dbg += 1
-            res = parse_payout(html, hd)
-            if res is None:
-                # 1R・2Rとも取れなければその候補日は非開催とみなしスキップ
-                if rno == 2 and day_hit == 0:
-                    break
-                continue
-            combo, yen = res
-            writer.writerow([hd, rno, combo, yen])
+            writer.writerow([hd, rno, combo, payout])
             out.flush()
             collected += 1
-            day_hit += 1
 
     out.close()
-    print("collected:", collected, "candidate_days:", len(candidates))
+    print("collected:", collected, "days_with_tokuyama:", days_with_data)
 
 
 if __name__ == "__main__":
