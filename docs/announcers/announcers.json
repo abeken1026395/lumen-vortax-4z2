@@ -1,40 +1,449 @@
 [
-  { "name": "松岡俊道", "yomi": "まつおかとしみち", "venues": ["桐生", "平和島", "下関", "大村"], "nickname": "", "note": "野球・サッカー・競馬・競艇を担当するフリーアナ。SG等の地上波中継も担当。", "source": "https://ja.wikipedia.org/wiki/%E6%9D%BE%E5%B2%A1%E4%BF%8A%E9%81%93" },
-  { "name": "高石順成", "yomi": "たかいしよりまさ", "venues": ["桐生", "平和島"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "二宮淳一", "yomi": "にのみやじゅんいち", "venues": ["戸田", "徳山"], "nickname": "", "note": "表記ゆれ注意（純一とする資料あり）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "白石祐大", "yomi": "しらいしゆうた", "venues": ["浜名湖"], "nickname": "", "note": "公式表記は『祐大』（裕太は誤記）。2025年4月1日から浜名湖を担当と公式告知。戸田・徳山も担当とするWiki由来資料があり兼務／過去担当の可能性、要再確認。", "source": "https://www.boatrace-hamanako.jp/sp/index.php?page=news-info_detail&page_id=info&news_id=000541&info=all" },
-  { "name": "田島美生", "yomi": "", "venues": ["江戸川"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "平山信一", "yomi": "", "venues": ["江戸川"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "辻村ゆりな", "yomi": "", "venues": ["江戸川"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "野村達也", "yomi": "", "venues": ["江戸川"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "坂田博昭", "yomi": "", "venues": ["平和島"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "福田裕美", "yomi": "", "venues": ["平和島"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "伊藤政昭", "yomi": "", "venues": ["平和島"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "滝やすし", "yomi": "", "venues": ["多摩川"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "高橋貴隆", "yomi": "", "venues": ["蒲郡"], "nickname": "", "note": "蒲郡の公式特集に取り上げられている実況者。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "梶西達", "yomi": "", "venues": ["蒲郡", "津", "鳴門"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "山口新之輔", "yomi": "", "venues": ["常滑"], "nickname": "", "note": "一部レースを担当。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "佐竹亮", "yomi": "", "venues": ["津"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "小林習之", "yomi": "", "venues": ["津", "三国", "鳴門"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "阿部宣祐", "yomi": "", "venues": ["津"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "佐藤一貴", "yomi": "", "venues": ["津"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "高橋敬亮", "yomi": "", "venues": ["三国"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "西山光樹", "yomi": "", "venues": ["びわこ"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "川村賢治", "yomi": "", "venues": ["びわこ"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "市岡学", "yomi": "", "venues": ["びわこ", "住之江"], "nickname": "", "note": "住之江のメイン実況を長く担当。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "原川恵", "yomi": "", "venues": ["びわこ"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "千葉誠一", "yomi": "ちばせいいち", "venues": ["尼崎"], "nickname": "", "note": "尼崎の実況者。レース後の締めが『以上、尼崎第○レースでした』。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "榑谷篤史", "yomi": "", "venues": ["尼崎", "丸亀"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "明智洋平", "yomi": "", "venues": ["丸亀", "尼崎", "児島"], "nickname": "", "note": "複数場を担当（児島は代理担当の例あり）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "椛島健一", "yomi": "かばしまけんいち", "venues": ["児島"], "nickname": "瀬戸のDJアナウンサー", "note": "福岡県柳川市出身。2002年実況デビューで児島のメイン実況。低いだみ声と独特のスタイルが名物で、児島公式が絶叫実況特集を制作。", "source": "https://ja.wikipedia.org/wiki/%E6%A4%9B%E5%B3%B6%E5%81%A5%E4%B8%80" },
-  { "name": "黒明良光", "yomi": "", "venues": ["児島"], "nickname": "", "note": "元競艇選手。児島のスタート展示・リプレイ解説を担当（オフィシャルアドバイザー）。", "source": "https://ja.wikipedia.org/wiki/%E6%A4%9B%E5%B3%B6%E5%81%A5%E4%B8%80" },
-  { "name": "土谷由美", "yomi": "", "venues": ["宮島"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "有冨義浩", "yomi": "", "venues": ["宮島"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "南鉄平", "yomi": "", "venues": ["下関"], "nickname": "", "note": "聞き取りベース資料での記載。要再確認。", "source": "https://note.com/bacque777/n/nfe44cf6f4faa" },
-  { "name": "安河内美記", "yomi": "", "venues": ["若松", "芦屋", "福岡", "唐津"], "nickname": "", "note": "福岡県内4場の女性実況陣（交代制ローテーション）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "吉野尚美", "yomi": "", "venues": ["若松", "芦屋", "福岡", "唐津"], "nickname": "", "note": "福岡県内4場の女性実況陣（交代制ローテーション）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "竹本春美", "yomi": "たけもとはるみ", "venues": ["若松", "芦屋", "福岡", "唐津"], "nickname": "", "note": "福岡県内4場の女性実況陣（交代制ローテーション）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "荒田美希", "yomi": "あらたみき", "venues": ["若松", "芦屋", "福岡", "唐津"], "nickname": "", "note": "福岡県内4場の女性実況陣（交代制ローテーション）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "清家美和", "yomi": "", "venues": ["下関", "若松", "芦屋", "福岡", "唐津"], "nickname": "", "note": "下関のほか福岡県内4場の女性実況陣（交代制ローテーション）。", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" },
-  { "name": "大場ナツキ", "yomi": "", "venues": ["大村"], "nickname": "", "note": "", "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000" }
+  {
+    "name": "松岡俊道",
+    "yomi": "まつおかとしみち",
+    "venues": [
+      "桐生",
+      "平和島",
+      "下関",
+      "大村"
+    ],
+    "nickname": "",
+    "note": "野球・サッカー・競馬・競艇を担当するフリーアナ。SG等の地上波中継も担当。",
+    "source": "https://ja.wikipedia.org/wiki/%E6%9D%BE%E5%B2%A1%E4%BF%8A%E9%81%93",
+    "hobby": ""
+  },
+  {
+    "name": "高石順成",
+    "yomi": "たかいしよりまさ",
+    "venues": [
+      "桐生",
+      "平和島"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "二宮淳一",
+    "yomi": "にのみやじゅんいち",
+    "venues": [
+      "戸田",
+      "徳山"
+    ],
+    "nickname": "",
+    "note": "1972年生・東京都出身。オフィス・ケイ・ステーション所属。戸田の実況の大半を担当し、徳山の一部開催も兼務。戸田・笹川賞や徳山オーシャンカップなどSG優勝戦の実況歴多数。",
+    "source": "https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%AE%AE%E6%B7%B3%E4%B8%80",
+    "hobby": ""
+  },
+  {
+    "name": "白石祐大",
+    "yomi": "しらいしゆうた",
+    "venues": [
+      "浜名湖"
+    ],
+    "nickname": "",
+    "note": "公式表記は『祐大』（裕太は誤記）。2025年4月1日から浜名湖を担当と公式告知。戸田・徳山も担当とするWiki由来資料があり兼務／過去担当の可能性、要再確認。",
+    "source": "https://www.boatrace-hamanako.jp/sp/index.php?page=news-info_detail&page_id=info&news_id=000541&info=all",
+    "hobby": ""
+  },
+  {
+    "name": "田島美生",
+    "yomi": "たじまみお",
+    "venues": [
+      "江戸川"
+    ],
+    "nickname": "",
+    "note": "東京都出身、早稲田大学卒。戸田・江戸川で実況を担当。スカパーJLCのキャスター・リポーター、企業ナレーションなども務める。",
+    "source": "http://www.narrator.co.jp/2021/02/01/tajima-mio/",
+    "hobby": "趣味は遺跡・史跡めぐりの海外旅行、歴史系の読書、スキューバダイビング、水泳、お菓子作り。PADIダイビングインストラクター・総合旅行業務取扱管理者・書道3段・TOEIC720点。自身を「自然のアウトドアが好きなアクティブ派」と紹介。"
+  },
+  {
+    "name": "平山信一",
+    "yomi": "ひらやましんいち",
+    "venues": [
+      "江戸川"
+    ],
+    "nickname": "",
+    "note": "1973年生・千葉県君津市出身。2003年まで気象庁職員、その後フリーアナに。江戸川の実況を担当（競輪・前橋でも実況）。後進の辻村ゆりなを指導。",
+    "source": "https://ja.wikipedia.org/wiki/%E5%B9%B3%E5%B1%B1%E4%BF%A1%E4%B8%80",
+    "hobby": ""
+  },
+  {
+    "name": "辻村ゆりな",
+    "yomi": "つじむらゆりな",
+    "venues": [
+      "江戸川"
+    ],
+    "nickname": "しらたまん",
+    "note": "1994年生・埼玉県出身、元グラビアアイドル。オフィスキイワード所属。2018年に江戸川のピットリポーターに就き、平山信一に師事して2022年4月に実況デビュー。",
+    "source": "https://ja.wikipedia.org/wiki/%E8%BE%BB%E6%9D%91%E3%82%86%E3%82%8A%E3%81%AA",
+    "hobby": "趣味はジブリ作品などのキャラクターグッズ集め・イラスト・カラオケ・皿回し・バルーンアート。保育士・漢字検定2級・温泉ソムリエの資格を持つ。"
+  },
+  {
+    "name": "野村達也",
+    "yomi": "のむらたつや",
+    "venues": [
+      "江戸川"
+    ],
+    "nickname": "",
+    "note": "1977年生・東京都出身。ナレーター・声優・実況アナ。ボートレースは多摩川・江戸川・戸田を担当。NASCAR中継など実況・ナレーション実績多数。",
+    "source": "https://www.tatsuyanomura.com/blank-1",
+    "hobby": "ボディコンバット・フットサル・脱出ゲーム・人狼などが好きで、食べ放題・バイキングにも目がない。妻は声優の川﨑芽衣子で、夫婦でラジオ番組「野村家ラジオ」も配信している。"
+  },
+  {
+    "name": "坂田博昭",
+    "yomi": "さかたひろあき",
+    "venues": [
+      "平和島"
+    ],
+    "nickname": "",
+    "note": "会社員を経て2001年頃にアナウンサー活動を開始（初実況は下関）。桐生・平和島・下関・大村を中心に担当し、JLCピット中継や場内司会も。",
+    "source": "https://sp.macour.jp/columns/macour/100068/",
+    "hobby": ""
+  },
+  {
+    "name": "福田裕美",
+    "yomi": "ふくだゆみ",
+    "venues": [
+      "平和島"
+    ],
+    "nickname": "",
+    "note": "平和島をメインに桐生・下関も担当。落ち着いた口調で抑揚を活かす実況スタイル。",
+    "source": "https://sp.macour.jp/columns/macour/100038/",
+    "hobby": "「もともとボートレースが好きなので仕事がとても楽しい」と語るボートレース好き。"
+  },
+  {
+    "name": "伊藤政昭",
+    "yomi": "",
+    "venues": [
+      "平和島"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "滝やすし",
+    "yomi": "",
+    "venues": [
+      "多摩川"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "高橋貴隆",
+    "yomi": "たかはしよしたか",
+    "venues": [
+      "蒲郡"
+    ],
+    "nickname": "",
+    "note": "蒲郡を中心に実況を担当。蒲郡公式サイトに「高橋アナのモーター太鼓判」「ズバッと解説」の専用コンテンツがあり、boatrace.jp記事(2018)で蒲郡の名物実況アナウンサーと紹介された。",
+    "source": "https://www.boatrace.jp/owsp/sp/site/stadium_info/2018/03/7833/",
+    "hobby": ""
+  },
+  {
+    "name": "梶西達",
+    "yomi": "かじにしさとし",
+    "venues": [
+      "蒲郡",
+      "津",
+      "鳴門"
+    ],
+    "nickname": "",
+    "note": "大阪府出身。2000年にアナウンス会社入社で丸亀の専属実況を担当、のちフリーに。現在は津・鳴門を中心に担当し浜名湖も不定期。複数場を渡り歩く。",
+    "source": "https://ja.wikipedia.org/wiki/%E6%A2%B6%E8%A5%BF%E9%81%94",
+    "hobby": ""
+  },
+  {
+    "name": "山口新之輔",
+    "yomi": "やまぐちしんのすけ",
+    "venues": [
+      "常滑"
+    ],
+    "nickname": "",
+    "note": "蒲郡で実況デビュー後、2010年4月から浜名湖の専属アナに。2023年4月以降は常滑のメイン実況、2025年4月開催からは常滑専属。",
+    "source": "https://ja.wikipedia.org/wiki/%E5%B8%B8%E6%BB%91%E7%AB%B6%E8%89%87%E5%A0%B4",
+    "hobby": ""
+  },
+  {
+    "name": "佐竹亮",
+    "yomi": "",
+    "venues": [
+      "津"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "小林習之",
+    "yomi": "",
+    "venues": [
+      "津",
+      "三国",
+      "鳴門"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "阿部宣祐",
+    "yomi": "",
+    "venues": [
+      "津"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "佐藤一貴",
+    "yomi": "",
+    "venues": [
+      "津"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "高橋敬亮",
+    "yomi": "",
+    "venues": [
+      "三国"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "西山光樹",
+    "yomi": "",
+    "venues": [
+      "びわこ"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "川村賢治",
+    "yomi": "",
+    "venues": [
+      "びわこ"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "市岡学",
+    "yomi": "",
+    "venues": [
+      "びわこ",
+      "住之江"
+    ],
+    "nickname": "",
+    "note": "住之江のメイン実況を長く担当。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "原川恵",
+    "yomi": "",
+    "venues": [
+      "びわこ"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "千葉誠一",
+    "yomi": "ちばせいいち",
+    "venues": [
+      "尼崎"
+    ],
+    "nickname": "",
+    "note": "メディアターナー所属。尼崎のメイン実況を担当し、尼崎のYouTube配信や取材を通じた情報発信にも携わる。",
+    "source": "https://www.terner.co.jp/",
+    "hobby": "趣味は走ること・山・音楽・サッカー観戦・鉄道・カメラ・料理（特技も走ること、兵庫県出身）。事故で亡くなった選手を毎年悼むなど、選手への思いをSNSで発信している。"
+  },
+  {
+    "name": "榑谷篤史",
+    "yomi": "",
+    "venues": [
+      "尼崎",
+      "丸亀"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "明智洋平",
+    "yomi": "",
+    "venues": [
+      "丸亀",
+      "尼崎",
+      "児島"
+    ],
+    "nickname": "",
+    "note": "複数場を担当（児島は代理担当の例あり）。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "椛島健一",
+    "yomi": "かばしまけんいち",
+    "venues": [
+      "児島"
+    ],
+    "nickname": "瀬戸のDJアナウンサー",
+    "note": "1977年生・福岡県柳川市出身、メディアターナー所属。2002年4月実況デビューで児島のメイン実況。低いだみ声と立って身体を使う独特のスタイルが名物で「瀬戸のDJアナウンサー」と呼ばれ、児島公式が絶叫実況の特集動画を制作。",
+    "source": "https://ja.wikipedia.org/wiki/%E6%A4%9B%E5%B3%B6%E5%81%A5%E4%B8%80",
+    "hobby": "趣味はドライブと旅行。"
+  },
+  {
+    "name": "黒明良光",
+    "yomi": "くろみょうよしみつ",
+    "venues": [
+      "児島"
+    ],
+    "nickname": "",
+    "note": "元競艇選手(登録2090・22期、岡山県倉敷市出身)。通算2049勝・SG2勝・G1 16勝、2007年ボートレース殿堂入り。引退後は児島のオフィシャルアドバイザーとしてスタート展示航走・リプレイ解説を担当。孫に現役の黒明花夢。",
+    "source": "https://ja.wikipedia.org/wiki/%E9%BB%92%E6%98%8E%E8%89%AF%E5%85%89",
+    "hobby": ""
+  },
+  {
+    "name": "土谷由美",
+    "yomi": "つちやゆみ",
+    "venues": [
+      "宮島"
+    ],
+    "nickname": "",
+    "note": "宮島の実況を担当し、宮島公式が「名物アナウンサー」と紹介。元はボートレーサー志望で61期生として研修所に入所(短期で離脱)、レポーターを経て実況アナに。公式PRインタビューで本人が経歴を語っている。",
+    "source": "https://www.facebook.com/boatracePR/posts/5080035345449305/",
+    "hobby": ""
+  },
+  {
+    "name": "有冨義浩",
+    "yomi": "",
+    "venues": [
+      "宮島"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "南鉄平",
+    "yomi": "",
+    "venues": [
+      "下関"
+    ],
+    "nickname": "",
+    "note": "聞き取りベース資料での記載。要再確認。",
+    "source": "https://note.com/bacque777/n/nfe44cf6f4faa",
+    "hobby": ""
+  },
+  {
+    "name": "安河内美記",
+    "yomi": "",
+    "venues": [
+      "若松",
+      "芦屋",
+      "福岡",
+      "唐津"
+    ],
+    "nickname": "",
+    "note": "RKBの子会社RKBミューズに所属し、福岡県内の場（若松・芦屋・福岡ほか）の実況を交代制で担当。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "吉野尚美",
+    "yomi": "",
+    "venues": [
+      "若松",
+      "芦屋",
+      "福岡",
+      "唐津"
+    ],
+    "nickname": "",
+    "note": "RKBの子会社RKBミューズに所属し、福岡県内の場（若松・芦屋・福岡ほか）の実況を交代制で担当。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "竹本春美",
+    "yomi": "たけもとはるみ",
+    "venues": [
+      "若松",
+      "芦屋",
+      "福岡",
+      "唐津"
+    ],
+    "nickname": "",
+    "note": "RKBの子会社RKBミューズに所属し、福岡県内の場（若松・芦屋・福岡ほか）の実況を交代制で担当。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "荒田美希",
+    "yomi": "あらたみき",
+    "venues": [
+      "若松",
+      "芦屋",
+      "福岡",
+      "唐津"
+    ],
+    "nickname": "",
+    "note": "RKBの子会社RKBミューズに所属し、福岡県内の場（若松・芦屋・福岡ほか）の実況を交代制で担当。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "清家美和",
+    "yomi": "",
+    "venues": [
+      "下関",
+      "若松",
+      "芦屋",
+      "福岡",
+      "唐津"
+    ],
+    "nickname": "",
+    "note": "RKBの子会社RKBミューズに所属し、福岡県内の場（若松・芦屋・福岡ほか）の実況を交代制で担当。",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  },
+  {
+    "name": "大場ナツキ",
+    "yomi": "",
+    "venues": [
+      "大村"
+    ],
+    "nickname": "",
+    "note": "",
+    "source": "https://pay484.hatenablog.com/entry/2024/06/26/060000",
+    "hobby": ""
+  }
 ]
