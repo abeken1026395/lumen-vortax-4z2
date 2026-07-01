@@ -23,6 +23,23 @@ CONFIRMED = {'尼崎','徳山','芦屋','下関','大村','常滑'}
 MAKURI = {'戸田','江戸川','びわこ','平和島'}
 K = '①②③④⑤⑥'
 
+# --- 場特性の1行目（24場・断定しない範囲で水面の傾向のみ）---
+# in天国(it>=58)/狭水面まくり場(MAKURI)/差し場を軸に、記者の1行目を作る。
+NARROW = {'戸田','平和島','江戸川'}          # 狭い・インが残りにくい
+SASHI  = {'常滑','蒲郡','児島','鳴門','丸亀'}  # うねり・差しが効きやすい傾向
+def ba_line(ba, it):
+    if ba in NARROW:
+        return f"{ba}はインが残りにくい狭水面で、まくりの土壌がある。"
+    if it >= 60:
+        return f"{ba}はイン有利の水面。外が崩すには相応の材料がいる。"
+    if it >= 57:
+        return f"{ba}はインがしっかり残りやすい水面。"
+    if ba in SASHI:
+        return f"{ba}はうねりで差しが効きやすく、内の一角にも目が向く。"
+    if it <= 50:
+        return f"{ba}はインが盤石とは言えず、外の仕掛けが通りやすい。"
+    return f"{ba}は極端に偏らない水面で、スタートの流れがものを言う。"
+
 # --- 検証用 引き算スコア（標準化＋等重み・仮置き）---
 # 重み・閾値は検証ログのスコア相関を見てから調整する。
 LV = {'A1': 4, 'A2': 3, 'B1': 2, 'B2': 1}
@@ -87,6 +104,8 @@ def main():
                 'まくられ率': fr(k.get('まくられ率', '')),
                 'まくりさされ率': fr(k.get('まくりさされ率', '')),
                 'イン数': in1,
+                'まくり率': fr(k.get('まくり率', '')),
+                '差し率': fr(k.get('差し率', '')),
             }
     except Exception:
         yarare = {}
@@ -99,6 +118,16 @@ def main():
 
     for r in rac:
         r['_mtr'] = mkey.get((r['場コード'], r['登録番号']), 0.0)
+
+    # 決まり手タイプ（まくり型/差し型/標準）。データ欠損はNone。
+    def kim_type(toban):
+        y = yarare.get(toban, {})
+        mk = y.get('まくり率'); sa = y.get('差し率')
+        if mk is None and sa is None: return None
+        mk = mk or 0.0; sa = sa or 0.0
+        if mk >= 25 and mk >= sa + 8: return 'makuri'
+        if sa >= 30 and sa >= mk + 8: return 'sashi'
+        return None
 
     races = defaultdict(list)
     for r in rac:
@@ -150,10 +179,15 @@ def main():
         elif it <= 50: seeds += 1
         if ba in MAKURI: seeds += 1
 
-        # --- 見立て見出し（断定しない） ---
+        # --- 見立て見出し（scoreトーン×主役、断定しない） ---
+        # score(diff)で①中心/難解/外主役のトーンを決め、その上に主役艇名を乗せる。
         o4 = sorted([t for t in threats if t['w'] >= 4], key=lambda x: x['w'])
         inn = sorted([t for t in threats if t['w'] < 4], key=lambda x: x['w'])
-        if in_strong:
+        if in_strong and diff >= TH_KATA:
+            headline = f"①{nm(in1['氏名'])}中心。外の一発をどこまで測るか"
+        elif in_weak and diff <= TH_HARAN and o4:
+            headline = f"イン薄く外が主役。{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりが本線候補"
+        elif in_strong:
             headline = f"①{nm(in1['氏名'])}の逃げが軸。外の一発をどこまで測るか"
         elif in_weak and o4:
             headline = f"①に不安、{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりが主役候補"
@@ -164,36 +198,87 @@ def main():
         elif o4:
             headline = f"①の出方ひとつ、{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりと連動"
         else:
-            headline = "①の先マイが軸、こじれれば内の差しが浮上"
+            headline = "軸を絞りにくい難解戦。展示のSで傾きを見たい"
 
-        # --- 展開の筋（複数併置） ---
+        # --- 展開の筋（記者文型：場特性→①〜したい〜だが→主役決まり手×場特性→死角）---
         tenkai = []
+        # 〔場〕1行目に場特性（実装テーブルA①）
+        tenkai.append(ba_line(ba, it))
+
+        # 〔軸＋死角〕①を「〜したい〜だが」で（実装テーブルA②：級別×機力×当地で分岐）
         m1 = '機力は場上位' if hi(mt[0]) else '機力は場下位' if lo(mt[0]) else ('機力は場平均並み' if use_m and mt[0] > 0 else '')
         in_f = int(in1['F数']) >= 1
+        in_kt = kim_type(in1['登録番号'])
         if in_strong:
-            tenkai.append(f"①{nm(in1['氏名'])}はA級・当地巧者{('で'+m1) if m1 else ''}。②③が壁を作れば逃げの軸として信頼度は高い構図。")
+            extra = ""
+            if ba in NARROW or (it >= 60):
+                extra = "水面もイン向きで、"
+            tenkai.append(f"逃げたい①{nm(in1['氏名'])}はA級・当地巧者{('で'+m1) if m1 else ''}。{extra}②③が壁を作れば主導権は譲りにくい。")
         elif in_weak:
             why = []
             if not inA: why.append('格')
             if il > 0 and il < ina: why.append('当地')
             if in_lo: why.append('機力')
-            tenkai.append(f"①{nm(in1['氏名'])}は{'・'.join(why)}で見劣り{('（F持ちで踏み込みにくい）') if in_f else ''}。先マイを許さなければ外に主導権が渡る余地。")
+            reason = '・'.join(why) if why else '総合力'
+            fnote = '（F持ちで踏み込みにくく）' if in_f else ''
+            tenkai.append(f"逃げたい①{nm(in1['氏名'])}だが{reason}で見劣り{fnote}、押し切りには不安。先マイを許さなければ外に主導権が渡る。")
         else:
-            tenkai.append(f"①{nm(in1['氏名'])}は標準評価{('（'+m1+'）') if m1 else ''}。スタートが決まれば逃げ、遅れれば外に付け入る隙。")
+            tenkai.append(f"逃げたい①{nm(in1['氏名'])}は標準評価{('（'+m1+'）') if m1 else ''}。Sが決まれば逃げ、遅れれば外に付け入る隙が生まれる。")
+
+        # 〔主役〕最有力の脅威を決まり手×場特性で言い切る（差別化の核）
         th2 = sorted(threats, key=lambda t: (t['st'] if t['st'] > 0 else 9, t['w']))[:2]
-        for t in th2:
+        toban_by_w = {int(b['枠']): b['登録番号'] for b in bo}
+        for idx, t in enumerate(th2):
             role = '外枠のダッシュ勢' if t['w'] >= 4 else '内寄りの一角'
-            kim = 'まくり' if t['w'] >= 4 else '差し・まくり差し'
             ex = []
             if t['local_out']: ex.append('当地巧者')
             if t['a_out']: ex.append('A級')
             if t['mhi']: ex.append('機力上位')
             if t['st'] > 0 and t['st'] <= 0.15: ex.append('鋭ST')
-            tenkai.append(f"{K[t['w']-1]}{t['nm']}は{role}（{'・'.join(ex)}）。スタートが決まれば{kim}の主役になりうる。")
-        if not threats and not in_weak:
-            tenkai.append("外に目立った脅威は乏しく、隊形どおりなら波乱の芽は薄い。")
-        if in_weak or any(t['w'] >= 4 for t in threats):
-            tenkai.append("スタートが揃えば①主導、内が遅れれば外まくり——の二択で見たい一戦。")
+            exs = ('（'+'・'.join(ex)+'）') if ex else ''
+            kt = kim_type(toban_by_w.get(t['w'], ''))
+            # 決まり手タイプ×場特性の噛み合い一言＋言い切る決まり手をタイプで決める
+            fit = ''
+            if t['w'] >= 4:
+                # 外枠の基本はまくりだが、差し型ならまくり差しに寄せる
+                base_kim = 'まくり差し' if kt == 'sashi' else 'まくり'
+                if kt == 'makuri':
+                    if ba in NARROW: fit = 'まくり型で狭水面と噛み合い、'
+                    elif it >= 58:   fit = 'まくり型だが差しの利く水面で割り引きたく、'
+                    else:            fit = 'まくり型の持ち味を出しやすく、'
+                elif kt == 'sashi':
+                    fit = '差し型で、内が動いた隙を突く形なら、'
+            else:
+                base_kim = '差し・まくり差し'
+                if kt == 'sashi':
+                    fit = '差し型が水を得やすく、'
+                elif kt == 'makuri':
+                    fit = 'まくり型で一発の破壊力があり、'
+            lead = '主役は' if idx == 0 else 'これに次ぐのが'
+            tenkai.append(f"{lead}{K[t['w']-1]}{t['nm']}{exs}。{fit}Sが決まれば{base_kim}の主役になりうる。")
+
+        # 〔死角〕必ず1つ（実装テーブルA④：F・級・機力から）
+        saten = None
+        f_out = [t for t in threats if t['w'] >= 4 and int(bo[t['w']-1]['F数']) >= 1]
+        f_in  = [b for b in bo if int(b['枠']) in (2,3) and int(b['F数']) >= 1]
+        if f_out:
+            t = f_out[0]
+            saten = f"死角は{K[t['w']-1]}のF。慎重Sならまくり不発で①が残る目も出てくる。"
+        elif f_in:
+            saten = f"死角は内のF。慎重Sは外を後押しもするが、手堅く回れば①が立つ余地も残る。"
+        elif in_strong:
+            saten = "①がSを決め先マイすれば、地力で押し切る本線も濃い。"
+        elif any(t['mhi'] for t in threats if t['w'] < 4):
+            mb = next(t for t in threats if t['w'] < 4 and t['mhi'])
+            saten = f"警戒は{K[mb['w']-1]}。機力上位で差し・まくり差しに動け、外の隙に連へ食い込む。"
+        elif in_weak:
+            # ①不安時は「①残しの目」を死角に置く（外主役の裏の芽）
+            saten = "死角は①の粘り。Sさえ五分なら、外の攻めが不発になり①が残る展開もある。"
+        elif any(t['w'] >= 4 for t in threats):
+            saten = "死角は外の仕掛け。Sが一枚決まれば隊形が乱れ、内の信頼は一気に揺らぐ。"
+        else:
+            saten = "内が壁を作れば波及は内で収まり、荒れの芽は限られる。"
+        tenkai.append(saten)
 
         # --- 波及の連鎖 ---
         out4 = any(t['w'] >= 4 for t in threats)
