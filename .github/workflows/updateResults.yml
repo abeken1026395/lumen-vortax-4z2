@@ -1,0 +1,44 @@
+name: 見立て結果照合（夜）
+
+on:
+  schedule:
+    # 毎日 JST 23:37（UTC 14:37）＝全場終了後。ナイター最終レース後を想定。
+    - cron: "37 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: boatrace-results
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install deps
+        run: pip install lhafile
+
+      - name: build results (mbrace全場)
+        run: python scripts/buildResults.py
+
+      - name: verify predictions
+        run: python scripts/verifyPredictions.py
+
+      - name: commit
+        if: always()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add results/ 2>/dev/null || true
+          git add verify_log.csv 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "auto: results + verify_log"
+          git push
