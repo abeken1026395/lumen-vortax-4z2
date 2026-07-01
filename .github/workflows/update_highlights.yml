@@ -28,7 +28,9 @@ jobs:
           python scripts/build_highlights.py \
             docs/racers/racers_today.csv \
             docs/motor/motors_all.csv \
-            docs/highlights/highlights.json
+            docs/highlights/highlights.json \
+            docs/players/racerKimarite.csv \
+            docs/data/weather.json
 
       - name: コミット＆プッシュ
         run: |
