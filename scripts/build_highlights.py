@@ -257,10 +257,12 @@ def main():
             lead = '主役は' if idx == 0 else 'これに次ぐのが'
             tenkai.append(f"{lead}{K[t['w']-1]}{t['nm']}{exs}。{fit}Sが決まれば{base_kim}の主役になりうる。")
 
-        # 〔死角〕必ず1つ（実装テーブルA④：F・級・機力から）
+        # 〔死角〕必ず1つ（実装テーブルA④：F・級・機力から。同文を避け条件で散らす）
         saten = None
         f_out = [t for t in threats if t['w'] >= 4 and int(bo[t['w']-1]['F数']) >= 1]
         f_in  = [b for b in bo if int(b['枠']) in (2,3) and int(b['F数']) >= 1]
+        o4top = o4[0] if o4 else None
+        o4kt = kim_type(toban_by_w.get(o4top['w'], '')) if o4top else None
         if f_out:
             t = f_out[0]
             saten = f"死角は{K[t['w']-1]}のF。慎重Sならまくり不発で①が残る目も出てくる。"
@@ -272,8 +274,25 @@ def main():
             mb = next(t for t in threats if t['w'] < 4 and t['mhi'])
             saten = f"警戒は{K[mb['w']-1]}。機力上位で差し・まくり差しに動け、外の隙に連へ食い込む。"
         elif in_weak:
-            # ①不安時は「①残しの目」を死角に置く（外主役の裏の芽）
-            saten = "死角は①の粘り。Sさえ五分なら、外の攻めが不発になり①が残る展開もある。"
+            # ①不安時の死角を、弱点理由×外主役の決まり手で分岐（同文回避）
+            wl = []
+            if not inA: wl.append('格')
+            if il > 0 and il < ina: wl.append('当地')
+            if in_lo: wl.append('機力')
+            if o4top and o4kt == 'makuri' and ba in NARROW:
+                saten = f"死角は⑥までの一気。狭水面で{K[o4top['w']-1]}のまくりが決まれば、内は総崩れの目もある。"
+            elif o4top and o4kt == 'makuri':
+                saten = f"死角は{K[o4top['w']-1]}の握り込み。まくりが決まりきれば内の粘りごと連れ去る一撃もある。"
+            elif o4top and o4kt == 'sashi':
+                saten = f"死角は{K[o4top['w']-1]}の差し損じ。踏み込みが甘ければ①が粘り込む展開に振れる。"
+            elif in_lo:
+                saten = "死角は①の船足。伸びが戻れば見立てほど脆くはなく、逃げ残りも一考。"
+            elif '格' in wl and '当地' not in wl:
+                saten = "死角は①の地元利。格は下でもSさえ五分なら、押し切って波乱を消す目も残る。"
+            elif '当地' in wl:
+                saten = "死角は①の当地慣れ。水面相性が出れば数字以上に粘り、連の一角に残る目も。"
+            else:
+                saten = "死角は①の粘り。Sが五分なら外の攻めが不発になり、①残しもある。"
         elif any(t['w'] >= 4 for t in threats):
             saten = "死角は外の仕掛け。Sが一枚決まれば隊形が乱れ、内の信頼は一気に揺らぐ。"
         else:
