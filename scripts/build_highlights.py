@@ -15,6 +15,7 @@ RACERS = sys.argv[1] if len(sys.argv) > 1 else "docs/racers/racers_today.csv"
 MOTORS = sys.argv[2] if len(sys.argv) > 2 else "docs/motor/motors_all.csv"
 OUT    = sys.argv[3] if len(sys.argv) > 3 else "docs/highlights/highlights.json"
 KIM    = sys.argv[4] if len(sys.argv) > 4 else "docs/players/racerKimarite.csv"
+WEATHER = sys.argv[5] if len(sys.argv) > 5 else "docs/data/weather.json"
 
 INTOP = {'大村':63,'徳山':62,'芦屋':64,'尼崎':62,'下関':60,'常滑':58,'住之江':55,'丸亀':56,
          '児島':55,'唐津':56,'若松':55,'宮島':54,'浜名湖':54,'三国':53,'蒲郡':54,'福岡':52,
@@ -129,6 +130,52 @@ def main():
         if sa >= 30 and sa >= mk + 8: return 'sashi'
         return None
 
+    # 天候（表示だけ：締切時刻に最も近い時刻の風をweather.jsonから引く。結論は書かない）
+    wjson = {}
+    try:
+        with open(WEATHER, encoding='utf-8') as wf:
+            wjson = json.load(wf).get('stadiums', {})
+    except Exception:
+        wjson = {}
+
+    def wind_line(jcd, hhmm):
+        """締切HH:MMに最も近い時刻の風の事実を1行返す。取れなければ空文字。"""
+        st = wjson.get(str(jcd).zfill(2))
+        if not st or not hhmm or ':' not in hhmm:
+            return ''
+        try:
+            target = int(hhmm.split(':')[0]) * 60 + int(hhmm.split(':')[1])
+        except Exception:
+            return ''
+        best = None; bd = 1e9
+        for h in st.get('hourly', []):
+            t = h.get('time', '')
+            if 'T' not in t:
+                continue
+            hm = t.split('T')[1][:5]
+            try:
+                cur = int(hm.split(':')[0]) * 60 + int(hm.split(':')[1])
+            except Exception:
+                continue
+            dd = abs(cur - target)
+            if dd < bd:
+                bd = dd; best = h
+        if not best:
+            return ''
+        wind = best.get('wind'); d = best.get('dir', ''); wx = best.get('wx', '')
+        if wind is None:
+            return ''
+        # 事実の描写のみ。有利不利の結論には踏み込まない。
+        wxs = f"{wx}天で" if wx and wx not in ('晴',) else ''
+        if wind < 3:
+            return f"当日は{wxs}{d}の風{wind:.0f}m前後と穏やかで、水面は落ち着いた条件。"
+        elif wind < 5:
+            return f"当日は{wxs}{d}の風{wind:.0f}m。スタート隊形に影響しうる風速。"
+        elif wind < 7:
+            return f"当日は{wxs}{d}の風{wind:.0f}mとやや強く、水面は波立ちやすい。"
+        else:
+            return f"当日は{wxs}{d}の風{wind:.0f}mの強風で、水面は落ち着かない。"
+
     races = defaultdict(list)
     for r in rac:
         races[(r['場名'], r['レース'])].append(r)
@@ -213,6 +260,10 @@ def main():
         tenkai = []
         # 〔場〕1行目に場特性（実装テーブルA①）
         tenkai.append(ba_line(ba, it))
+        # 〔天候〕締切時刻の風の事実を1行（表示だけ・結論は書かない）
+        wl_line = wind_line(bo[0]['場コード'], bo[0].get('締切時刻', ''))
+        if wl_line:
+            tenkai.append(wl_line)
 
         # 〔軸＋死角〕①を「〜したい〜だが」で（実装テーブルA②：級別×機力×当地で分岐）
         m1 = '機力は場上位' if hi(mt[0]) else '機力は場下位' if lo(mt[0]) else ('機力は場平均並み' if use_m and mt[0] > 0 else '')
