@@ -1,0 +1,37 @@
+name: 荒れ指数 更新
+
+on:
+  schedule:
+    # 出走表更新(UTC23:30)の後。UTC23:45 = JST8:45
+    - cron: '45 23 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: boatrace-arare
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  arare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 荒れ指数生成（標準ライブラリのみ）
+        run: python scripts/build_arare.py
+
+      - name: commit
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/arare.json || true
+          git diff --cached --quiet || git commit -m "update arare.json"
+          git push || true
