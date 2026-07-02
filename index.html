@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>桐生 R別万舟率｜データ攻め</title>
+<style>
+  :root{ --bg:#0b1219; --card:#111c27; --line:#1e2f3f; --txt:#e6eef5; --sub:#8aa0b2; --accent:#ffd166; --man:#ff6b6b; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif; line-height:1.6; padding:16px; max-width:760px; margin:0 auto; }
+  h1{ font-size:1.2rem; color:var(--accent); margin-bottom:4px; }
+  .meta{ color:var(--sub); font-size:.8rem; margin-bottom:16px; }
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:20px; }
+  .stat{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center; }
+  .stat .n{ font-size:1.4rem; font-weight:700; color:var(--accent); }
+  .stat .l{ font-size:.72rem; color:var(--sub); margin-top:2px; }
+  h2{ font-size:.95rem; margin:18px 0 8px; border-left:3px solid var(--accent); padding-left:8px; }
+  table{ width:100%; border-collapse:collapse; background:var(--card); border-radius:10px; overflow:hidden; font-size:.85rem; }
+  th,td{ padding:8px 6px; text-align:center; border-bottom:1px solid var(--line); }
+  th{ color:var(--sub); font-weight:600; font-size:.75rem; }
+  tr:last-child td{ border-bottom:none; }
+  .bar{ height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:3px; }
+  .bar>span{ display:block; height:100%; background:var(--man); }
+  .combo{ font-variant-numeric:tabular-nums; letter-spacing:.5px; }
+  .pay{ color:var(--man); font-weight:700; }
+  .frame{ display:flex; gap:6px; flex-wrap:wrap; }
+  .fchip{ flex:1; min-width:70px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px; text-align:center; }
+  .fchip .fn{ font-weight:700; }
+  .c1{ color:#e6eef5; } .c2{ color:#9aa7b2; } .c3{ color:#ff6b6b; }
+  .c4{ color:#4d9de0; } .c5{ color:#ffd166; } .c6{ color:#5fd18b; }
+  .note{ color:var(--sub); font-size:.72rem; margin-top:14px; }
+  .err{ color:var(--man); padding:20px; text-align:center; }
+</style>
+</head>
+<body>
+  <h1>桐生 R別万舟率</h1>
+  <div class="meta" id="meta">読み込み中…</div>
+  <div id="app"></div>
+  <div class="note">万舟＝3連単配当1万円以上。数値は<a href="http://www1.mbrace.or.jp/" style="color:var(--sub)">mbrace公式競走成績</a>より集計。買い目・予想は出しません。読者が荒れ傾向を読むための実数です。</div>
+
+<script>
+const FCOLOR={1:"c1",2:"c2",3:"c3",4:"c4",5:"c5",6:"c6"};
+function fmt(n){ return n.toLocaleString("ja-JP"); }
+
+fetch("../payouts/kiryuManRate.json?t="+Date.now())
+  .then(r=>{ if(!r.ok) throw new Error(); return r.json(); })
+  .then(render)
+  .catch(()=>{ document.getElementById("app").innerHTML='<div class="err">データ未取得です。集計後に表示されます。</div>'; document.getElementById("meta").textContent=""; });
+
+function render(d){
+  const o=d.overall;
+  document.getElementById("meta").textContent=
+    "集計 "+fmt(o.total)+"レース　全体万舟率 "+o.manRate+"%　平均配当 "+fmt(o.avgPayout)+"円";
+
+  let h="";
+  h+='<div class="cards">'
+    +'<div class="stat"><div class="n">'+fmt(o.total)+'</div><div class="l">総レース数</div></div>'
+    +'<div class="stat"><div class="n">'+o.manRate+'%</div><div class="l">万舟率</div></div>'
+    +'<div class="stat"><div class="n">'+fmt(o.avgPayout)+'</div><div class="l">平均配当(円)</div></div>'
+    +'</div>';
+
+  // R別
+  h+='<h2>R別の荒れ傾向</h2><table><thead><tr><th>R</th><th>本数</th><th>万舟</th><th>万舟率</th><th>平均配当</th></tr></thead><tbody>';
+  const maxRate=Math.max(...d.byRace.map(x=>x.manRate),1);
+  d.byRace.forEach(x=>{
+    h+='<tr><td>'+x.rno+'R</td><td>'+fmt(x.total)+'</td><td>'+x.man+'</td>'
+      +'<td>'+x.manRate+'%<div class="bar"><span style="width:'+(x.manRate/maxRate*100)+'%"></span></div></td>'
+      +'<td>'+fmt(x.avgPayout)+'</td></tr>';
+  });
+  h+='</tbody></table>';
+
+  // 1着艇番別
+  h+='<h2>1着艇番の内訳</h2><div class="frame">';
+  const fc=d.frameContribution;
+  const ftot=Object.values(fc).reduce((a,b)=>a+b,0)||1;
+  for(let i=1;i<=6;i++){
+    const v=fc[String(i)]||0;
+    h+='<div class="fchip"><div class="fn '+FCOLOR[i]+'">'+i+'号艇</div><div>'+v+'本</div>'
+      +'<div style="color:var(--sub);font-size:.72rem">'+Math.round(v/ftot*100)+'%</div></div>';
+  }
+  h+='</div>';
+
+  // TOP5
+  h+='<h2>高配当TOP5</h2><table><thead><tr><th>日付</th><th>R</th><th>3連単</th><th>配当</th></tr></thead><tbody>';
+  d.top5.forEach(x=>{
+    const y=x.hd.slice(0,4),m=x.hd.slice(4,6),dd=x.hd.slice(6,8);
+    h+='<tr><td>'+y+'/'+m+'/'+dd+'</td><td>'+x.rno+'R</td>'
+      +'<td class="combo">'+x.combo+'</td><td class="pay">'+fmt(x.payout)+'円</td></tr>';
+  });
+  h+='</tbody></table>';
+
+  document.getElementById("app").innerHTML=h;
+}
+</script>
+</body>
+</html>
