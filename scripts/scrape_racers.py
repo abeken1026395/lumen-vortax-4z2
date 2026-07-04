@@ -61,6 +61,23 @@ def parse_deadlines(soup):
     return []
 
 
+def parse_title(soup):
+    """節タイトル（例：一般戦、G1〇〇記念）と企画名（例：予選、進入固定）を返す。
+    取れなければ空文字。h2=節、h3=各レースの企画名。"""
+    setsu = ""; kikaku = ""
+    h2 = soup.find("h2")
+    if h2:
+        setsu = re.sub(r"\s+", " ", h2.get_text(" ", strip=True)).strip()
+    h3 = soup.find("h3")
+    if h3:
+        t = re.sub(r"\s+", " ", h3.get_text(" ", strip=True)).strip()
+        # 距離(1800m等)やレース番号を落として企画名だけ残す
+        t = re.sub(r"\d+\s*[mMｍ]", "", t)
+        t = re.sub(r"^\d+\s*R", "", t)
+        kikaku = t.strip()
+    return setsu, kikaku
+
+
 def parse_racelist(html, jcd, venue, hd, rno):
     soup = BeautifulSoup(html, "html.parser")
     records = []
@@ -68,6 +85,9 @@ def parse_racelist(html, jcd, venue, hd, rno):
     # このレースの締切予定時刻（締切行の rno 番目）
     deadlines = parse_deadlines(soup)
     deadline = deadlines[rno - 1] if len(deadlines) >= rno else ""
+
+    # 節タイトル・企画名（表示用）
+    setsu, kikaku = parse_title(soup)
 
     for tr in soup.find_all("tr"):
         tds = tr.find_all("td")
@@ -141,6 +161,7 @@ def parse_racelist(html, jcd, venue, hd, rno):
             "全国勝率": zen[0], "全国2連率": zen[1], "全国3連率": zen[2],
             "当地勝率": toti[0], "当地2連率": toti[1], "当地3連率": toti[2],
             "支部": shibu, "出身": home, "年齢": age, "締切時刻": deadline,
+            "節名": setsu, "企画名": kikaku,
         }
         records.append(rec)
 
@@ -210,6 +231,7 @@ CSV_COLUMNS = [
     "場名", "場コード", "開催日", "レース", "枠", "登録番号", "級別", "氏名",
     "F数", "L数", "平均ST", "全国勝率", "全国2連率", "全国3連率",
     "当地勝率", "当地2連率", "当地3連率", "支部", "出身", "年齢", "締切時刻",
+    "節名", "企画名",
 ]
 
 
