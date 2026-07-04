@@ -46,9 +46,11 @@ function Bar({v}){
   const n=parseFloat(v); const pct=isNaN(n)?0:Math.max(0,Math.min(100,(n/50)*100));
   const c=rank(v).color;
   return (
-    <div style={{position:"relative",height:16,background:"#0f1923",borderRadius:8,overflow:"hidden",minWidth:70,flex:1}}>
-      <div style={{position:"absolute",left:0,top:0,bottom:0,width:pct+"%",background:c,opacity:.85,borderRadius:8}}/>
-      <div style={{position:"absolute",right:6,top:0,bottom:0,display:"flex",alignItems:"center",fontSize:11,fontWeight:700,color:"#e8eef5"}}>{isNaN(n)?"-":n.toFixed(1)}</div>
+    <div style={{display:"flex",alignItems:"center",gap:6,flex:1,minWidth:90}}>
+      <div style={{position:"relative",height:14,background:"#0f1923",borderRadius:7,overflow:"hidden",flex:1}}>
+        <div style={{position:"absolute",left:0,top:0,bottom:0,width:pct+"%",background:c,opacity:.85,borderRadius:7}}/>
+      </div>
+      <div style={{fontSize:12,fontWeight:800,color:c,minWidth:44,textAlign:"right"}}>{isNaN(n)?"-":n.toFixed(1)+"%"}</div>
     </div>
   );
 }
@@ -129,7 +131,7 @@ function App(){
         <div key={venue} style={{marginBottom:14,background:"#0d1622",border:"1px solid #16222f",borderRadius:12,overflow:"hidden"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:"#132030",borderBottom:"1px solid #1e2d3d"}}>
             <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}</span>
-            <span style={{fontSize:11,color:"#6b7f95"}}>{rows.length}艇</span>
+            <span style={{fontSize:11,color:"#6b7f95"}}>{rows.length}艇　<span style={{color:"#8faabe"}}>モーター2連率 →</span></span>
           </div>
           <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r}/>)}</div>
         </div>
