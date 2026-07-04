@@ -15,63 +15,125 @@
 <script type="text/babel">
 const { useState, useMemo } = React;
 const R = window.__D;
-function App() {
-  const [vf, setVf] = useState("ALL");
-  const [q, setQ] = useState("");
-  const [sc, setSc] = useState(null);
-  const [sd, setSd] = useState("desc");
-  const [showHelp, setShowHelp] = useState(false);
-  const cols = R.columns, venues = R.venues;
-  const filtered = useMemo(() => {
-    let rows = R.data;
-    const vi = cols.indexOf("場名");
-    if (vf !== "ALL" && vi >= 0) rows = rows.filter(r => r[vi] === vf);
-    if (q) { const s = q.toLowerCase(); rows = rows.filter(r => r.some(c => String(c).toLowerCase().includes(s))); }
-    if (sc !== null) rows = [...rows].sort((a, b) => { let va=a[sc],vb=b[sc]; const na=parseFloat(va),nb=parseFloat(vb); if(!isNaN(na)&&!isNaN(nb)){va=na;vb=nb;} return sd==="asc"?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0); });
-    return rows;
-  }, [vf, q, sc, sd]);
-  const venueCount = useMemo(() => { const vi = cols.indexOf("場名"); return new Set(R.data.map(r => r[vi])).size; }, []);
+const cols = R.columns;
+
+// 列名を部分一致で探す（列順・表記ゆれに強くする）
+function findCol(cands){ for(const c of cands){ const i=cols.findIndex(h=>String(h).includes(c)); if(i>=0) return i; } return -1; }
+const CI = {
+  venue: findCol(["場名"]),
+  mno:   findCol(["モーター番号","機番"]),
+  name:  findCol(["選手名","氏名"]),
+  grade: findCol(["級別"]),
+  rate:  findCol(["2連対率","2連率","２連対率","２連率"]),
+};
+
+// 機力ランク（目安。場ごとに基準が違うので絶対値ではない）
+function rank(v){
+  const n=parseFloat(v);
+  if(isNaN(n)) return {key:"na",label:"—",color:"#556579"};
+  if(n>=40) return {key:"top",label:"超抜",color:"#ffd166"};
+  if(n>=35) return {key:"hi", label:"上位",color:"#79c0ff"};
+  if(n>=30) return {key:"mid",label:"普通",color:"#7d9bb5"};
+  return {key:"low",label:"下位",color:"#556579"};
+}
+function isB(g){ return String(g).includes("B"); }
+// B級×高機力＝妙味（人気が落ちやすい構造。判断は読者に委ねる）
+function myoumi(g,v){ return isB(g) && parseFloat(v)>=35; }
+
+const gradeColor = g => String(g).startsWith("A")?"#e05a5a":String(g).startsWith("B")?"#5a7fe0":"#6b7f95";
+
+function Bar({v}){
+  const n=parseFloat(v); const pct=isNaN(n)?0:Math.max(0,Math.min(100,(n/50)*100));
+  const c=rank(v).color;
   return (
-    <div style={{minHeight:"100vh",padding:"12px"}}>
+    <div style={{position:"relative",height:16,background:"#0f1923",borderRadius:8,overflow:"hidden",minWidth:70,flex:1}}>
+      <div style={{position:"absolute",left:0,top:0,bottom:0,width:pct+"%",background:c,opacity:.85,borderRadius:8}}/>
+      <div style={{position:"absolute",right:6,top:0,bottom:0,display:"flex",alignItems:"center",fontSize:11,fontWeight:700,color:"#e8eef5"}}>{isNaN(n)?"-":n.toFixed(1)}</div>
+    </div>
+  );
+}
+
+function MotorRow({row}){
+  const v=row[CI.rate], g=row[CI.grade];
+  const rk=rank(v), my=myoumi(g,v);
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,marginBottom:6,
+      background:my?"#1a2412":"#0f1923",border:my?"1px solid #3a5220":"1px solid #16222f"}}>
+      <div style={{width:4,alignSelf:"stretch",borderRadius:2,background:rk.color}}/>
+      <div style={{fontSize:13,fontWeight:800,color:"#8faabe",minWidth:36,textAlign:"center"}}>{row[CI.mno]||"-"}</div>
+      <div style={{minWidth:0,flex:"0 0 auto"}}>
+        <div style={{fontSize:13,fontWeight:700,color:"#e8eef5",whiteSpace:"nowrap"}}>{row[CI.name]||"-"}</div>
+        <div style={{display:"flex",gap:4,marginTop:2,alignItems:"center"}}>
+          <span style={{fontSize:10,fontWeight:800,color:"#fff",background:gradeColor(g),padding:"1px 5px",borderRadius:3}}>{g||"-"}</span>
+          <span style={{fontSize:10,fontWeight:800,color:rk.color}}>{rk.label}</span>
+          {my&&<span style={{fontSize:10,fontWeight:800,color:"#a8e063",border:"1px solid #3a5220",borderRadius:3,padding:"1px 5px"}}>B級×高機力</span>}
+        </div>
+      </div>
+      <Bar v={v}/>
+    </div>
+  );
+}
+
+function App(){
+  const [vf,setVf]=useState("ALL");
+  const [q,setQ]=useState("");
+  const [showHelp,setShowHelp]=useState(false);
+
+  const allVenues = useMemo(()=>[...new Set(R.data.map(r=>r[CI.venue]))].filter(Boolean),[]);
+  const grouped = useMemo(()=>{
+    let rows=R.data;
+    if(vf!=="ALL") rows=rows.filter(r=>r[CI.venue]===vf);
+    if(q){const s=q.toLowerCase(); rows=rows.filter(r=>r.some(c=>String(c).toLowerCase().includes(s)));}
+    const g={};
+    for(const r of rows){ const v=r[CI.venue]||"その他"; (g[v]=g[v]||[]).push(r); }
+    for(const v in g) g[v].sort((a,b)=>(parseFloat(b[CI.rate])||0)-(parseFloat(a[CI.rate])||0));
+    return g;
+  },[vf,q]);
+  const total = useMemo(()=>Object.values(grouped).reduce((a,l)=>a+l.length,0),[grouped]);
+
+  return (
+    <div style={{minHeight:"100vh",padding:"12px",maxWidth:760,margin:"0 auto"}}>
       <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:4,flexWrap:"wrap"}}>
         <span style={{fontSize:20,fontWeight:800,color:"#ffd166"}}>BOATRACE モーター成績</span>
-        <span style={{fontSize:12,color:"#6b7f95"}}>{venueCount}場 / {R.data.length}件</span>
+        <span style={{fontSize:12,color:"#6b7f95"}}>{allVenues.length}場 / {R.data.length}件</span>
       </div>
-      <div style={{fontSize:11,color:"#4a6070",marginBottom:8}}>最終更新: {R.updated || "-"}</div>
-      <button onClick={()=>setShowHelp(s=>!s)} style={{marginBottom:8,padding:"6px 12px",background:"#1a2738",color:"#8faabe",border:"1px solid #2a3d52",borderRadius:6,fontSize:12,cursor:"pointer",fontWeight:600}}>{showHelp ? "▲ 見方を閉じる" : "▼ このデータの見方"}</button>
-      {showHelp && (
+      <div style={{fontSize:11,color:"#4a6070",marginBottom:8}}>最終更新: {R.updated||"-"}</div>
+
+      <button onClick={()=>setShowHelp(s=>!s)} style={{marginBottom:8,padding:"6px 12px",background:"#1a2738",color:"#8faabe",border:"1px solid #2a3d52",borderRadius:6,fontSize:12,cursor:"pointer",fontWeight:600}}>{showHelp?"▲ 見方を閉じる":"▼ このデータの見方"}</button>
+      {showHelp&&(
         <div style={{background:"#111d2b",border:"1px solid #1e2d3d",borderRadius:8,padding:"12px 14px",marginBottom:10,fontSize:12.5,lineHeight:1.7,color:"#c5d2e0"}}>
           <div style={{color:"#ffd166",fontWeight:700,marginBottom:6}}>このデータについて</div>
-          <div style={{marginBottom:8}}>各場の<b style={{color:"#e0e6ed"}}>今節のモーター抽選結果</b>です。前検日に抽選が確定するため、同じ節の間は使用者は変わりません。</div>
-          <div style={{color:"#8faabe",fontWeight:700,marginBottom:4}}>各項目の意味</div>
-          <div style={{paddingLeft:4}}>
-            <div style={{marginBottom:4}}>・<b style={{color:"#e0e6ed"}}>選手名</b>＝今節そのモーターを使っている選手</div>
-            <div style={{marginBottom:4}}>・<b style={{color:"#e0e6ed"}}>モーター番号</b>＝各場のモーターに振られた固有番号</div>
-            <div style={{marginBottom:4}}>・<b style={{color:"#ffd166"}}>モーター2連対率</b>＝そのモーター自体の今期通算成績（％）。数字が高いほど機力が良い</div>
-            <div style={{marginBottom:4}}>・<b style={{color:"#e0e6ed"}}>級別</b>＝選手のランク（A1＞A2＞B1＞B2）</div>
-          </div>
-          <div style={{color:"#8faabe",fontWeight:700,margin:"8px 0 4px"}}>狙い目のヒント</div>
+          <div style={{marginBottom:8}}>各場の<b style={{color:"#e0e6ed"}}>今節のモーター抽選結果</b>です。前検日に確定するため、同じ節の間は使用者は変わりません。</div>
+          <div style={{color:"#8faabe",fontWeight:700,marginBottom:4}}>機力ランク（バー・色）</div>
           <div style={{paddingLeft:4,marginBottom:8}}>
-            <div style={{marginBottom:4}}>・2連対率はモーターの成績で、<b style={{color:"#e0e6ed"}}>選手の調子とは別物</b></div>
-            <div>・<b style={{color:"#79c0ff"}}>機力の高いモーターを下級（B級）の選手が引いている</b>と、人気が落ちて狙い目になることがある</div>
+            <div>・<b style={{color:"#ffd166"}}>超抜</b>40%〜／<b style={{color:"#79c0ff"}}>上位</b>35〜40／<b style={{color:"#7d9bb5"}}>普通</b>30〜35／<b style={{color:"#556579"}}>下位</b>〜30</div>
+            <div style={{color:"#6b7f95",marginTop:4}}>※場ごとに水準が違うため<b>目安</b>。絶対評価ではありません。</div>
           </div>
-          <div style={{fontSize:11,color:"#6b7f95",borderTop:"1px solid #1e2d3d",paddingTop:6}}>列見出しをタップで並び替え／場の絞り込み・選手名やモーター番号で検索ができます。データ提供：boatrace.jp 公式</div>
+          <div style={{color:"#8faabe",fontWeight:700,marginBottom:4}}>「B級×高機力」タグ</div>
+          <div style={{paddingLeft:4}}>下級の選手が機力上位のモーターを引いている状態。人気が落ちやすい構造です。<b style={{color:"#e0e6ed"}}>買い目は出しません</b>。読み方は各自の判断で。</div>
+          <div style={{fontSize:11,color:"#6b7f95",borderTop:"1px solid #1e2d3d",paddingTop:6,marginTop:8}}>データ提供：boatrace.jp 公式</div>
         </div>
       )}
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
         <select value={vf} onChange={e=>setVf(e.target.value)} style={{padding:"6px",background:"#162232",color:"#e0e6ed",border:"1px solid #1e2d3d",borderRadius:4,fontSize:13}}>
           <option value="ALL">全場</option>
-          {Object.entries(venues).map(([k,v])=><option key={k} value={v}>{v}</option>)}
+          {allVenues.map(v=><option key={v} value={v}>{v}</option>)}
         </select>
         <input placeholder="選手名・モーター番号で検索..." value={q} onChange={e=>setQ(e.target.value)} style={{flex:1,minWidth:120,padding:"6px 10px",background:"#162232",color:"#e0e6ed",border:"1px solid #1e2d3d",borderRadius:4,fontSize:13}}/>
-        <span style={{color:"#6b7f95",fontSize:12,alignSelf:"center"}}>{filtered.length}件</span>
+        <span style={{color:"#6b7f95",fontSize:12,alignSelf:"center"}}>{total}件</span>
       </div>
-      <div style={{overflowX:"auto"}}>
-        <table style={{borderCollapse:"collapse",width:"100%",fontSize:12}}>
-          <thead><tr>{cols.map((c,i)=>(<th key={i} onClick={()=>{if(sc===i)setSd(d=>d==="asc"?"desc":"asc");else{setSc(i);setSd("desc");}}} style={{padding:"6px 8px",background:"#162232",color:"#8faabe",cursor:"pointer",whiteSpace:"nowrap",borderBottom:"2px solid #1e2d3d",textAlign:"left",position:"sticky",top:0,zIndex:1}}>{c}{sc===i?(sd==="asc"?" ▲":" ▼"):""}</th>))}</tr></thead>
-          <tbody>{filtered.map((row,ri)=>(<tr key={ri} style={{background:ri%2===0?"#0f1923":"#0b1219"}}>{row.map((cell,ci)=>(<td key={ci} style={{padding:"6px 8px",borderBottom:"1px solid #1a2535",whiteSpace:"nowrap"}}>{cell===""?"-":cell}</td>))}</tr>))}</tbody>
-        </table>
-      </div>
+
+      {Object.keys(grouped).length===0 && <div style={{color:"#6b7f95",fontSize:13,padding:20,textAlign:"center"}}>該当なし</div>}
+      {Object.entries(grouped).map(([venue,rows])=>(
+        <div key={venue} style={{marginBottom:14,background:"#0d1622",border:"1px solid #16222f",borderRadius:12,overflow:"hidden"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:"#132030",borderBottom:"1px solid #1e2d3d"}}>
+            <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}</span>
+            <span style={{fontSize:11,color:"#6b7f95"}}>{rows.length}艇</span>
+          </div>
+          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r}/>)}</div>
+        </div>
+      ))}
     </div>
   );
 }
