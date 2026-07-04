@@ -61,32 +61,64 @@ def get_open_venues(hd):
 
 
 def parse_motor_table(soup):
+    """rankingmotorページの行を位置固定でパースする。
+    公式の列並び（td順）:
+      順位 / 登録番号 / 選手名 / 級別 / モーター番号 / モーター2連率 /
+      ボート番号 / ボート2連率 / 前検タイム
+    級別セルの直後 = モーター番号、その次 = モーター2連率で固定取得する。
+    ボート2連率（大きい値）を誤って拾わないための対策。
+    """
     records = []
     for table in soup.find_all("table"):
         for row in table.find_all("tr"):
             cells = row.find_all("td")
-            if len(cells) < 5:
+            if len(cells) < 6:
                 continue
             texts = [c.get_text(strip=True) for c in cells]
             if not texts or not texts[0].isdigit():
                 continue
-            toban = name = rank = motor_no = motor_rate = ""
+
+            # 登録番号（4桁）とその直後の選手名
+            toban = name = ""
+            toban_idx = -1
             for i, t in enumerate(texts):
-                if re.match(r"^\d{4}$", t) and not toban:
+                if re.match(r"^\d{4}$", t):
                     toban = t
+                    toban_idx = i
                     if i + 1 < len(texts):
                         name = texts[i + 1]
-            for t in texts:
+                    break
+
+            # 級別セルの位置
+            rank = ""
+            rank_idx = -1
+            for i, t in enumerate(texts):
                 if t in ("A1", "A2", "B1", "B2"):
                     rank = t
+                    rank_idx = i
                     break
-            for i, t in enumerate(texts):
-                if re.match(r"^\d+\.\d+%$", t) and i > 0:
-                    prev = texts[i - 1]
-                    if re.match(r"^\d{1,3}$", prev):
-                        motor_no = prev
-                        motor_rate = t
+
+            motor_no = motor_rate = ""
+            # 本命：級別の直後=モーター番号、その次=モーター2連率（位置固定）
+            if rank_idx >= 0 and rank_idx + 2 < len(texts):
+                cand_no = texts[rank_idx + 1]
+                cand_rate = texts[rank_idx + 2]
+                if re.match(r"^\d{1,3}$", cand_no) and re.match(r"^\d+\.\d+%$", cand_rate):
+                    motor_no = cand_no
+                    motor_rate = cand_rate
+
+            # フォールバック：級別が取れない等の場合、最初の「番号→%」ペア＝
+            # 必ずモーター側（ボートより左）を拾う
+            if not motor_no:
+                for i in range(len(texts) - 1):
+                    if re.match(r"^\d{1,3}$", texts[i]) and re.match(r"^\d+\.\d+%$", texts[i + 1]):
+                        # 登録番号(4桁)の手前は順位なので除外、toban以降に限定
+                        if toban_idx >= 0 and i <= toban_idx:
+                            continue
+                        motor_no = texts[i]
+                        motor_rate = texts[i + 1]
                         break
+
             if toban and motor_no:
                 records.append({
                     "順位": texts[0], "登録番号": toban, "選手名": name,
