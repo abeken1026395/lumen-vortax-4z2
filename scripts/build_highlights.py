@@ -431,6 +431,8 @@ def main():
         out_races.append({
             '場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
             '締切時刻': bo[0].get('締切時刻', ''),
+            '節名': bo[0].get('節名', ''), '企画名': bo[0].get('企画名', ''),
+            '日目': bo[0].get('日目', ''),
             '波乱': seeds, 'イン堅': in_strong, 'モーター使用': use_m, 'イン1着率': it,
             '艇': boats, '見立て': headline, '展開': tenkai, '波及': suji
         })
