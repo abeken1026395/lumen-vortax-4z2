@@ -61,6 +61,23 @@ def parse_deadlines(soup):
     return []
 
 
+def parse_nichime(soup, hd):
+    """開催日タブから当日の日数（初日/２日目/最終日 等）を返す。取れなければ空。
+    当日はリンクが無いテキストで並ぶ。日付テキストから日目表記だけ抜く。"""
+    y, m, d = hd[:4], str(int(hd[4:6])), str(int(hd[6:8]))
+    label = f"{m}月{d}日"
+    for el in soup.find_all(["li", "span", "a"]):
+        t = el.get_text(" ", strip=True)
+        if label in t:
+            mm = re.search(r"(初日|最終日|\d+日目|[０-９]+日目)", t)
+            if mm:
+                return mm.group(1)
+    # フォールバック：ページ内の当日ラベル近傍を全文から探す
+    txt = soup.get_text(" ", strip=True)
+    mm = re.search(re.escape(label) + r"\s*(初日|最終日|\d+日目|[０-９]+日目)", txt)
+    return mm.group(1) if mm else ""
+
+
 def parse_title(soup):
     """節タイトル（例：一般戦、G1〇〇記念）と企画名（例：予選、進入固定）を返す。
     取れなければ空文字。h2=節、h3=各レースの企画名。"""
@@ -86,8 +103,9 @@ def parse_racelist(html, jcd, venue, hd, rno):
     deadlines = parse_deadlines(soup)
     deadline = deadlines[rno - 1] if len(deadlines) >= rno else ""
 
-    # 節タイトル・企画名（表示用）
+    # 節タイトル・企画名・開催日数（表示用）
     setsu, kikaku = parse_title(soup)
+    nichime = parse_nichime(soup, hd)
 
     for tr in soup.find_all("tr"):
         tds = tr.find_all("td")
@@ -161,7 +179,7 @@ def parse_racelist(html, jcd, venue, hd, rno):
             "全国勝率": zen[0], "全国2連率": zen[1], "全国3連率": zen[2],
             "当地勝率": toti[0], "当地2連率": toti[1], "当地3連率": toti[2],
             "支部": shibu, "出身": home, "年齢": age, "締切時刻": deadline,
-            "節名": setsu, "企画名": kikaku,
+            "節名": setsu, "企画名": kikaku, "日目": nichime,
         }
         records.append(rec)
 
@@ -231,7 +249,7 @@ CSV_COLUMNS = [
     "場名", "場コード", "開催日", "レース", "枠", "登録番号", "級別", "氏名",
     "F数", "L数", "平均ST", "全国勝率", "全国2連率", "全国3連率",
     "当地勝率", "当地2連率", "当地3連率", "支部", "出身", "年齢", "締切時刻",
-    "節名", "企画名",
+    "節名", "企画名", "日目",
 ]
 
 
