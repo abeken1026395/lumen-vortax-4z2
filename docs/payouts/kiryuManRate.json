@@ -3,104 +3,135 @@
   "jcd": "01",
   "manThreshold": 10000,
   "overall": {
-    "total": 0,
-    "man": 0,
-    "manRate": 0.0,
-    "avgPayout": 0
+    "total": 461,
+    "man": 98,
+    "manRate": 21.3,
+    "avgPayout": 7967
   },
   "byRace": [
     {
       "rno": 1,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 39,
+      "man": 10,
+      "manRate": 25.6,
+      "avgPayout": 8400
     },
     {
       "rno": 2,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 39,
+      "man": 8,
+      "manRate": 20.5,
+      "avgPayout": 6761
     },
     {
       "rno": 3,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 39,
+      "man": 14,
+      "manRate": 35.9,
+      "avgPayout": 8886
     },
     {
       "rno": 4,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 39,
+      "man": 14,
+      "manRate": 35.9,
+      "avgPayout": 8543
     },
     {
       "rno": 5,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 39,
+      "man": 7,
+      "manRate": 17.9,
+      "avgPayout": 7344
     },
     {
       "rno": 6,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 39,
+      "man": 6,
+      "manRate": 15.4,
+      "avgPayout": 12259
     },
     {
       "rno": 7,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 38,
+      "man": 7,
+      "manRate": 18.4,
+      "avgPayout": 7125
     },
     {
       "rno": 8,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 38,
+      "man": 8,
+      "manRate": 21.1,
+      "avgPayout": 8409
     },
     {
       "rno": 9,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 38,
+      "man": 6,
+      "manRate": 15.8,
+      "avgPayout": 7470
     },
     {
       "rno": 10,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 38,
+      "man": 5,
+      "manRate": 13.2,
+      "avgPayout": 5914
     },
     {
       "rno": 11,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 38,
+      "man": 5,
+      "manRate": 13.2,
+      "avgPayout": 4928
     },
     {
       "rno": 12,
-      "total": 0,
-      "man": 0,
-      "manRate": 0.0,
-      "avgPayout": 0
+      "total": 37,
+      "man": 8,
+      "manRate": 21.6,
+      "avgPayout": 9495
     }
   ],
   "frameContribution": {
-    "1": 0,
-    "2": 0,
-    "3": 0,
-    "4": 0,
-    "5": 0,
-    "6": 0
+    "1": 232,
+    "2": 60,
+    "3": 67,
+    "4": 47,
+    "5": 35,
+    "6": 20
   },
-  "top5": []
+  "top5": [
+    {
+      "hd": "20260618",
+      "rno": 6,
+      "combo": "6-2-3",
+      "payout": 213090
+    },
+    {
+      "hd": "20260606",
+      "rno": 12,
+      "combo": "3-4-6",
+      "payout": 119170
+    },
+    {
+      "hd": "20260616",
+      "rno": 9,
+      "combo": "6-1-2",
+      "payout": 110870
+    },
+    {
+      "hd": "20260608",
+      "rno": 6,
+      "combo": "6-4-5",
+      "payout": 80060
+    },
+    {
+      "hd": "20260607",
+      "rno": 7,
+      "combo": "4-5-6",
+      "payout": 77480
+    }
+  ]
 }

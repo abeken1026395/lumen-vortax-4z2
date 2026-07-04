@@ -11,13 +11,15 @@ mbrace公式競走成績配布（LZH）方式。徳山高速版と同設定。
 import os
 import re
 import csv
+import glob
 import time
 import datetime
+import tempfile
+import subprocess
 import urllib.request
 
-import lhafile
-
-BASE = "http://www1.mbrace.or.jp/od2/K/{ym}/k{ymd}.lzh"
+# https直叩き（http://は301でhttpsへ飛ぶ。urllibはリダイレクト追従するがhttps固定で往復を省く）
+BASE = "https://www1.mbrace.or.jp/od2/K/{ym}/k{ymd}.lzh"
 OUT = "docs/payouts/kiryuPayouts.csv"
 
 KIRYU = "\u6850\u3000\u751f\uff3b\u6210\u7e3e\uff3d"   # 桐　生［成績］（全角スペース有り・現物確認済み）
@@ -26,26 +28,52 @@ PAY = "\u6255\u623b\u91d1"                            # 払戻金
 PAYLINE = re.compile(r"\s*(\d{1,2})R\s+(\d)-(\d)-(\d)\s+(\d+)")
 
 SLEEP = 1.0
-TIMEOUT = 8
+TIMEOUT = 40  # mbraceは応答が遅め(~20s)なので長めに
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) boatrace-data-collector"
+
+# LZH解凍はWindows同梱bsdtar(libarchive)を使う。lhafileはPython3.14でC拡張ビルド不可のため。
+BSDTAR = os.environ.get(
+    "BSDTAR",
+    os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32", "tar.exe"),
+)
 
 
 def fetch_lzh(d):
     ym = d.strftime("%Y%m")
     ymd = d.strftime("%y%m%d")
     url = BASE.format(ym=ym, ymd=ymd)
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
         return r.read()
 
 
+def unlzh(raw):
+    """LZHバイト列をbsdtarで解凍し、内側テキスト(K*.TXT)のバイト列を返す。失敗時None。"""
+    with tempfile.TemporaryDirectory() as td:
+        lzh = os.path.join(td, "k.lzh")
+        with open(lzh, "wb") as f:
+            f.write(raw)
+        try:
+            subprocess.run(
+                [BSDTAR, "-xf", lzh, "-C", td],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            return None
+        txts = glob.glob(os.path.join(td, "*.TXT")) + glob.glob(os.path.join(td, "*.txt"))
+        if not txts:
+            return None
+        with open(txts[0], "rb") as f:
+            return f.read()
+
+
 def parse_kiryu(raw):
-    tmp = "_tmp_kiryu.lzh"
-    with open(tmp, "wb") as f:
-        f.write(raw)
-    a = lhafile.Lhafile(tmp)
-    data = a.read(a.infolist()[0].filename)
+    data = unlzh(raw)
+    if not data:
+        return []
     txt = data.decode("shift_jis", "ignore")
-    os.remove(tmp)
     out = []
     in_t = False
     in_p = False
@@ -85,6 +113,18 @@ def load_done():
     return done, rows
 
 
+def last_collected_date(rows):
+    """CSVに記録済みの最終開催日(datetime.date)。無ければNone。"""
+    last = None
+    for row in rows:
+        hd = row[0]
+        if len(hd) == 8 and hd.isdigit() and (last is None or hd > last):
+            last = hd
+    if last is None:
+        return None
+    return datetime.date(int(last[0:4]), int(last[4:6]), int(last[6:8]))
+
+
 def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     done, rows = load_done()
@@ -99,9 +139,22 @@ def main():
             nxt = datetime.date(y, mo + 1, 1)
         days = [start + datetime.timedelta(d) for d in range((nxt - start).days)]
     else:
-        n = int(os.environ.get("DAYS", "365"))
+        # daily差分: 前回取得日の翌日 〜 昨日（全期間の再取得はしない）
         today = datetime.date.today()
-        days = [today - datetime.timedelta(d) for d in range(1, n + 1)]
+        yesterday = today - datetime.timedelta(days=1)
+        start_env = os.environ.get("START", "").strip()  # YYYYMMDD 明示指定（CSV空のとき用）
+        last = last_collected_date(rows)
+        if start_env:
+            start = datetime.date(int(start_env[0:4]), int(start_env[4:6]), int(start_env[6:8]))
+        elif last is not None:
+            start = last + datetime.timedelta(days=1)
+        else:
+            start = yesterday - datetime.timedelta(days=int(os.environ.get("DAYS", "365")))
+        days = []
+        d = start
+        while d <= yesterday:
+            days.append(d)
+            d += datetime.timedelta(days=1)
 
     got = 0
     for d in days:
