@@ -5,6 +5,11 @@ on:
     # 毎日 JST 23:37（UTC 14:37）＝全場終了後。ナイター最終レース後を想定。
     - cron: "37 14 * * *"
   workflow_dispatch:
+    inputs:
+      hd:
+        description: "照合する日付(YYYYMMDD)。空欄なら当日(JST)。過去日を埋めるとき指定。"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -29,9 +34,13 @@ jobs:
 
       - name: build results (mbrace全場)
         run: python scripts/buildResults.py
+        env:
+          HD: ${{ github.event.inputs.hd }}
 
       - name: verify predictions
         run: python scripts/verifyPredictions.py
+        env:
+          HD: ${{ github.event.inputs.hd }}
 
       - name: build verify summary
         run: python scripts/build_verify_summary.py
