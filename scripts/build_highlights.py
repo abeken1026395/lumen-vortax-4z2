@@ -248,8 +248,6 @@ def main():
                 hero = 4  # ④まくり型×狭水面は外に振る
             else:
                 hero = 1  # 拮抗は内(実測で混戦の1着は①最多)
-        pred_list.append({'場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
-                          '判定': verdict, '主役艇': hero, 'スコア': diff})
         if it >= 60: seeds = max(0, seeds-1)
         elif it <= 50: seeds += 1
         if ba in MAKURI: seeds += 1
@@ -259,26 +257,47 @@ def main():
         o4 = sorted([t for t in threats if t['w'] >= 4], key=lambda x: x['w'])
         inn = sorted([t for t in threats if t['w'] < 4], key=lambda x: x['w'])
         head_w = None
+        def _kt_of(w):
+            return kim_type(bo[w-1]['登録番号'])
+        # 語調は実測連動：スコアが深いほど強く言い切る（+0.40帯の波乱率18%実測）。
+        # 波乱側はスコア深度と波乱率が相関しない実測のため、断定を強めない。
         if in_strong and diff >= TH_KATA:
-            headline = f"①{nm(in1['氏名'])}中心。外の一発をどこまで測るか"
+            if diff >= 0.30:
+                headline = f"①{nm(in1['氏名'])}の信頼厚し。相手探しの一戦"; hid = 'K1'
+            elif it >= 60:
+                headline = f"①{nm(in1['氏名'])}中心。水面も後押しし、崩れは考えにくい"; hid = 'K2'
+            else:
+                headline = f"①{nm(in1['氏名'])}中心。外の一発をどこまで測るか"; hid = 'K3'
         elif in_weak and diff <= TH_HARAN and o4:
-            headline = f"イン薄く外が主役。{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりが本線候補"
-            head_w = o4[0]['w']
+            w0 = o4[0]; kt0 = _kt_of(w0['w'])
+            if kt0 == 'makuri' and ba in NARROW:
+                headline = f"イン薄く外が主役。{K[w0['w']-1]}{w0['nm']}のまくりが狭水面と噛み合う"; hid = 'H1'
+            elif kt0 == 'sashi':
+                headline = f"イン薄く外が主役。{K[w0['w']-1]}{w0['nm']}のまくり差しに妙味"; hid = 'H2'
+            else:
+                headline = f"イン薄く外が主役。{K[w0['w']-1]}{w0['nm']}の一撃が本線候補"; hid = 'H3'
+            head_w = w0['w']
         elif in_strong:
-            headline = f"①{nm(in1['氏名'])}の逃げが軸。外の一発をどこまで測るか"
+            headline = f"①{nm(in1['氏名'])}の逃げが軸。外の一発をどこまで測るか"; hid = 'K4'
         elif in_weak and o4:
-            headline = f"①に不安、{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりが主役候補"
-            head_w = o4[0]['w']
+            w0 = o4[0]; kt0 = _kt_of(w0['w'])
+            if kt0 == 'sashi':
+                headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}のまくり差しが主役候補"; hid = 'M1'
+            elif kt0 == 'makuri':
+                headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}のまくりが主役候補"; hid = 'M2'
+            else:
+                headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}のダッシュ一撃を測る一戦"; hid = 'M3'
+            head_w = w0['w']
         elif in_weak and inn:
-            headline = f"①に不安、{K[inn[0]['w']-1]}{inn[0]['nm']}の差しが突け入る一戦"
+            headline = f"①に不安、{K[inn[0]['w']-1]}{inn[0]['nm']}の差しが突け入る一戦"; hid = 'M4'
             head_w = inn[0]['w']
         elif in_weak:
-            headline = "①に不安、外の仕掛け待ちで波乱含み"
+            headline = "①に不安、外の仕掛け待ちで波乱含み"; hid = 'M5'
         elif o4:
-            headline = f"①の出方ひとつ、{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりと連動"
+            headline = f"①の出方ひとつ、{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりと連動"; hid = 'M6'
             head_w = o4[0]['w']
         else:
-            headline = "軸を絞りにくい難解戦。展示のSで傾きを見たい"
+            headline = "軸を絞りにくい難解戦。展示のSで傾きを見たい"; hid = 'M7'
 
         # --- 展開の筋（記者文型：場特性→①〜したい〜だが→主役決まり手×場特性→死角）---
         tenkai = []
@@ -297,7 +316,10 @@ def main():
             extra = ""
             if ba in NARROW or (it >= 60):
                 extra = "水面もイン向きで、"
-            tenkai.append(f"逃げたい①{nm(in1['氏名'])}はA級・当地巧者{('で'+m1) if m1 else ''}。{extra}②③が壁を作れば主導権は譲りにくい。")
+            if diff >= 0.30:
+                tenkai.append(f"①{nm(in1['氏名'])}はA級・当地巧者{('で'+m1) if m1 else ''}。{extra}比較で抜けており、Sさえ五分なら主導権は譲るまい。")
+            else:
+                tenkai.append(f"逃げたい①{nm(in1['氏名'])}はA級・当地巧者{('で'+m1) if m1 else ''}。{extra}②③が壁を作れば主導権は譲りにくい。")
         elif in_weak:
             why = []
             if not inA: why.append('格')
@@ -365,10 +387,12 @@ def main():
                 tenkai.append(f"これに次ぐのが{K[t['w']-1]}{t['nm']}{exs}。{fit}二の矢、{pred2}形。")
 
         # 修正1：主役より格上・当地上位の艇がいれば、主役でない理由を一言添える
+        mentioned_w = {t['w'] for t in th2}
         if head_w0 is not None:
             main_meta = boat_meta.get(head_w0, {})
             # 明確な格上のみ：級が1段以上上、または同格で当地が1.0以上上（僅差では言わない）
-            supers = [w for w, mm in boat_meta.items() if w != head_w0 and w != 1 and (
+            # ※展開で既に言及した艇（二番手含む）は除外＝同一艇の二重言及バグ修正
+            supers = [w for w, mm in boat_meta.items() if w not in mentioned_w and w != 1 and (
                 mm['lvr'] > main_meta.get('lvr', 0) or
                 (mm['lvr'] == main_meta.get('lvr', 0) and mm['loc'] > main_meta.get('loc', 0) + 1.0))]
             # 主役より級が下または同格なら「地力最上位」とは言わない
@@ -383,8 +407,15 @@ def main():
                     else:
                         tenkai.append(f"{K[sw-1]}{sm['nm']}は{sm['lv']}で地力上位だが、進入位置で分があるのは主役側。")
 
+        # 〔混戦の痩せ対策〕言及すべき対抗が拾えなかったレースでも、主役側の一文を必ず置く
+        if not th2:
+            if hero == 4:
+                tenkai.append(f"対するカド④{nm(bo[3]['氏名'])}。目立つ材料は薄いが、Sひとつで景色の変わる位置ではある。")
+            else:
+                tenkai.append("相手は横一線。②の差し、④のダッシュと、二番手争いは展示の気配次第。")
+
         # 〔死角〕必ず1つ（実装テーブルA④：F・級・機力から。同文を避け条件で散らす）
-        saten = None
+        saten = None; skw = None; sid = None
         f_out = [t for t in threats if t['w'] >= 4 and int(bo[t['w']-1]['F数']) >= 1]
         f_in  = [b for b in bo if int(b['枠']) in (2,3) and int(b['F数']) >= 1]
         o4top = o4[0] if o4 else None
@@ -392,13 +423,18 @@ def main():
         if f_out:
             t = f_out[0]
             saten = f"死角は{K[t['w']-1]}のF。慎重Sならまくり不発で①が残る目も出てくる。"
+            skw = t['w']; sid = 'D1'
         elif f_in:
-            saten = f"死角は内のF。慎重Sは外を後押しもするが、手堅く回れば①が立つ余地も残る。"
+            fw = int(f_in[0]['枠'])
+            saten = f"死角は{K[fw-1]}のF。慎重Sは外を後押しもするが、手堅く回れば①が立つ余地も残る。"
+            skw = fw; sid = 'D2'
         elif in_strong:
             saten = "①がSを決め先マイすれば、地力で押し切る本線も濃い。"
+            skw = 1; sid = 'D3'
         elif any(t['mhi'] for t in threats if t['w'] < 4):
             mb = next(t for t in threats if t['w'] < 4 and t['mhi'])
             saten = f"警戒は{K[mb['w']-1]}。機力上位で差し・まくり差しに動け、外の隙に連へ食い込む。"
+            skw = mb['w']; sid = 'D4'
         elif in_weak:
             # ①不安時の死角を、弱点理由×外主役の決まり手で分岐（同文回避）
             wl = []
@@ -407,32 +443,81 @@ def main():
             if in_lo: wl.append('機力')
             if o4top and o4kt == 'makuri' and ba in NARROW:
                 saten = f"死角は⑥までの一気。狭水面で{K[o4top['w']-1]}のまくりが決まれば、内は総崩れの目もある。"
+                skw = 6; sid = 'D5'
             elif o4top and o4kt == 'makuri':
                 saten = f"死角は{K[o4top['w']-1]}の握り込み。まくりが決まりきれば内の粘りごと連れ去る一撃もある。"
+                skw = o4top['w']; sid = 'D6'
             elif o4top and o4kt == 'sashi':
                 saten = f"死角は{K[o4top['w']-1]}の差し損じ。踏み込みが甘ければ①が粘り込む展開に振れる。"
+                skw = 1; sid = 'D7'
             elif in_lo:
                 saten = "死角は①の船足。伸びが戻れば見立てほど脆くはなく、逃げ残りも一考。"
+                skw = 1; sid = 'D8'
             elif '格' in wl and '当地' not in wl:
                 saten = "死角は①の地元利。格は下でもSさえ五分なら、押し切って波乱を消す目も残る。"
+                skw = 1; sid = 'D9'
             elif '当地' in wl:
                 saten = "死角は①の当地慣れ。水面相性が出れば数字以上に粘り、連の一角に残る目も。"
+                skw = 1; sid = 'D10'
             else:
                 saten = "死角は①の粘り。Sが五分なら外の攻めが不発になり、①残しもある。"
+                skw = 1; sid = 'D11'
         elif any(t['w'] >= 4 for t in threats):
             saten = "死角は外の仕掛け。Sが一枚決まれば隊形が乱れ、内の信頼は一気に揺らぐ。"
+            sid = 'D12'
         else:
             saten = "内が壁を作れば波及は内で収まり、荒れの芽は限られる。"
+            sid = 'D13'
         tenkai.append(saten)
 
-        # --- 波及の連鎖 ---
+        # --- 波及の連鎖（主役の決まり手型×場×イン強弱で分岐。同文を散らす）---
         out4 = any(t['w'] >= 4 for t in threats)
-        if in_strong or (not in_weak and not out4):
-            suji = "①が先マイを決めれば②③が続く筋。壁が崩れない限り波及は内で収まる。"
+        kt_h = _kt_of(head_w) if (head_w and head_w >= 4) else None
+        n1 = nm(in1['氏名']); n2b = nm(bo[1]['氏名'])
+        if in_strong and it >= 60:
+            suji = f"①{n1}が先マイなら②③が続く本線。外が崩す材料は乏しく、波及は内で収まりやすい。"; fid = 'S1'
+        elif in_strong or (not in_weak and not out4):
+            suji = f"①{n1}が先マイを決めれば②③が続く筋。壁が崩れない限り波及は内で収まる。"; fid = 'S2'
+        elif out4 and kt_h == 'makuri' and ba in NARROW:
+            suji = f"{K[head_w-1]}{boat_meta[head_w]['nm']}が握って回れば内は総崩れ、空いた最内を⑤⑥が拾う目まで。外決着なら内の連は薄れる。"; fid = 'S3'
+        elif out4 and kt_h == 'sashi':
+            suji = f"{K[head_w-1]}{boat_meta[head_w]['nm']}がまくり差しに構えれば①②の間が割れ、差された内は着を落とす連鎖。"; fid = 'S4'
+        elif out4 and head_w and head_w >= 4:
+            suji = f"{K[head_w-1]}{boat_meta[head_w]['nm']}が仕掛ければ②③は外に張られ、空いた内を逃げ残りの①{n1}や⑤が拾う波及。"; fid = 'S5'
         elif out4:
-            suji = "外が仕掛ければ②③は外に張られ、空いた内を⑤や逃げ残りの①が拾う波及。外決着なら内の連は薄れる。"
+            ow = o4[0]['w'] if o4 else 4
+            suji = f"{K[ow-1]}{boat_meta[ow]['nm']}が仕掛ければ②③は外に張られ、空いた内を⑤や逃げ残りの①{n1}が拾う波及。外決着なら内の連は薄れる。"; fid = 'S6'
         else:
-            suji = "②が差し込めば①は先頭を譲っても2着に残りやすく、③が続く形。"
+            suji = f"②{n2b}が差し込めば①{n1}は先頭を譲っても2着に残りやすく、③が続く形。"; fid = 'S7'
+
+        # --- 締めの1行（実装テーブルA⑤：判定×語調実測連動でパターンを散らす）---
+        if verdict == '堅め':
+            if diff >= 0.30 and in_strong:
+                shime = "①の信頼は厚い。展示は相手選びの材料に。"; cid = 'C1'
+            elif in_strong:
+                shime = "①軸は動かしにくい。崩れるとすれば外のS一枚。"; cid = 'C2'
+            else:
+                # 数字は①寄りだが文面は主役を絞れていない：矛盾しない締めに落とす
+                shime = "比較の数字は①寄り。あとは体勢ひとつ、展示で確かめたい。"; cid = 'C6'
+        elif verdict == '波乱':
+            tgt = K[head_w-1] if head_w else '外'
+            if in_weak:
+                shime = f"「①残り」か「{tgt}の一撃」か。断は展示のSまで預けたい。"; cid = 'C3'
+            else:
+                shime = "比較の数字は外寄りに振れる。仕掛けの有無を展示で。"; cid = 'C7'
+        else:
+            if hero == 4:
+                shime = "内外どちらにも振れる。進入と展示気配を見てから。"; cid = 'C4'
+            else:
+                shime = "軸を絞りにくい一戦。展示のSで傾きを確かめたい。"; cid = 'C5'
+        tenkai.append(shime)
+
+        # --- 検証ログ（拡張）：対抗・死角・文パターンIDまで保存し、書き方自体を検証可能に ---
+        pred_list.append({'場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
+                          '判定': verdict, '主役艇': hero, 'スコア': diff,
+                          '対抗艇': (th2[1]['w'] if len(th2) > 1 else None),
+                          '死角艇': skw,
+                          '見出しID': hid, '死角ID': sid, '波及ID': fid, '締めID': cid})
 
         boats = []
         for b in bo:
