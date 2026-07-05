@@ -139,6 +139,16 @@ function App() {
       if(j && typeof j==="object") setProf(j);
     }).catch(()=>{});
   },[]);
+  // URLに ?toban=登番 があれば、その選手を検索欄にプリセットして開く（モーター等からのリンク用）
+  useEffect(()=>{
+    const t=new URLSearchParams(location.search).get("toban");
+    if(!t) return;
+    setQ(t); setOpen(t);
+    setTimeout(()=>{
+      const el=document.getElementById("p-"+t);
+      if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+    },400);
+  },[]);
 
   const branches = useMemo(()=>[...new Set(R.players.map(p=>p.branch))].sort(), []);
   const filtered = useMemo(()=>{
@@ -211,7 +221,7 @@ function App() {
           const k = kim[p.no];
           const pf = prof[p.no];
           return (
-            <div key={p.no} onClick={()=>setOpen(isOpen?null:p.no)} style={{background:"#0f1923",borderRadius:12,cursor:"pointer",overflow:"hidden",borderLeft:"4px solid "+RANK_LINE[p.rank],boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}>
+            <div key={p.no} id={"p-"+p.no} onClick={()=>setOpen(isOpen?null:p.no)} style={{background:"#0f1923",borderRadius:12,cursor:"pointer",overflow:"hidden",borderLeft:"4px solid "+RANK_LINE[p.rank],boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}>
               {/* 一覧行（旧版踏襲: バッジ＋名前＋右に大きな数字2列） */}
               <div style={{display:"flex",alignItems:"center",padding:"14px 16px",gap:12}}>
                 {tab!=="list" && <span style={{fontSize:15,fontWeight:900,color:"#ffd166",minWidth:26,textAlign:"center",flexShrink:0}}>{idx+1}</span>}
