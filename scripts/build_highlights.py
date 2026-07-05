@@ -192,9 +192,7 @@ def main():
         elif diff <= TH_HARAN:
             verdict, hero = '波乱', 4
         else:
-            verdict, hero = '混戦', 1
-        pred_list.append({'場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
-                          '判定': verdict, '主役艇': hero, 'スコア': diff})
+            verdict, hero = '混戦', None  # 混戦の主役は下で機力→実力→決まり手で判断
         it = INTOP.get(ba, 53)
         use_m = motok.get(ba, True)
         mt = [b['_mtr'] for b in bo]
@@ -236,6 +234,22 @@ def main():
                                 'mlo': lo(mt[i]), 'n2': n2})
             if w >= 4 and hi(mt[i]): out_hi = True
         if in_lo and out_hi: seeds += 1
+
+        # 混戦の主役を①と④で判断（機力差→実力(当地)差→決まり手）
+        if hero is None:
+            m1v, m4v = mt[0], mt[3]
+            loc1, loc4 = f(bo[0]['当地勝率']), f(bo[3]['当地勝率'])
+            kt4 = kim_type(bo[3]['登録番号'])
+            if use_m and m1v > 0 and m4v > 0 and abs(m1v - m4v) >= 8:
+                hero = 1 if m1v > m4v else 4  # 機力差が明確
+            elif loc1 > 0 and loc4 > 0 and abs(loc1 - loc4) >= 1.0:
+                hero = 1 if loc1 > loc4 else 4  # 実力(当地)差が明確
+            elif kt4 == 'makuri' and ba in NARROW:
+                hero = 4  # ④まくり型×狭水面は外に振る
+            else:
+                hero = 1  # 拮抗は内(実測で混戦の1着は①最多)
+        pred_list.append({'場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
+                          '判定': verdict, '主役艇': hero, 'スコア': diff})
         if it >= 60: seeds = max(0, seeds-1)
         elif it <= 50: seeds += 1
         if ba in MAKURI: seeds += 1
