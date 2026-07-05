@@ -225,13 +225,15 @@ def main():
         LVRANK = {'A1': 4, 'A2': 3, 'B1': 2, 'B2': 1}
         for i, b in enumerate(bo):
             w = int(b['枠']); lv = b['級別']; loc = f(b['当地勝率']); nat = f(b['全国勝率']); st = f(b['平均ST'])
+            n2 = f(b['全国2連率'])
             a_out = w >= 4 and lv in ('A1', 'A2')
             local_out = w >= 3 and loc > 0 and loc > nat
             if a_out or local_out:
                 seeds += 1
                 threats.append({'w': w, 'lv': lv, 'st': st, 'a_out': a_out,
                                 'local_out': local_out, 'mhi': hi(mt[i]), 'nm': nm(b['氏名']),
-                                'lvr': LVRANK.get(lv, 0), 'loc': loc})
+                                'lvr': LVRANK.get(lv, 0), 'loc': loc,
+                                'mlo': lo(mt[i]), 'n2': n2})
             if w >= 4 and hi(mt[i]): out_hi = True
         if in_lo and out_hi: seeds += 1
         if it >= 60: seeds = max(0, seeds-1)
@@ -336,6 +338,13 @@ def main():
                 # 主役：主役述語（1回だけ）
                 tenkai.append(f"主役は{K[t['w']-1]}{t['nm']}{exs}。{fit}Sが決まれば{base_kim}の主役になりうる。")
                 used_shuyaku = True
+                # 三島型の機力注記：実力(全国2連率上位)に対し今節機が下位なら、決まり手に接続して一言
+                if t.get('mlo') and t.get('n2', 0) >= 35 and use_m:
+                    if t['w'] >= 4:
+                        kimt = 'まくり一発の型は作りにくく、伸びが戻るかが鍵。'
+                    else:
+                        kimt = '差し場に持ち込む足がまだ物足りず、機の上向きを待ちたい。'
+                    tenkai.append(f"ただ{K[t['w']-1]}は実力上位ながら今節機が伸び劣り、{kimt}")
             else:
                 # 二番手以下：述語を変える（「主役になりうる」は使わない）
                 pred2 = 'まくり差しから連に食い込む' if t['w'] >= 4 else '差し込みで連に絡む'
