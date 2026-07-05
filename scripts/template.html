@@ -13,7 +13,7 @@
 <div id="root"></div>
 <script>window.__D = __DATA_PLACEHOLDER__;</script>
 <script type="text/babel">
-const { useState, useMemo } = React;
+const { useState, useMemo, useEffect } = React;
 const R = window.__D;
 const cols = R.columns;
 
@@ -59,9 +59,11 @@ function Bar({v,c}){
   );
 }
 
-function MotorRow({row,rk}){
+function MotorRow({row,rk,fem}){
   const v=row[CI.rate], g=row[CI.grade];
   const my=myoumi(g,rk);
+  const heart = fem ? <span style={{color:"#ff7eb6",marginLeft:3}}>♥</span> : null;
+  const nameColor = fem ? "#ff9ec9" : "#8fd0ff";
   return (
     <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,marginBottom:6,
       background:my?"#1a2412":"#0f1923",border:my?"1px solid #3a5220":"1px solid #16222f"}}>
@@ -70,8 +72,8 @@ function MotorRow({row,rk}){
       <div style={{minWidth:0,flex:"0 0 auto"}}>
         <div style={{fontSize:13,fontWeight:700,whiteSpace:"nowrap"}}>{
           row[CI.toban]
-          ? <a href={"../players/?toban="+row[CI.toban]} style={{color:"#8fd0ff",textDecoration:"none",borderBottom:"1px dotted #4a6a8a"}}>{row[CI.name]||"-"}</a>
-          : <span style={{color:"#e8eef5"}}>{row[CI.name]||"-"}</span>
+          ? <a href={"../players/?toban="+row[CI.toban]} style={{color:nameColor,textDecoration:"none",borderBottom:"1px dotted #4a6a8a"}}>{row[CI.name]||"-"}{heart}</a>
+          : <span style={{color:fem?"#ff9ec9":"#e8eef5"}}>{row[CI.name]||"-"}{heart}</span>
         }</div>
         <div style={{display:"flex",gap:4,marginTop:2,alignItems:"center"}}>
           <span style={{fontSize:10,fontWeight:800,color:"#fff",background:gradeColor(g),padding:"1px 5px",borderRadius:3}}>{g||"-"}</span>
@@ -88,6 +90,11 @@ function App(){
   const [vf,setVf]=useState("ALL");
   const [q,setQ]=useState("");
   const [showHelp,setShowHelp]=useState(false);
+  const [females,setFemales]=useState(null);
+  useEffect(()=>{
+    fetch("../players/female.json").then(r=>r.ok?r.json():Promise.reject())
+      .then(a=>{ if(Array.isArray(a)) setFemales(new Set(a.map(String))); }).catch(()=>{});
+  },[]);
 
   const allVenues = useMemo(()=>[...new Set(R.data.map(r=>r[CI.venue]))].filter(Boolean),[]);
   const grouped = useMemo(()=>{
@@ -141,7 +148,7 @@ function App(){
             <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}<span style={{fontSize:11,fontWeight:600,color:"#7d94a8",marginLeft:8}}>{(()=>{const h=String(rows[0][CI.hd]||"");return h.length===8?`${+h.slice(4,6)}/${+h.slice(6,8)}時点`:"";})()}</span></span>
             <span style={{fontSize:11,color:"#6b7f95"}}>{rows.length}艇　<span style={{color:"#8faabe"}}>モーター2連率 →</span></span>
           </div>
-          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r} rk={rankByPos(i+1, rows.length)}/>)}</div>
+          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r} rk={rankByPos(i+1, rows.length)} fem={females&&females.has(String(r[CI.toban]))}/>)}</div>
         </div>
       ))}
     </div>
