@@ -23,28 +23,32 @@ const CI = {
   venue: findCol(["場名"]),
   mno:   findCol(["モーター番号","機番"]),
   name:  findCol(["選手名","氏名"]),
+  toban: findCol(["登録番号","登番"]),
   grade: findCol(["級別"]),
   rate:  findCol(["2連対率","2連率","２連対率","２連率"]),
+  hd:    findCol(["開催日"]),
 };
 
-// 機力ランク（目安。場ごとに基準が違うので絶対値ではない）
-function rank(v){
-  const n=parseFloat(v);
-  if(isNaN(n)) return {key:"na",label:"—",color:"#556579"};
-  if(n>=40) return {key:"top",label:"超抜",color:"#ffd166"};
-  if(n>=35) return {key:"hi", label:"上位",color:"#79c0ff"};
-  if(n>=30) return {key:"mid",label:"普通",color:"#7d9bb5"};
+// 場ごとの相対順位でランクを決める（絶対値の跳ねに依存しない）。
+// 各場の2連率降順で位置を出し、上位の割合で段階付け。
+// pos=1始まりの場内順位、total=その場の機数。
+function rankByPos(pos, total){
+  if(!total || !pos) return {key:"na",label:"—",color:"#556579"};
+  if(pos <= 3) return {key:"top",label:"超抜",color:"#ffd166"};
+  const r = pos / total;
+  if(r <= 0.40) return {key:"hi", label:"上位",color:"#79c0ff"};
+  if(r <= 0.75) return {key:"mid",label:"普通",color:"#7d9bb5"};
   return {key:"low",label:"下位",color:"#556579"};
 }
 function isB(g){ return String(g).includes("B"); }
-// B級×高機力＝妙味（人気が落ちやすい構造。判断は読者に委ねる）
-function myoumi(g,v){ return isB(g) && parseFloat(v)>=35; }
+// B級×高機力＝妙味（人気が落ちやすい構造。判断は読者に委ねる）。
+// 場内で上位40%以内のモーターにB級が乗っている状態。
+function myoumi(g, rk){ return isB(g) && (rk.key==="top"||rk.key==="hi"); }
 
 const gradeColor = g => String(g).startsWith("A")?"#e05a5a":String(g).startsWith("B")?"#5a7fe0":"#6b7f95";
 
-function Bar({v}){
+function Bar({v,c}){
   const n=parseFloat(v); const pct=isNaN(n)?0:Math.max(0,Math.min(100,(n/50)*100));
-  const c=rank(v).color;
   return (
     <div style={{display:"flex",alignItems:"center",gap:6,flex:1,minWidth:90}}>
       <div style={{position:"relative",height:14,background:"#0f1923",borderRadius:7,overflow:"hidden",flex:1}}>
@@ -55,23 +59,27 @@ function Bar({v}){
   );
 }
 
-function MotorRow({row}){
+function MotorRow({row,rk}){
   const v=row[CI.rate], g=row[CI.grade];
-  const rk=rank(v), my=myoumi(g,v);
+  const my=myoumi(g,rk);
   return (
     <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,marginBottom:6,
       background:my?"#1a2412":"#0f1923",border:my?"1px solid #3a5220":"1px solid #16222f"}}>
       <div style={{width:4,alignSelf:"stretch",borderRadius:2,background:rk.color}}/>
       <div style={{fontSize:13,fontWeight:800,color:"#8faabe",minWidth:36,textAlign:"center"}}>{row[CI.mno]||"-"}</div>
       <div style={{minWidth:0,flex:"0 0 auto"}}>
-        <div style={{fontSize:13,fontWeight:700,color:"#e8eef5",whiteSpace:"nowrap"}}>{row[CI.name]||"-"}</div>
+        <div style={{fontSize:13,fontWeight:700,whiteSpace:"nowrap"}}>{
+          row[CI.toban]
+          ? <a href={"../players/?toban="+row[CI.toban]} style={{color:"#8fd0ff",textDecoration:"none",borderBottom:"1px dotted #4a6a8a"}}>{row[CI.name]||"-"}</a>
+          : <span style={{color:"#e8eef5"}}>{row[CI.name]||"-"}</span>
+        }</div>
         <div style={{display:"flex",gap:4,marginTop:2,alignItems:"center"}}>
           <span style={{fontSize:10,fontWeight:800,color:"#fff",background:gradeColor(g),padding:"1px 5px",borderRadius:3}}>{g||"-"}</span>
           <span style={{fontSize:10,fontWeight:800,color:rk.color}}>{rk.label}</span>
           {my&&<span style={{fontSize:10,fontWeight:800,color:"#a8e063",border:"1px solid #3a5220",borderRadius:3,padding:"1px 5px"}}>B級×高機力</span>}
         </div>
       </div>
-      <Bar v={v}/>
+      <Bar v={v} c={rk.color}/>
     </div>
   );
 }
@@ -108,8 +116,8 @@ function App(){
           <div style={{marginBottom:8}}>各場の<b style={{color:"#e0e6ed"}}>今節のモーター抽選結果</b>です。前検日に確定するため、同じ節の間は使用者は変わりません。</div>
           <div style={{color:"#8faabe",fontWeight:700,marginBottom:4}}>機力ランク（バー・色）</div>
           <div style={{paddingLeft:4,marginBottom:8}}>
-            <div>・<b style={{color:"#ffd166"}}>超抜</b>40%〜／<b style={{color:"#79c0ff"}}>上位</b>35〜40／<b style={{color:"#7d9bb5"}}>普通</b>30〜35／<b style={{color:"#556579"}}>下位</b>〜30</div>
-            <div style={{color:"#6b7f95",marginTop:4}}>※場ごとに水準が違うため<b>目安</b>。絶対評価ではありません。</div>
+            <div>その場の2連率の高い順に、<b style={{color:"#ffd166"}}>超抜</b>（上位3機）／<b style={{color:"#79c0ff"}}>上位</b>（〜40%）／<b style={{color:"#7d9bb5"}}>普通</b>（〜75%）／<b style={{color:"#556579"}}>下位</b>で色分け。</div>
+            <div style={{color:"#6b7f95",marginTop:4}}>※場ごとの相対評価。他場との比較ではありません。走行数が少ない節は数字が振れやすいので、数字そのものも併せてご確認を。</div>
           </div>
           <div style={{color:"#8faabe",fontWeight:700,marginBottom:4}}>「B級×高機力」タグ</div>
           <div style={{paddingLeft:4}}>下級の選手が機力上位のモーターを引いている状態。人気が落ちやすい構造です。<b style={{color:"#e0e6ed"}}>買い目は出しません</b>。読み方は各自の判断で。</div>
@@ -130,10 +138,10 @@ function App(){
       {Object.entries(grouped).map(([venue,rows])=>(
         <div key={venue} style={{marginBottom:14,background:"#0d1622",border:"1px solid #16222f",borderRadius:12,overflow:"hidden"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:"#132030",borderBottom:"1px solid #1e2d3d"}}>
-            <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}</span>
+            <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}<span style={{fontSize:11,fontWeight:600,color:"#7d94a8",marginLeft:8}}>{(()=>{const h=String(rows[0][CI.hd]||"");return h.length===8?`${+h.slice(4,6)}/${+h.slice(6,8)}時点`:"";})()}</span></span>
             <span style={{fontSize:11,color:"#6b7f95"}}>{rows.length}艇　<span style={{color:"#8faabe"}}>モーター2連率 →</span></span>
           </div>
-          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r}/>)}</div>
+          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r} rk={rankByPos(i+1, rows.length)}/>)}</div>
         </div>
       ))}
     </div>
