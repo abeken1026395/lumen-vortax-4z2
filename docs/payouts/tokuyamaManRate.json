@@ -2,6 +2,11 @@
   "stadium": "徳山",
   "jcd": 18,
   "threshold": 10000,
+  "period": {
+    "from": "2025/06/30",
+    "to": "2026/06/29",
+    "days": 203
+  },
   "totalRaces": 2436,
   "manTotal": 357,
   "races": [

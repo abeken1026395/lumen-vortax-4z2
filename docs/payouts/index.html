@@ -91,6 +91,7 @@
 <header>
   <h1>徳山 R別 万舟率</h1>
   <div class="lead">過去1年・3連単の実績だけで読む、徳山の荒れどころ。買い目は出しません。</div>
+  <div class="period" id="period" style="margin-top:6px;font-size:12px;opacity:.75"></div>
 </header>
 
 <div id="feature" class="feature" style="display:none">
@@ -140,6 +141,10 @@ function yen(n){return n.toLocaleString()+'円';}
 fetch('tokuyamaManRate.json?_=' + Date.now())
   .then(function(r){ if(!r.ok) throw new Error('no data'); return r.json(); })
   .then(function(d){
+    if(d.period){
+      document.getElementById('period').textContent =
+        'データ期間: '+d.period.from+'〜'+d.period.to+'（'+d.period.days+'開催日 / '+(d.totalRaces||0)+'レース）';
+    }
     var races = d.races || [];
     var avgRate = races.length ? races.reduce(function(a,b){return a+b.manRate;},0)/races.length : 0;
     var maxRate = Math.max.apply(null, races.map(function(r){return r.manRate;}).concat([1]));

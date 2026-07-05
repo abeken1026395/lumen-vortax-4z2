@@ -65,10 +65,21 @@ def main():
     man_total = sum(1 for x in rows if x["payout"] >= MAN)
     sum_total = sum(x["payout"] for x in rows)
 
+    # データ期間（最古〜最新の開催日と開催日数）
+    hds = sorted({x["hd"] for x in rows})
+    def _fmt(h):
+        return h[0:4] + "/" + h[4:6] + "/" + h[6:8]
+    period = {
+        "from": _fmt(hds[0]),
+        "to": _fmt(hds[-1]),
+        "days": len(hds),
+    } if hds else None
+
     result = {
         "venue": "桐生",
         "jcd": "01",
         "manThreshold": MAN,
+        "period": period,
         "overall": {
             "total": total,
             "man": man_total,

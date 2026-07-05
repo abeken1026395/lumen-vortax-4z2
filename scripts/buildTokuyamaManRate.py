@@ -77,10 +77,21 @@ def main():
         calm = min(races, key=lambda r: r["manRate"])
         wild = max(races, key=lambda r: r["manRate"])
 
+    # データ期間（最古〜最新の開催日と開催日数）
+    hds = sorted({r[0] for r in all_rows})
+    def fmt(h):
+        return h[0:4] + "/" + h[4:6] + "/" + h[6:8]
+    period = {
+        "from": fmt(hds[0]),
+        "to": fmt(hds[-1]),
+        "days": len(hds),
+    } if hds else None
+
     out = {
         "stadium": "徳山",
         "jcd": 18,
         "threshold": MAN,
+        "period": period,
         "totalRaces": total_races,
         "manTotal": man_total,
         "races": races,

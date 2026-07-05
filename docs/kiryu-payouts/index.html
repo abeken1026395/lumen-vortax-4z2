@@ -49,8 +49,9 @@ fetch("../payouts/kiryuManRate.json?t="+Date.now())
 
 function render(d){
   const o=d.overall;
+  const per = d.period ? "データ期間 "+d.period.from+"〜"+d.period.to+"（"+d.period.days+"開催日）　" : "";
   document.getElementById("meta").textContent=
-    "集計 "+fmt(o.total)+"レース　全体万舟率 "+o.manRate+"%　平均配当 "+fmt(o.avgPayout)+"円";
+    per+"集計 "+fmt(o.total)+"レース　全体万舟率 "+o.manRate+"%　平均配当 "+fmt(o.avgPayout)+"円";
 
   let h="";
   h+='<div class="cards">'
