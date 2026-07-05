@@ -54,12 +54,23 @@ def to_races(data):
         if len(top3) != 3:
             continue
         try:
+            boats = []
+            for b in r.get("boats", []):
+                boats.append({
+                    "枠": b.get("racer_boat_number"),
+                    "登番": b.get("racer_number"),
+                    "氏名": b.get("racer_name"),
+                    "コース": b.get("racer_course_number"),
+                    "ST": b.get("racer_start_timing"),
+                    "着": b.get("racer_place_number"),
+                })
             races.append({
                 "場コード": "%02d" % int(r["race_stadium_number"]),
                 "レース": "%dR" % int(r["race_number"]),
                 "着順": combo,
                 "1着": int(top3[0]), "2着": int(top3[1]), "3着": int(top3[2]),
                 "三連単配当": int(pay),
+                "艇": boats,
             })
         except Exception:
             continue
