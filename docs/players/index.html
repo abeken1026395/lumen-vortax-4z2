@@ -117,6 +117,8 @@ function App() {
   const [open, setOpen] = useState(null);
   const [kim, setKim] = useState({});
   const [prof, setProf] = useState({});
+  const [mon, setMon] = useState(null);
+  const [monMeta, setMonMeta] = useState(null);
   useEffect(()=>{
     fetch("racerKimarite.csv").then(r=>r.ok?r.text():Promise.reject()).then(t=>{
       const lines=t.trim().split(/\r?\n/); if(lines.length<2) return;
@@ -139,6 +141,13 @@ function App() {
       if(j && typeof j==="object") setProf(j);
     }).catch(()=>{});
   },[]);
+  // 詳細を初めて開いた時だけ月別成績JSONを遅延読込（一覧を重くしない）
+  useEffect(()=>{
+    if(!open || mon!==null) return;
+    fetch("../data/playerMonthly.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+      if(j && j.選手){ setMon(j.選手); setMonMeta({months:j.対象月||[], days:j.対象日数, src:j.出典}); }
+    }).catch(()=>{ setMon({}); });
+  },[open]);
   // URLに ?toban=登番 があれば、その選手を検索欄にプリセットして開く（モーター等からのリンク用）
   useEffect(()=>{
     const t=new URLSearchParams(location.search).get("toban");
@@ -306,6 +315,44 @@ function App() {
                       <div style={{fontSize:10,color:"#6b7f95",marginTop:4,lineHeight:1.6}}>まくり率/差し率＝1着のうちその決まり手の割合。前づけ＝枠より内側への進入度（平均＝枠−進入コース、率＝2枚以上内側に入った割合、進入固定は除外）。出典：公式競走成績。</div>
                     </div>
                   )}
+
+                  {(()=>{
+                    const md = mon && mon[p.no] ? mon[p.no].月別 : null;
+                    const months = monMeta ? monMeta.months : [];
+                    const rows = md ? months.filter(m=>md[m]&&md[m].出走>0).slice().reverse() : [];
+                    return (
+                      <div>
+                        <div style={{fontSize:11,color:"#8faabe",fontWeight:700,margin:"16px 0 6px"}}>■ 月別成績　<span style={{color:"#6b7f95",fontWeight:400}}>直近13ヶ月 / 公式競走成績</span></div>
+                        {mon===null ? (
+                          <div style={{fontSize:11,color:"#6b7f95",background:"#0b1219",borderRadius:8,padding:"12px"}}>読み込み中…</div>
+                        ) : rows.length===0 ? (
+                          <div style={{fontSize:11,color:"#6b7f95",background:"#0b1219",borderRadius:8,padding:"12px"}}>この期間の出走データがありません。</div>
+                        ) : (
+                          <div style={{background:"#0b1219",borderRadius:8,padding:"8px 10px"}}>
+                            <div style={{display:"flex",fontSize:10,color:"#6b7f95",fontWeight:700,padding:"0 0 6px",borderBottom:"1px solid #1a2535"}}>
+                              <span style={{width:56}}>月</span><span style={{width:44,textAlign:"right"}}>出走</span><span style={{width:40,textAlign:"right"}}>1着</span><span style={{flex:1,paddingLeft:10}}>2連率</span><span style={{width:56,textAlign:"right"}}>平均ST</span>
+                            </div>
+                            {rows.map(m=>{
+                              const r=md[m]; const rate=r.出走>0?(r["2連"]/r.出走*100):0;
+                              return (
+                                <div key={m} style={{display:"flex",alignItems:"center",fontSize:12,padding:"5px 0",borderBottom:"1px solid #131f2e"}}>
+                                  <span style={{width:56,color:"#c5d2e0",fontWeight:600}}>{m.replace("-",".")}</span>
+                                  <span style={{width:44,textAlign:"right",color:"#e0e6ed"}}>{r.出走}</span>
+                                  <span style={{width:40,textAlign:"right",color:r["1着"]>0?"#ffd166":"#6b7f95",fontWeight:700}}>{r["1着"]}</span>
+                                  <span style={{flex:1,paddingLeft:10,display:"flex",alignItems:"center",gap:6}}>
+                                    <span style={{flex:1,height:6,background:"#1a2535",borderRadius:3,overflow:"hidden"}}><span style={{display:"block",height:"100%",width:Math.min(100,rate)+"%",background:"#3fb1c9"}}></span></span>
+                                    <span style={{width:38,textAlign:"right",color:"#3fb1c9",fontWeight:700}}>{rate.toFixed(0)}%</span>
+                                  </span>
+                                  <span style={{width:56,textAlign:"right",color:"#e0e6ed"}}>{r["平均ST"]?r["平均ST"].toFixed(2):"-"}</span>
+                                </div>
+                              );
+                            })}
+                            <div style={{fontSize:10,color:"#6b7f95",marginTop:6,lineHeight:1.5}}>2連率＝2連対数÷出走。平均STはF/L等の非数値を除外。出典：公式競走成績（results/配下）。</div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
