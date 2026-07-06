@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 # buildResults.py
 # BoatraceOpenAPI(GitHub Pages配信)から全24場・全レースの
-# 3連単の着順(組番)と配当を抽出し results/YYYYMMDD.json に出力。
-# 見立て検証(verifyPredictions.py)の結果側データ。
+# 着順(組番)・決まり手・全式別払戻を抽出し results/YYYYMMDD.json に出力。
+# 見立て検証(verifyPredictions.py)の結果側データ、および結果表ページ(docs/results/)の元データ。
 #
 # 取得元: https://raw.githubusercontent.com/BoatraceOpenAPI/results/HEAD/docs/v2/YYYY/YYYYMMDD.json
 #   ・GitHub配信のためGitHub ActionsのIPからも通る(mbraceのIPブロック問題を回避)。
 #   ・当日結果はレース確定後に反映。未確定/非開催日は404。
+#   ・OpenAPIには決まり手(race_technique_number)と全式別払戻(trifecta/trio/exacta/
+#     quinella/quinella_place/win/place)が含まれるため mbrace LZH は不要。
 #
 # 本番: 環境変数なしで当日(JST)分を取得。
 # 複数日: 環境変数 HD にカンマ区切りで日付(YYYYMMDD)を渡すと全日ぶん取得(過去分の穴埋め用)。
@@ -19,6 +21,41 @@ import urllib.request
 
 BASE = "https://raw.githubusercontent.com/BoatraceOpenAPI/results/HEAD/docs/v2/"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) boatrace-data-collector"
+
+# 決まり手コード(race_technique_number) → 表記
+TECHNIQUE = {
+    1: "逃げ", 2: "差し", 3: "まくり",
+    4: "まくり差し", 5: "抜き", 6: "恵まれ",
+}
+
+
+def _payouts(payouts):
+    """OpenAPIのpayoutsを、式別ごとの[{組番,配当}...]に整形して返す。
+    単勝/複勝/2連単/2連複/拡連複/3連複/3連単の順。配当欠損は0/Noneを除外。"""
+    # OpenAPIキー → 日本語式別名
+    mapping = [
+        ("win", "単勝"),
+        ("place", "複勝"),
+        ("exacta", "2連単"),
+        ("quinella", "2連複"),
+        ("quinella_place", "拡連複"),
+        ("trio", "3連複"),
+        ("trifecta", "3連単"),
+    ]
+    out = {}
+    for key, label in mapping:
+        rows = []
+        for e in payouts.get(key, []) or []:
+            combo = e.get("combination")
+            pay = e.get("payout")
+            if not combo or pay in (None, 0):
+                continue
+            try:
+                rows.append({"組番": combo, "配当": int(pay)})
+            except Exception:
+                continue
+        out[label] = rows
+    return out
 
 
 def fetch_json(hd):
@@ -64,12 +101,19 @@ def to_races(data):
                     "ST": b.get("racer_start_timing"),
                     "着": b.get("racer_place_number"),
                 })
+            tech_no = r.get("race_technique_number")
+            try:
+                tech_no = int(tech_no) if tech_no is not None else None
+            except Exception:
+                tech_no = None
             races.append({
                 "場コード": "%02d" % int(r["race_stadium_number"]),
                 "レース": "%dR" % int(r["race_number"]),
                 "着順": combo,
                 "1着": int(top3[0]), "2着": int(top3[1]), "3着": int(top3[2]),
                 "三連単配当": int(pay),
+                "決まり手": TECHNIQUE.get(tech_no),
+                "払戻": _payouts(r.get("payouts", {})),
                 "艇": boats,
             })
         except Exception:

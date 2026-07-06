@@ -32,10 +32,13 @@ jobs:
       - name: install deps
         run: pip install lhafile
 
-      - name: build results (mbrace全場)
+      - name: build results (OpenAPI全場・決まり手/全式別払戻含む)
         run: python scripts/buildResults.py
         env:
           HD: ${{ github.event.inputs.hd }}
+
+      - name: build results site data (docs/results/)
+        run: python scripts/buildResultsSite.py
 
       - name: verify predictions
         run: python scripts/verifyPredictions.py
@@ -54,6 +57,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add results/ 2>/dev/null || true
+          git add docs/results/data/ 2>/dev/null || true
           git add verify_log.csv 2>/dev/null || true
           git add docs/data/verify_summary.json 2>/dev/null || true
           git add docs/data/playerMonthly.json 2>/dev/null || true

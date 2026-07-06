@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レース結果表 | データ攻め</title>
+<style>
+  :root{
+    --bg:#0b1219; --panel:#121c26; --panel2:#0f1822;
+    --line:#1e2c3a; --txt:#e6edf3; --sub:#8aa0b2;
+    --acc:#ffd166; --win:#3fb56b;
+    /* 枠色: 1白 2黒 3赤 4青 5黄 6緑 */
+    --l1:#ffffff; --l1t:#111; --l2:#222222; --l2t:#fff;
+    --l3:#e05b4b; --l3t:#fff; --l4:#2b6cb0; --l4t:#fff;
+    --l5:#ffd166; --l5t:#111; --l6:#3fb56b; --l6t:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--txt);
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    line-height:1.6;padding:16px;max-width:820px;margin:0 auto;}
+  a{color:var(--acc);}
+  header{margin-bottom:14px;}
+  h1{font-size:1.25rem;color:var(--acc);}
+  .lead{color:var(--sub);font-size:.82rem;margin-top:4px;}
+  .home{font-size:.78rem;margin-top:6px;display:inline-block;}
+
+  .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    margin:14px 0;padding:12px;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;}
+  .bar label{font-size:.8rem;color:var(--sub);}
+  select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+    border-radius:8px;padding:7px 10px;font-size:.9rem;min-width:150px;
+    font-family:inherit;}
+  .bar .meta{font-size:.78rem;color:var(--sub);margin-left:auto;
+    font-variant-numeric:tabular-nums;}
+
+  .venue{background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .venue > h2{font-size:.95rem;padding:11px 14px;background:var(--panel2);
+    border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:8px;}
+  .venue > h2 .jcd{font-size:.72rem;color:var(--sub);font-weight:400;}
+  .venue > h2 .rc{font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto;}
+
+  .grid{display:flex;flex-direction:column;}
+  details.race{border-top:1px solid var(--line);}
+  details.race:first-child{border-top:0;}
+  summary{list-style:none;cursor:pointer;padding:9px 14px;
+    display:flex;align-items:center;gap:10px;font-size:.86rem;}
+  summary::-webkit-details-marker{display:none;}
+  summary:hover{background:var(--panel2);}
+  .rlab{font-weight:700;color:var(--acc);width:38px;flex:none;
+    font-variant-numeric:tabular-nums;}
+  .rorder{display:flex;gap:4px;align-items:center;}
+  .kim{font-size:.74rem;color:var(--sub);}
+  .rpay{margin-left:auto;color:var(--acc);font-weight:700;
+    font-variant-numeric:tabular-nums;font-size:.84rem;}
+  .rpay.hi{color:var(--l3);}
+
+  .badge{width:22px;height:22px;border-radius:5px;display:inline-flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:.8rem;
+    flex:none;border:1px solid rgba(255,255,255,.15);}
+  .b1{background:var(--l1);color:var(--l1t);}
+  .b2{background:var(--l2);color:var(--l2t);}
+  .b3{background:var(--l3);color:var(--l3t);}
+  .b4{background:var(--l4);color:var(--l4t);}
+  .b5{background:var(--l5);color:var(--l5t);}
+  .b6{background:var(--l6);color:var(--l6t);}
+  .sep{color:var(--sub);font-weight:700;}
+
+  .body{padding:6px 14px 14px;}
+  .sect{margin-top:10px;}
+  .sect h3{font-size:.72rem;color:var(--acc);letter-spacing:.06em;
+    border-left:3px solid var(--acc);padding-left:7px;margin-bottom:7px;font-weight:700;}
+
+  table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  th,td{padding:5px 6px;text-align:left;border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;}
+  th{color:var(--sub);font-weight:600;font-size:.72rem;}
+  td.num,th.num{text-align:right;}
+  tr.win td{color:var(--win);font-weight:700;}
+  .nm{white-space:nowrap;}
+
+  .pays{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;}
+  .pcell{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    padding:7px 9px;}
+  .pcell .k{font-size:.7rem;color:var(--sub);}
+  .pcell .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .pcell .combo{font-weight:700;letter-spacing:.03em;font-size:.82rem;}
+  .pcell .amt{color:var(--acc);font-weight:800;font-variant-numeric:tabular-nums;
+    font-size:.82rem;}
+
+  .empty{color:var(--sub);font-size:.85rem;padding:24px 8px;text-align:center;}
+  footer{color:var(--sub);font-size:.72rem;margin-top:20px;text-align:center;
+    line-height:1.7;}
+</style>
+</head>
+<body>
+<header>
+  <h1>レース結果表</h1>
+  <div class="lead">全24場・全レースの着順／決まり手／払戻／艇別。生データのみ・買い目や予想は出しません。</div>
+  <a class="home" href="../index.html">← データポータルへ</a>
+</header>
+
+<div class="bar">
+  <label for="dsel">開催日</label>
+  <select id="dsel"></select>
+  <span class="meta" id="dmeta"></span>
+</div>
+
+<div id="out"></div>
+
+<footer>
+  出典: 公開データを集計。着順・決まり手・払戻は確定結果に基づく。<br>
+  数値は参考情報であり、的中や利益を保証するものではありません。
+</footer>
+
+<script>
+const KIM_ORDER = ['単勝','複勝','2連単','2連複','拡連複','3連複','3連単'];
+
+function badge(n){
+  n = parseInt(n,10);
+  const s = document.createElement('span');
+  s.className = 'badge b'+n;
+  s.textContent = n;
+  return s;
+}
+function orderEls(combo){
+  // "4-1-6" → バッジ列
+  const wrap = document.createElement('span');
+  wrap.className = 'rorder';
+  const parts = String(combo).split('-');
+  parts.forEach((p,i)=>{
+    if(i){const sp=document.createElement('span');sp.className='sep';sp.textContent='›';wrap.appendChild(sp);}
+    wrap.appendChild(badge(p));
+  });
+  return wrap;
+}
+function fmtYen(n){ return Number(n).toLocaleString('ja-JP')+'円'; }
+function fmtDate(hd){
+  return hd.slice(0,4)+'/'+hd.slice(4,6)+'/'+hd.slice(6,8);
+}
+
+function renderRace(r){
+  const d = document.createElement('details');
+  d.className = 'race';
+  const sm = document.createElement('summary');
+
+  const lab = document.createElement('span');
+  lab.className = 'rlab';
+  lab.textContent = r['レース'];
+  sm.appendChild(lab);
+  sm.appendChild(orderEls(r['着順']));
+
+  if(r['決まり手']){
+    const k = document.createElement('span');
+    k.className = 'kim';
+    k.textContent = r['決まり手'];
+    sm.appendChild(k);
+  }
+  const pay = document.createElement('span');
+  const tri = (r['払戻']&&r['払戻']['3連単']&&r['払戻']['3連単'][0]) ? r['払戻']['3連単'][0]['配当'] : r['三連単配当'];
+  pay.className = 'rpay' + (tri>=10000?' hi':'');
+  pay.textContent = fmtYen(tri);
+  sm.appendChild(pay);
+  d.appendChild(sm);
+
+  const body = document.createElement('div');
+  body.className = 'body';
+
+  // 払戻
+  if(r['払戻']){
+    const sec = document.createElement('div'); sec.className='sect';
+    sec.innerHTML = '<h3>払戻金</h3>';
+    const g = document.createElement('div'); g.className='pays';
+    KIM_ORDER.forEach(k=>{
+      const rows = r['払戻'][k]||[];
+      if(!rows.length) return;
+      const c = document.createElement('div'); c.className='pcell';
+      c.innerHTML = '<div class="k">'+k+'</div>';
+      rows.forEach(x=>{
+        const row=document.createElement('div');row.className='row';
+        row.innerHTML='<span class="combo">'+x['組番']+'</span><span class="amt">'+Number(x['配当']).toLocaleString('ja-JP')+'</span>';
+        c.appendChild(row);
+      });
+      g.appendChild(c);
+    });
+    sec.appendChild(g); body.appendChild(sec);
+  }
+
+  // 艇別
+  const boats = r['艇']||[];
+  if(boats.length){
+    const sec = document.createElement('div'); sec.className='sect';
+    sec.innerHTML = '<h3>艇別</h3>';
+    const t = document.createElement('table');
+    t.innerHTML = '<thead><tr><th>枠</th><th class="nm">氏名</th><th class="num">コース</th><th class="num">ST</th><th class="num">着</th></tr></thead>';
+    const tb = document.createElement('tbody');
+    boats.slice().sort((a,b)=>(a['枠']||0)-(b['枠']||0)).forEach(b=>{
+      const tr=document.createElement('tr');
+      if(b['着']===1) tr.className='win';
+      const td0=document.createElement('td');td0.appendChild(badge(b['枠']));
+      const st = (b['ST']==null?'—':(b['ST']<0?'F':b['ST'].toFixed(2)));
+      tr.appendChild(td0);
+      const c1=document.createElement('td');c1.className='nm';c1.textContent=b['氏名']||'';
+      const c2=document.createElement('td');c2.className='num';c2.textContent=b['コース']==null?'':b['コース'];
+      const c3=document.createElement('td');c3.className='num';c3.textContent=st;
+      const c4=document.createElement('td');c4.className='num';c4.textContent=b['着']==null?'':b['着'];
+      tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);tr.appendChild(c4);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); sec.appendChild(t); body.appendChild(sec);
+  }
+
+  d.appendChild(body);
+  return d;
+}
+
+function renderDay(day){
+  const out = document.getElementById('out');
+  out.innerHTML = '';
+  const meta = document.getElementById('dmeta');
+  meta.textContent = day['場数']+'場 / '+day['レース数']+'レース';
+  if(!day['場'] || !day['場'].length){
+    out.innerHTML = '<div class="empty">この日の結果データはありません。</div>';
+    return;
+  }
+  day['場'].forEach(v=>{
+    const card = document.createElement('div'); card.className='venue';
+    const h = document.createElement('h2');
+    h.innerHTML = '<span>'+v['場名']+'</span><span class="jcd">['+v['場コード']+']</span><span class="rc">'+v['レース'].length+'R</span>';
+    card.appendChild(h);
+    const grid = document.createElement('div'); grid.className='grid';
+    v['レース'].forEach(r=>grid.appendChild(renderRace(r)));
+    card.appendChild(grid);
+    out.appendChild(card);
+  });
+}
+
+async function loadDay(hd){
+  const out = document.getElementById('out');
+  out.innerHTML = '<div class="empty">読み込み中…</div>';
+  try{
+    const res = await fetch('data/'+hd+'.json',{cache:'no-cache'});
+    if(!res.ok) throw new Error(res.status);
+    renderDay(await res.json());
+  }catch(e){
+    out.innerHTML = '<div class="empty">データの取得に失敗しました（'+hd+'）。</div>';
+  }
+}
+
+async function init(){
+  const sel = document.getElementById('dsel');
+  try{
+    const res = await fetch('data/index.json',{cache:'no-cache'});
+    const idx = await res.json();
+    const days = idx['日付']||[];
+    if(!days.length){
+      document.getElementById('out').innerHTML='<div class="empty">結果データがまだありません。</div>';
+      return;
+    }
+    days.forEach(d=>{
+      const o=document.createElement('option');
+      o.value=d['開催日'];
+      o.textContent=fmtDate(d['開催日'])+'（'+d['場数']+'場）';
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change',()=>loadDay(sel.value));
+    loadDay(days[0]['開催日']);
+  }catch(e){
+    document.getElementById('out').innerHTML='<div class="empty">日付一覧の取得に失敗しました。</div>';
+  }
+}
+init();
+</script>
+</body>
+</html>
