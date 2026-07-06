@@ -104,41 +104,44 @@ def main():
         print("no racing found")
         return 0
 
-    hd, jcd, venue, _ = target
+    hd, jcd, venue, txt1 = target
     w("")
     w("## 対象: jcd={} {} / hd={}".format(jcd, venue, hd))
 
-    # --- 1〜3レースで構造ダンプ＋パース ---
-    for rno in range(1, 4):
-        url = "https://www.boatrace.jp/owpc/pc/race/racelist?rno={}&jcd={}&hd={}".format(rno, jcd, hd)
-        st, txt, err = fetch(url)
-        w("")
-        w("### {}R (status={})".format(rno, st))
-        if st != 200:
-            continue
-        soup = BeautifulSoup(txt, "html.parser")
-        trs = racer_trs(soup)
-        if trs:
-            tds, info_idx = trs[0]
-            w("- td総数={} / info_idx={}".format(len(tds), info_idx))
-            w("- 1号艇の生td（info+4以降＝モーター/ボート/今節成績。改行は⏎で表示）:")
-            w("```")
-            for i in range(info_idx + 4, len(tds)):
-                raw = tds[i].get_text("⏎", strip=True)
-                w("td[info+{}] (abs {}): {!r}".format(i - info_idx, i, raw))
-            w("```")
+    soup = BeautifulSoup(txt1, "html.parser")
 
-        recs = sr.parse_racelist(txt, jcd, venue, hd, rno)
-        w("- parse結果 {} 名:".format(len(recs)))
-        w("")
-        w("| 枠 | 氏名 | 1日目 | 2日目 | 3日目 | 4日目 | 5日目 | 6日目 |")
-        w("|---|---|---|---|---|---|---|---|")
-        for r in recs:
-            w("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
-                r.get("枠", ""), r.get("氏名", ""),
-                r.get("1日目成績", "") or "·", r.get("2日目成績", "") or "·",
-                r.get("3日目成績", "") or "·", r.get("4日目成績", "") or "·",
-                r.get("5日目成績", "") or "·", r.get("6日目成績", "") or "·"))
+    # --- 選手ブロック(tbody)の生HTMLをダンプして真の構造を確認 ---
+    w("")
+    w("### 1号艇 tbody 生HTML（先頭〜4000字）")
+    first_tbody = None
+    for tbody in soup.find_all("tbody"):
+        if re.search(r"\d{4}\s*/\s*(A1|A2|B1|B2)", tbody.get_text(" ", strip=True)):
+            first_tbody = tbody
+            break
+    if first_tbody is not None:
+        raw = str(first_tbody)
+        w("- tbody内 <tr> 数: {}".format(len(first_tbody.find_all("tr", recursive=False))))
+        w("```html")
+        w(raw[:4000])
+        w("```")
+        # tbody配下の各trのtdテキストも列挙
+        w("- tbody直下 各<tr>のtd:")
+        w("```")
+        for ti, tr in enumerate(first_tbody.find_all("tr", recursive=False)):
+            cells = [td.get_text("⏎", strip=True) for td in tr.find_all("td", recursive=False)]
+            w("tr[{}] ({}td): {!r}".format(ti, len(cells), cells))
+        w("```")
+    else:
+        w("(選手tbodyを検出できず)")
+
+    # --- 「今節成績」ヘッダの有無と、その列位置の手掛かり ---
+    w("")
+    w("### 今節成績ヘッダ探索")
+    hits = [el.get_text(" ", strip=True) for el in soup.find_all(["th", "td"])
+            if "今節成績" in el.get_text(" ", strip=True)]
+    w("- '今節成績' を含むセル数: {}".format(len(hits)))
+    for h in hits[:3]:
+        w("  - {!r}".format(h[:80]))
 
     open(OUT, "w", encoding="utf-8").write("\n".join(L) + "\n")
     print("wrote", OUT)
