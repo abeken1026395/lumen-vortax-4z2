@@ -309,6 +309,16 @@ def main():
             else:
                 headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}の一撃を警戒したい"; hid = 'H3'
             head_w = w0['w']
+        elif in_strong and verdict == '波乱' and o4:
+            # in_strong水面でも④優勢で波乱判定＝外主役が実態に整合（旧K4矛盾の解消）
+            w0 = o4[0]; kt0 = _kt_of(w0['w'])
+            if kt0 == 'makuri' and ba in NARROW:
+                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}のまくりが狭水面で一考"; hid = 'H1'
+            elif kt0 == 'sashi':
+                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}のまくり差しを警戒"; hid = 'H2'
+            else:
+                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}の一撃を警戒したい"; hid = 'H3'
+            head_w = w0['w']
         elif in_strong:
             headline = f"①{nm(in1['氏名'])}の逃げが軸。外の一発をどこまで測るか"; hid = 'K4'
         elif in_weak and o4:
