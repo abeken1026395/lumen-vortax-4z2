@@ -22,8 +22,6 @@
   header{margin-bottom:14px;}
   h1{font-size:1.25rem;color:var(--acc);}
   .lead{color:var(--sub);font-size:.82rem;margin-top:4px;}
-  .home{font-size:.78rem;margin-top:6px;display:inline-block;}
-
   .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
     margin:14px 0;padding:12px;background:var(--panel);
     border:1px solid var(--line);border-radius:12px;}
@@ -34,12 +32,19 @@
   .bar .meta{font-size:.78rem;color:var(--sub);margin-left:auto;
     font-variant-numeric:tabular-nums;}
 
-  .venue{background:var(--panel);border:1px solid var(--line);
-    border-radius:12px;margin-bottom:12px;overflow:hidden;}
-  .venue > h2{font-size:.95rem;padding:11px 14px;background:var(--panel2);
-    border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:8px;}
-  .venue > h2 .jcd{font-size:.72rem;color:var(--sub);font-weight:400;}
-  .venue > h2 .rc{font-size:.72rem;color:var(--sub);font-weight:400;margin-left:auto;}
+  details.venue{background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  summary.vhead{list-style:none;cursor:pointer;font-size:.95rem;font-weight:700;
+    padding:12px 14px;background:var(--panel2);display:flex;align-items:center;gap:8px;}
+  summary.vhead::-webkit-details-marker{display:none;}
+  summary.vhead:hover{background:#13202c;}
+  .venue[open] > summary.vhead{border-bottom:1px solid var(--line);}
+  .vhead .jcd{font-size:.72rem;color:var(--sub);font-weight:400;}
+  .vhead .rc{font-size:.74rem;color:var(--sub);font-weight:400;margin-left:auto;
+    font-variant-numeric:tabular-nums;}
+  .vhead .chev{color:var(--sub);font-size:.9rem;transition:transform .15s ease;
+    flex:none;width:14px;text-align:center;}
+  .venue[open] > .vhead .chev{transform:rotate(90deg);}
 
   .grid{display:flex;flex-direction:column;}
   details.race{border-top:1px solid var(--line);}
@@ -98,7 +103,6 @@
 <header>
   <h1>レース結果表</h1>
   <div class="lead">全24場・全レースの着順／決まり手／払戻／艇別。生データのみ・買い目や予想は出しません。</div>
-  <a class="home" href="../index.html">← データポータルへ</a>
 </header>
 
 <div class="bar">
@@ -224,10 +228,13 @@ function renderDay(day){
     out.innerHTML = '<div class="empty">この日の結果データはありません。</div>';
     return;
   }
-  day['場'].forEach(v=>{
-    const card = document.createElement('div'); card.className='venue';
-    const h = document.createElement('h2');
-    h.innerHTML = '<span>'+v['場名']+'</span><span class="jcd">['+v['場コード']+']</span><span class="rc">'+v['レース'].length+'R</span>';
+  day['場'].forEach((v,i)=>{
+    const card = document.createElement('details'); card.className='venue';
+    if(i===0) card.open = true; // 先頭場だけ開いておく
+    const h = document.createElement('summary'); h.className='vhead';
+    h.innerHTML = '<span class="chev">›</span><span>'+v['場名']+'</span>'+
+      '<span class="jcd">['+v['場コード']+']</span>'+
+      '<span class="rc">'+v['レース'].length+'R</span>';
     card.appendChild(h);
     const grid = document.createElement('div'); grid.className='grid';
     v['レース'].forEach(r=>grid.appendChild(renderRace(r)));
