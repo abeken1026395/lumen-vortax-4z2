@@ -53,61 +53,71 @@ def cell_decimals(td):
     return re.findall(r"\d+\.\d+", td.get_text(" ", strip=True))
 
 
-# 今節成績（Phase2）: 着順は漢数字で並ぶ
-KANJI_CHAKU = "一二三四五六"
+# 今節成績（Phase2）
 SHUSSETSU_MAX_DAYS = 6
+_FW2HW = str.maketrans("０１２３４５６７８９", "0123456789")
 
 
-def _parse_shussetsu_cell(td):
-    """今節成績の1日分セルを整形して返す。判定不能・非該当は空文字。
-    セル内は「レースNo・進入コース・ST・着順」の4カテゴリで構成され、
-    複数レース出走日は各カテゴリに複数値が列方向で並ぶ（仕様: 4行1組）。
-    tag/class名に依存せず、テキストトークンを種別で分類して組み立てる。
-    出力例: 単走 '2R/6/.15/六' / 2走 '2R/6/.15/六 12R/3/.08/三' / 未出走 ''。
-    ※STは公式表記(先頭ドット)を保つため文字列のまま。着順は漢数字のまま保存。"""
-    toks = [t for t in re.split(r"\s+", td.get_text(" ", strip=True)) if t]
-    if not toks:
-        return ""
-    st_list, chaku_list, rno_tag, digit_bare = [], [], [], []
-    for t in toks:
-        if re.match(r"^\d?\.\d{2}$", t):        # ST: .15 / 0.15
-            st_list.append(t)
-        elif t in KANJI_CHAKU:                  # 着順（漢数字）
-            chaku_list.append(t)
-        elif re.match(r"^\d{1,2}R$", t):        # レースNo（R付き）
-            rno_tag.append(t[:-1])
-        elif re.match(r"^\d{1,2}$", t):         # 数字（レースNo or 進入コース）
-            digit_bare.append(t)
-        # 見出し等その他トークンは無視
-    r = len(chaku_list)
-    # 着順が無い日 = 未出走 or 非該当セル → 空
-    if r == 0:
-        return ""
-    # ST本数が着順本数と食い違う構造は判定不能 → 空（防御）
-    if len(st_list) != r:
-        return ""
-    # レースNo・進入コースを確定（複数走は列方向グルーピング前提: 前半=No,後半=進入）
-    if len(rno_tag) == r and len(digit_bare) == r:
-        rnos, courses = rno_tag, digit_bare
-    elif not rno_tag and len(digit_bare) == 2 * r:
-        rnos, courses = digit_bare[:r], digit_bare[r:]
-    else:
-        return ""  # 構造が想定外 → 空（誤データを出さない）
-    return " ".join(
-        "{}R/{}/{}/{}".format(rnos[i], courses[i], st_list[i], chaku_list[i])
-        for i in range(r)
-    )
+def _hw(s):
+    """全角数字→半角。前後空白除去。"""
+    return (s or "").translate(_FW2HW).strip()
 
 
-def parse_shussetsu(tds, info_idx, max_days=SHUSSETSU_MAX_DAYS):
-    """今節成績（初日〜最終日、最大 max_days 日）を日別文字列のリストで返す。
-    モーター(info_idx+4)/ボート(info_idx+5) の右、info_idx+6 以降に日別セルが並ぶ。
-    到達できない/判定不能な日は空文字（既存scrapeを壊さない防御的設計）。"""
-    start = info_idx + 6
-    days = []
-    for k in range(max_days):
-        i = start + k
-        days.append(_parse_shussetsu_cell(tds[i]) if i < len(tds) else "")
+def parse_shussetsu_grid(trs):
+    """選手tbody（4つの<tr>）から今節成績を「実施レース」の並びで返す。
+    公式racelistの今節成績は 14列×4行のグリッドで、
+      tr0 の非rowspanセル = レースNo, tr1 = 進入コース, tr2 = ST,
+      tr3 = 着順（全角数字＋raceresultリンク hd=YYYYMMDD）。
+    列は「日」ではなく「実施レース」単位。日付は着セルのリンク hd から取る。
+    戻り値: [{'hd': 'YYYYMMDD', 'rno': '6', 'course': '5', 'st': '.18', 'chaku': '6'}, ...]
+    構造不一致（4行未満等）は空リスト（防御）。"""
+    if len(trs) < 4:
+        return []
+    rowA = [td.get_text(" ", strip=True)
+            for td in trs[0].find_all("td", recursive=False) if not td.has_attr("rowspan")]
+    rowB = [td.get_text(" ", strip=True) for td in trs[1].find_all("td", recursive=False)]
+    rowC = [td.get_text(" ", strip=True) for td in trs[2].find_all("td", recursive=False)]
+    tds3 = trs[3].find_all("td", recursive=False)
+    rowD = [td.get_text(" ", strip=True) for td in tds3]
+    rowHd = []
+    for td in tds3:
+        a = td.find("a", href=True)
+        dm = re.search(r"hd=(\d{8})", a["href"]) if a else None
+        rowHd.append(dm.group(1) if dm else "")
+
+    n = min(len(rowA), len(rowB), len(rowC), len(rowD))
+    out = []
+    for i in range(n):
+        rno = _hw(rowA[i])
+        chaku = _hw(rowD[i])
+        hd = rowHd[i]
+        # レースNo・着順・日付が揃った列だけが実施レース。未実施/空列はスキップ。
+        if not re.match(r"^\d{1,2}$", rno) or not re.match(r"^\d{1,2}$", chaku) or not hd:
+            continue
+        out.append({"hd": hd, "rno": rno, "course": _hw(rowB[i]),
+                    "st": rowC[i].strip(), "chaku": chaku})
+    return out
+
+
+def shussetsu_days(results, meeting_start, max_days=SHUSSETSU_MAX_DAYS):
+    """実施レースのリストを日別セル文字列（最大6日）に集約する。
+    day_index = (開催日 - 節初日).days（連続開催前提）。
+    セル例: '6R/5/.18/6'（複数走は半角スペース区切りで併記）。範囲外/空は ''。"""
+    days = [""] * max_days
+    if not meeting_start:
+        return days
+    byday = {}
+    for r in results:
+        try:
+            d = datetime.datetime.strptime(r["hd"], "%Y%m%d").date()
+        except Exception:
+            continue
+        di = (d - meeting_start).days
+        if 0 <= di < max_days:
+            byday.setdefault(di, []).append(r)
+    for di, lst in byday.items():
+        days[di] = " ".join(
+            "{}R/{}/{}/{}".format(x["rno"], x["course"], x["st"], x["chaku"]) for x in lst)
     return days
 
 
@@ -166,7 +176,14 @@ def parse_racelist(html, jcd, venue, hd, rno):
     setsu, kikaku = parse_title(soup)
     nichime = parse_nichime(soup, hd)
 
-    for tr in soup.find_all("tr"):
+    # 各選手は1つの<tbody>（4つの<tr>: レースNo/進入/ST/着）で構成される。
+    # tr0 に枠/写真/情報/成績/モーター/ボートが rowspan で入る。
+    pending = []  # (rec, results) を集めて後段で日別集約
+    for tbody in soup.find_all("tbody"):
+        trs = tbody.find_all("tr", recursive=False)
+        if not trs:
+            continue
+        tr = trs[0]
         tds = tr.find_all("td")
         if len(tds) < 8:
             continue
@@ -258,13 +275,11 @@ def parse_racelist(html, jcd, venue, hd, rno):
                 if len(b_dec) >= 2:
                     boat_3rt = b_dec[1]
 
-        # 今節成績（初日〜最終日、最大6日）。構造未確定でも壊れないよう例外は握りつぶす。
-        shussetsu = ["", "", "", "", "", ""]
-        if info_idx is not None:
-            try:
-                shussetsu = parse_shussetsu(tds, info_idx)
-            except Exception:
-                shussetsu = ["", "", "", "", "", ""]
+        # 今節成績のグリッド（tbody4行）。構造不一致でも壊れないよう例外は握りつぶす。
+        try:
+            results = parse_shussetsu_grid(trs)
+        except Exception:
+            results = []
 
         rec = {
             "場名": venue, "場コード": jcd, "開催日": hd, "レース": "{}R".format(rno),
@@ -274,11 +289,27 @@ def parse_racelist(html, jcd, venue, hd, rno):
             "当地勝率": toti[0], "当地2連率": toti[1], "当地3連率": toti[2],
             "モーターNo": motor_no, "モーター2連率": motor_2rt, "モーター3連率": motor_3rt,
             "ボートNo": boat_no, "ボート2連率": boat_2rt, "ボート3連率": boat_3rt,
-            "1日目成績": shussetsu[0], "2日目成績": shussetsu[1], "3日目成績": shussetsu[2],
-            "4日目成績": shussetsu[3], "5日目成績": shussetsu[4], "6日目成績": shussetsu[5],
+            "1日目成績": "", "2日目成績": "", "3日目成績": "",
+            "4日目成績": "", "5日目成績": "", "6日目成績": "",
             "支部": shibu, "出身": home, "年齢": age, "締切時刻": deadline,
             "節名": setsu, "企画名": kikaku, "日目": nichime,
         }
+        pending.append((rec, results))
+
+    # 節初日 = 全選手の実施レース日付の最小（連続開催前提で day_index を確定）。
+    all_dates = []
+    for _rec, results in pending:
+        for r in results:
+            try:
+                all_dates.append(datetime.datetime.strptime(r["hd"], "%Y%m%d").date())
+            except Exception:
+                pass
+    meeting_start = min(all_dates) if all_dates else None
+
+    for rec, results in pending:
+        days = shussetsu_days(results, meeting_start)
+        for k in range(SHUSSETSU_MAX_DAYS):
+            rec["{}日目成績".format(k + 1)] = days[k]
         records.append(rec)
 
     # 枠番を出現順に振り直す（この関数は1レース分なので、出現順=枠順）

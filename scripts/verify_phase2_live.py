@@ -104,44 +104,27 @@ def main():
         print("no racing found")
         return 0
 
-    hd, jcd, venue, txt1 = target
+    hd, jcd, venue, _ = target
     w("")
     w("## 対象: jcd={} {} / hd={}".format(jcd, venue, hd))
 
-    soup = BeautifulSoup(txt1, "html.parser")
-
-    # --- 選手ブロック(tbody)の生HTMLをダンプして真の構造を確認 ---
-    w("")
-    w("### 1号艇 tbody 生HTML（先頭〜4000字）")
-    first_tbody = None
-    for tbody in soup.find_all("tbody"):
-        if re.search(r"\d{4}\s*/\s*(A1|A2|B1|B2)", tbody.get_text(" ", strip=True)):
-            first_tbody = tbody
-            break
-    if first_tbody is not None:
-        raw = str(first_tbody)
-        w("- tbody内 <tr> 数: {}".format(len(first_tbody.find_all("tr", recursive=False))))
-        w("```html")
-        w(raw[:4000])
-        w("```")
-        # tbody配下の各trのtdテキストも列挙
-        w("- tbody直下 各<tr>のtd:")
-        w("```")
-        for ti, tr in enumerate(first_tbody.find_all("tr", recursive=False)):
-            cells = [td.get_text("⏎", strip=True) for td in tr.find_all("td", recursive=False)]
-            w("tr[{}] ({}td): {!r}".format(ti, len(cells), cells))
-        w("```")
-    else:
-        w("(選手tbodyを検出できず)")
-
-    # --- 「今節成績」ヘッダの有無と、その列位置の手掛かり ---
-    w("")
-    w("### 今節成績ヘッダ探索")
-    hits = [el.get_text(" ", strip=True) for el in soup.find_all(["th", "td"])
-            if "今節成績" in el.get_text(" ", strip=True)]
-    w("- '今節成績' を含むセル数: {}".format(len(hits)))
-    for h in hits[:3]:
-        w("  - {!r}".format(h[:80]))
+    # --- 修正後 parse_racelist の成績テーブルを全6艇×3レースで確認 ---
+    for rno in range(1, 4):
+        url = "https://www.boatrace.jp/owpc/pc/race/racelist?rno={}&jcd={}&hd={}".format(rno, jcd, hd)
+        st, txt, err = fetch(url)
+        w("")
+        w("### {}R (status={})".format(rno, st))
+        if st != 200:
+            continue
+        recs = sr.parse_racelist(txt, jcd, venue, hd, rno)
+        w("| 枠 | 氏名 | 1日目 | 2日目 | 3日目 | 4日目 | 5日目 | 6日目 |")
+        w("|---|---|---|---|---|---|---|---|")
+        for r in recs:
+            w("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
+                r.get("枠", ""), r.get("氏名", ""),
+                r.get("1日目成績", "") or "·", r.get("2日目成績", "") or "·",
+                r.get("3日目成績", "") or "·", r.get("4日目成績", "") or "·",
+                r.get("5日目成績", "") or "·", r.get("6日目成績", "") or "·"))
 
     open(OUT, "w", encoding="utf-8").write("\n".join(L) + "\n")
     print("wrote", OUT)

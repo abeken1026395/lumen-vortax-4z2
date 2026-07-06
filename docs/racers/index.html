@@ -152,7 +152,7 @@ function shuTable(row){
     var disp=v.split(" ").map(function(rr){
       var p=rr.split("/"); /* [NR, 進入, ST, 着] */
       if(p.length<4) return esc(rr);
-      var win=(p[3]==="一");
+      var win=(p[3]==="1");
       return '<span'+(win?' class="win"':'')+'>'+esc(p[1]+"/"+p[3])+'</span>';
     }).join("<br>");
     return '<td>'+disp+'</td>';
