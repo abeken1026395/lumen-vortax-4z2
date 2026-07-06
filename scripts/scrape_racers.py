@@ -53,6 +53,64 @@ def cell_decimals(td):
     return re.findall(r"\d+\.\d+", td.get_text(" ", strip=True))
 
 
+# 今節成績（Phase2）: 着順は漢数字で並ぶ
+KANJI_CHAKU = "一二三四五六"
+SHUSSETSU_MAX_DAYS = 6
+
+
+def _parse_shussetsu_cell(td):
+    """今節成績の1日分セルを整形して返す。判定不能・非該当は空文字。
+    セル内は「レースNo・進入コース・ST・着順」の4カテゴリで構成され、
+    複数レース出走日は各カテゴリに複数値が列方向で並ぶ（仕様: 4行1組）。
+    tag/class名に依存せず、テキストトークンを種別で分類して組み立てる。
+    出力例: 単走 '2R/6/.15/六' / 2走 '2R/6/.15/六 12R/3/.08/三' / 未出走 ''。
+    ※STは公式表記(先頭ドット)を保つため文字列のまま。着順は漢数字のまま保存。"""
+    toks = [t for t in re.split(r"\s+", td.get_text(" ", strip=True)) if t]
+    if not toks:
+        return ""
+    st_list, chaku_list, rno_tag, digit_bare = [], [], [], []
+    for t in toks:
+        if re.match(r"^\d?\.\d{2}$", t):        # ST: .15 / 0.15
+            st_list.append(t)
+        elif t in KANJI_CHAKU:                  # 着順（漢数字）
+            chaku_list.append(t)
+        elif re.match(r"^\d{1,2}R$", t):        # レースNo（R付き）
+            rno_tag.append(t[:-1])
+        elif re.match(r"^\d{1,2}$", t):         # 数字（レースNo or 進入コース）
+            digit_bare.append(t)
+        # 見出し等その他トークンは無視
+    r = len(chaku_list)
+    # 着順が無い日 = 未出走 or 非該当セル → 空
+    if r == 0:
+        return ""
+    # ST本数が着順本数と食い違う構造は判定不能 → 空（防御）
+    if len(st_list) != r:
+        return ""
+    # レースNo・進入コースを確定（複数走は列方向グルーピング前提: 前半=No,後半=進入）
+    if len(rno_tag) == r and len(digit_bare) == r:
+        rnos, courses = rno_tag, digit_bare
+    elif not rno_tag and len(digit_bare) == 2 * r:
+        rnos, courses = digit_bare[:r], digit_bare[r:]
+    else:
+        return ""  # 構造が想定外 → 空（誤データを出さない）
+    return " ".join(
+        "{}R/{}/{}/{}".format(rnos[i], courses[i], st_list[i], chaku_list[i])
+        for i in range(r)
+    )
+
+
+def parse_shussetsu(tds, info_idx, max_days=SHUSSETSU_MAX_DAYS):
+    """今節成績（初日〜最終日、最大 max_days 日）を日別文字列のリストで返す。
+    モーター(info_idx+4)/ボート(info_idx+5) の右、info_idx+6 以降に日別セルが並ぶ。
+    到達できない/判定不能な日は空文字（既存scrapeを壊さない防御的設計）。"""
+    start = info_idx + 6
+    days = []
+    for k in range(max_days):
+        i = start + k
+        days.append(_parse_shussetsu_cell(tds[i]) if i < len(tds) else "")
+    return days
+
+
 def parse_deadlines(soup):
     """ページ上部の「締切予定時刻」行から12レース分のHH:MMを返す"""
     for tr in soup.find_all("tr"):
@@ -200,6 +258,14 @@ def parse_racelist(html, jcd, venue, hd, rno):
                 if len(b_dec) >= 2:
                     boat_3rt = b_dec[1]
 
+        # 今節成績（初日〜最終日、最大6日）。構造未確定でも壊れないよう例外は握りつぶす。
+        shussetsu = ["", "", "", "", "", ""]
+        if info_idx is not None:
+            try:
+                shussetsu = parse_shussetsu(tds, info_idx)
+            except Exception:
+                shussetsu = ["", "", "", "", "", ""]
+
         rec = {
             "場名": venue, "場コード": jcd, "開催日": hd, "レース": "{}R".format(rno),
             "枠": waku, "登録番号": toban, "級別": rank, "氏名": name,
@@ -208,6 +274,8 @@ def parse_racelist(html, jcd, venue, hd, rno):
             "当地勝率": toti[0], "当地2連率": toti[1], "当地3連率": toti[2],
             "モーターNo": motor_no, "モーター2連率": motor_2rt, "モーター3連率": motor_3rt,
             "ボートNo": boat_no, "ボート2連率": boat_2rt, "ボート3連率": boat_3rt,
+            "1日目成績": shussetsu[0], "2日目成績": shussetsu[1], "3日目成績": shussetsu[2],
+            "4日目成績": shussetsu[3], "5日目成績": shussetsu[4], "6日目成績": shussetsu[5],
             "支部": shibu, "出身": home, "年齢": age, "締切時刻": deadline,
             "節名": setsu, "企画名": kikaku, "日目": nichime,
         }
@@ -271,6 +339,7 @@ CSV_COLUMNS = [
     "当地勝率", "当地2連率", "当地3連率",
     "モーターNo", "モーター2連率", "モーター3連率",
     "ボートNo", "ボート2連率", "ボート3連率",
+    "1日目成績", "2日目成績", "3日目成績", "4日目成績", "5日目成績", "6日目成績",
     "支部", "出身", "年齢", "締切時刻",
     "節名", "企画名", "日目",
 ]

@@ -73,6 +73,14 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .stat.mach .lb { color:#7ec8ff; }
 .stat.mach .v { color:#a9c6dd; }
 .up { font-size:11px; }
+/* 今節成績ミニテーブル */
+.shu-wrap { margin-top:8px; }
+.shu-cap { font-size:10px; color:#8a94a3; margin-bottom:3px; }
+.shu { width:100%; border-collapse:collapse; font-size:10px; table-layout:fixed; }
+.shu th { color:#7ec8ff; font-weight:normal; padding:2px 1px; border-bottom:1px solid #23303f; }
+.shu td { text-align:center; padding:3px 1px; color:#cdd6e0; border-bottom:1px solid #16202c; line-height:1.35; white-space:nowrap; }
+.shu td.shu-empty { color:#3a4656; }
+.shu .win { color:#ffd166; font-weight:bold; }
 .empty { text-align:center; color:#8a94a3; font-size:13px; padding:40px 0; }
 </style>
 </head>
@@ -130,6 +138,30 @@ function isClosed(hd,dl){
 }
 function fmtNum(s){ var f=parseFloat(s); return isNaN(f)?"-":f.toFixed(2); }
 function fmtPct(s){ var f=parseFloat(s); return isNaN(f)?"-":f.toFixed(1)+"%"; }
+
+/* 今節成績ミニテーブル。CSV値 'NR/進入/ST/着'（複数走はスペース区切り）を
+   「進入/着」の2要素で省スペース表示。全日空なら表を出さない。 */
+var SHU_COLS=["1日目成績","2日目成績","3日目成績","4日目成績","5日目成績","6日目成績"];
+var SHU_LABELS=["初日","2日","3日","4日","5日","最終"];
+function shuTable(row){
+  var has=false;
+  var cells=SHU_COLS.map(function(c){
+    var v=g(row,c).trim();
+    if(!v) return '<td class="shu-empty">・</td>';
+    has=true;
+    var disp=v.split(" ").map(function(rr){
+      var p=rr.split("/"); /* [NR, 進入, ST, 着] */
+      if(p.length<4) return esc(rr);
+      var win=(p[3]==="一");
+      return '<span'+(win?' class="win"':'')+'>'+esc(p[1]+"/"+p[3])+'</span>';
+    }).join("<br>");
+    return '<td>'+disp+'</td>';
+  });
+  if(!has) return "";
+  var head=SHU_LABELS.map(function(l){return '<th>'+l+'</th>';}).join("");
+  return '<div class="shu-wrap"><div class="shu-cap">今節成績（進入/着）</div>'
+    +'<table class="shu"><tr>'+head+'</tr><tr>'+cells.join("")+'</tr></table></div>';
+}
 
 function findArare(jcd,rno){
   if(!arare||!arare.races) return null;
@@ -255,7 +287,7 @@ function render(){
       +'<div class="stat'+(hot?' hot':'')+'"><div class="lb">当地勝率'+(hot?'<span class="up"> ↑</span>':'')+'</div><div class="v">'+fmtNum(g(row,"当地勝率"))+'</div><div class="v2">2連 '+fmtPct(g(row,"当地2連率"))+'</div></div>'
       +'<div class="stat mach"><div class="lb">モーター'+(g(row,"モーターNo")?' No.'+esc(g(row,"モーターNo")):'')+'</div><div class="v">'+fmtPct(g(row,"モーター2連率"))+'</div><div class="v2">3連 '+fmtPct(g(row,"モーター3連率"))+'</div></div>'
       +'<div class="stat mach"><div class="lb">ボート'+(g(row,"ボートNo")?' No.'+esc(g(row,"ボートNo")):'')+'</div><div class="v">'+fmtPct(g(row,"ボート2連率"))+'</div><div class="v2">3連 '+fmtPct(g(row,"ボート3連率"))+'</div></div>'
-      +'</div></div></div>';
+      +'</div>'+shuTable(row)+'</div></div>';
   }).join("");
 
   app.innerHTML=html;
