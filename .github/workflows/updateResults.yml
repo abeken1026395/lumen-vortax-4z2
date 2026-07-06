@@ -45,6 +45,9 @@ jobs:
       - name: build verify summary
         run: python scripts/build_verify_summary.py
 
+      - name: build player monthly
+        run: python scripts/buildPlayerMonthly.py
+
       - name: commit
         if: always()
         run: |
@@ -53,5 +56,6 @@ jobs:
           git add results/ 2>/dev/null || true
           git add verify_log.csv 2>/dev/null || true
           git add docs/data/verify_summary.json 2>/dev/null || true
+          git add docs/data/playerMonthly.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: results + verify_log + summary"
           git push
