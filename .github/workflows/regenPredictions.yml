@@ -39,6 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: clear old predictions
+        run: rm -rf predictions && mkdir predictions
+
       - uses: actions/download-artifact@v4
         with:
           pattern: preds-*
@@ -49,7 +52,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add predictions/
+          git add -A predictions/
           git diff --cached --quiet || git commit -m "regen predictions 20250715-20260705 parallel"
           git pull --rebase origin main || true
           git push
