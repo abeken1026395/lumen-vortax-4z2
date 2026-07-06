@@ -26,6 +26,17 @@ jobs:
           SKIPW: "1"
         run: python scripts/regenPredictions.py "${{ matrix.range.s }}" "${{ matrix.range.e }}"
 
+      - name: keep only this range
+        run: |
+          python - "${{ matrix.range.s }}" "${{ matrix.range.e }}" <<'PY'
+          import os, sys, glob
+          s, e = sys.argv[1], sys.argv[2]
+          for f in glob.glob("predictions/*.json"):
+              ymd = os.path.splitext(os.path.basename(f))[0]
+              if not (s <= ymd <= e):
+                  os.remove(f)
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: preds-${{ matrix.range.id }}
