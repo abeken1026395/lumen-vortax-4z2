@@ -60,13 +60,15 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .badge-local { font-size:10px; color:#0b1219; background:#ffd166; border-radius:4px; padding:1px 5px; font-weight:bold; flex:none; }
 .badge-f { font-size:10px; color:#fff; background:#c9184a; border-radius:4px; padding:1px 5px; font-weight:bold; flex:none; }
 .boat-sub { font-size:11px; color:#8a94a3; margin-top:2px; }
-.stats { display:flex; gap:14px; margin-top:7px; }
-.stat { line-height:1.35; }
+.stats { display:flex; gap:10px; margin-top:7px; flex-wrap:wrap; }
+.stat { line-height:1.35; min-width:70px; }
 .stat .lb { font-size:10px; color:#8a94a3; }
 .stat .v { font-size:15px; font-weight:bold; color:#e0e6ed; }
 .stat .v2 { font-size:11px; color:#9fb0c3; }
 .stat.hot .v { color:#ffd166; }
 .stat.hot .lb { color:#ffd166; }
+.stat.mach .lb { color:#7ec8ff; }
+.stat.mach .v { color:#a9c6dd; }
 .up { font-size:11px; }
 .empty { text-align:center; color:#8a94a3; font-size:13px; padding:40px 0; }
 </style>
@@ -229,6 +231,8 @@ function render(){
       +'<div class="stats">'
       +'<div class="stat"><div class="lb">全国勝率</div><div class="v">'+fmtNum(g(row,"全国勝率"))+'</div><div class="v2">2連 '+fmtPct(g(row,"全国2連率"))+'</div></div>'
       +'<div class="stat'+(hot?' hot':'')+'"><div class="lb">当地勝率'+(hot?'<span class="up"> ↑</span>':'')+'</div><div class="v">'+fmtNum(g(row,"当地勝率"))+'</div><div class="v2">2連 '+fmtPct(g(row,"当地2連率"))+'</div></div>'
+      +'<div class="stat mach"><div class="lb">モーター'+(g(row,"モーターNo")?' No.'+esc(g(row,"モーターNo")):'')+'</div><div class="v">'+fmtPct(g(row,"モーター2連率"))+'</div><div class="v2">3連 '+fmtPct(g(row,"モーター3連率"))+'</div></div>'
+      +'<div class="stat mach"><div class="lb">ボート'+(g(row,"ボートNo")?' No.'+esc(g(row,"ボートNo")):'')+'</div><div class="v">'+fmtPct(g(row,"ボート2連率"))+'</div><div class="v2">3連 '+fmtPct(g(row,"ボート3連率"))+'</div></div>'
       +'</div></div></div>';
   }).join("");
 
