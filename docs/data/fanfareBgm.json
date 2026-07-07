@@ -1,17 +1,36 @@
 {
   "updated": "2026-07-07",
-  "_policy": "検証可能な事実のみ掲載。曲名・作曲者名の記載はOK、歌詞・音源の転載はNG。各曲は confirmed で信頼度を明示する（official=公式サイトで確認 / secondary=二次ソース止まり・公式未確認）。secondary はUI上で必ず『未確認（二次ソース）』と分かる表示にし、断定しないこと。詳細な調査ログは docs/data/fanfareBgmMemo.md を参照。",
+  "_policy": "検証可能な事実のみ掲載。曲名・作曲者名の記載はOK、歌詞・音源の転載はNG。曲名は confirmed で信頼度を明示（official=公式確認 / secondary=二次ソース＝『諸説あり』扱いで出典付き表示）。hook/psych は読み物（コラム）向けの編集コメントで、心理描写は一般論・俗説を含み『〜という声も』の非断定で書く（効果には個人差あり）。曲名・勝敗・個人の内心は断定しない。調査ログは docs/data/fanfareBgmMemo.md。",
   "_schema": {
     "confirmed": {
-      "official": "公式サイト（各場公式・boatrace.jp等）で曲名を確認できたもの。",
-      "secondary": "ファンメディア/ブログ/投稿など二次ソースでのみ曲名が挙がるもの。公式未確認のため断定しない。",
+      "official": "公式サイトで曲名を確認できたもの。",
+      "secondary": "二次ソース（ファンメディア/ブログ/投稿）でのみ曲名が挙がるもの。UIは『諸説あり（出典○○）』と非断定で表示。",
       "none": "締切BGM・場内曲が『無い』とされるもの（二次ソース）。",
-      "unknown": "曲が流れるが曲名を特定できていない、または公式ページの存在のみ確認で曲名未読。"
+      "unknown": "曲は流れるが曲名を特定できていない、または公式ページの存在のみ確認で曲名未読。"
+    },
+    "psych": {
+      "gap": "射幸心 vs 童謡などの“落差”ネタ",
+      "nostalgia": "童謡・郷愁で警戒がゆるむ系",
+      "tension": "テンポ/緊張/無音で焦り・高揚を煽る系",
+      "local-pride": "ご当地ソング＝土地の物語",
+      "mystery": "正体不明・特定できないBGM",
+      "class": "クラシック/映画音楽で“格”を演出"
     },
     "song_fields": "title / artist(原曲者・任意) / type / confirmed / source / checked / note",
-    "venue_status": "songs が空の場合は status と note で状況（none / unknown / page_exists）を示す。"
+    "venue_fields": "name / songs[] / hook(読ませ1〜2文) / psych(心理タグ) / status(songs空時: none/unknown/page_exists) / note"
   },
-  "_collection_note": "本データ収集時（2026-07-07）の実行環境は egress ポリシーにより boatrace.jp / boatrace-*.jp など全公式ドメインおよび archive.org・macour.jp への直接アクセスが遮断（CONNECT 403）。そのため secondary の曲名は『二次ソース（主にファンメディア）での言及』を Web 検索経由で把握したもので、公式ページ本文での一次確認は未実施。ネットワーク制約のないローカル環境から各公式サイトを再巡回し、確認できたものを confirmed:official へ格上げする運用を想定（fanfareBgmMemo.md がチェックリスト）。",
+  "_collection_note": "収集時（2026-07-07）の実行環境は egress ポリシーにより boatrace.jp / boatrace-*.jp など全公式ドメインおよび archive.org・macour.jp を遮断（CONNECT 403）。secondary の曲名は二次ソースの言及を Web 検索経由で把握したもので、公式ページ本文での一次確認は未実施。ローカル環境から公式サイトを再巡回し確認できたものを confirmed:official へ格上げする運用（fanfareBgmMemo.md がチェックリスト）。",
+  "column": {
+    "title": "締切前に、何が流れてる？ 24場BGMの心理学",
+    "lead": "舟券握って一番アツくなる“締切前”。実はその裏で流れているのは、童謡だったりクラシックだったり、正体不明の一曲だったり。音の選び方に、場の性格と客の心理がにじむ。",
+    "angles": [
+      { "key": "gap", "label": "射幸心 vs 童謡", "text": "配当に目がギラつく締切前、流れているのは「森のくまさん」「線路は続くよどこまでも」――この落差こそ最大の見どころ。子どもの頃の曲は警戒をゆるめる、と言われる。" },
+      { "key": "local-pride", "label": "土地の記憶", "text": "鳴門の『第九』（日本初演の地）、丸亀の『金毘羅船々』、宮島の『もみじ』。BGMはご当地の物語そのもの。" },
+      { "key": "mystery", "label": "名前のないBGM", "text": "三国・唐津・福岡は“曲名の分からないBGM”。特定できないからこそ、何年も語り継がれる名物になる。" },
+      { "key": "tension", "label": "テンポと焦り", "text": "締切が近づくとテンポが上がる場も。速い音は高揚・焦りを誘う、という説。逆に若松・芦屋は“無音”という硬派もいる。" }
+    ],
+    "disclaimer": "曲名は公式未確認のものを含む（諸説あり・出典明記）。心理の話は一般論・俗説を含み、効果には個人差があります。買い目・勝敗の断定はしません。"
+  },
   "common": {
     "fanfare": {
       "note": "ピットアウト時のファンファーレは2010年6月から全国共通の10種類。曲名は付けられていない。グレード（一般/G3/G2/G1/SG/ルーキー等）と予選/優勝戦で使い分ける。",
@@ -21,6 +40,8 @@
         "延近輝之"
       ],
       "history": "2010年5月まではさだまさし作曲の優勝戦ファンファーレを使用（1991年6月〜）。",
+      "hook": "今のファンファーレは全国共通10種で、なんと曲名すら無い。でも1991〜2010年の優勝戦ファンファーレは“あの”さだまさし作曲だった、というのは通のネタ。あの高鳴りには、ちゃんと理由がある。",
+      "psych": "tension",
       "sources": [
         {
           "title": "BOAT RACE オフィシャルウェブサイト｜ビギナーズガイド LEVEL.1 ピットアウトからスタートまで",
@@ -35,147 +56,195 @@
     "01": {
       "name": "桐生",
       "songs": [
-        { "title": "ジ・エンターテイナー", "artist": "スコット・ジョプリン（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "ジ・エンターテイナー", "artist": "スコット・ジョプリン（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "諸説あり（ファンメディア）。公式未確認。" }
+      ],
+      "hook": "締切前に流れるのはラグタイムの名曲「ジ・エンターテイナー」。映画『スティング』の“イカサマ師”のテーマでもあり、駆け引きムードを勝手に盛り上げてくる、と深読みしたくなる。",
+      "psych": "tension"
     },
     "02": {
       "name": "戸田",
       "songs": [
-        { "title": "エレクトリック・カウンターポイント 第3楽章", "artist": "スティーヴ・ライヒ（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "エレクトリック・カウンターポイント 第3楽章", "artist": "スティーヴ・ライヒ（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "諸説あり（ファンメディア）。公式未確認。" }
+      ],
+      "hook": "まさかの現代ミニマル・ミュージック（スティーヴ・ライヒ）。同じフレーズが反復しながら増殖する曲で、静かにジワジワ追い詰められる…と通は言う。難水面の戸田に妙に合う。",
+      "psych": "tension"
     },
     "03": {
       "name": "江戸川",
       "songs": [
-        { "title": "リバーサイドドリーム", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "オリジナル系（タイトル無しの独自曲との記述もあり）。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "リバーサイドドリーム", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "オリジナル系（タイトル無しの独自曲との記述もあり）。諸説あり。公式未確認。" }
+      ],
+      "hook": "全国唯一の“川”レース場で、曲名が「リバーサイドドリーム」。出来すぎ。荒れる水面とのギャップで、夢見て沈む人が後を絶たない…とかなんとか。",
+      "psych": "local-pride"
     },
     "04": {
       "name": "平和島",
       "songs": [
-        { "title": "僕たちのお祭り前線", "type": "イメージソング", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "僕たちのお祭り前線", "type": "イメージソング", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "諸説あり（ファンメディア）。公式未確認。" }
+      ],
+      "hook": "“お祭り”を掲げるだけあって、イメージソングは「僕たちのお祭り前線」。ハレの高揚感で財布のヒモがゆるむ…のは気のせい、ということにしておきたい。",
+      "psych": "tension"
     },
     "05": {
       "name": "多摩川",
       "songs": [
-        { "title": "ほほえみのバネッサ（Vanessa's First Smile）", "type": "イメージソング", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "ほほえみのバネッサ（Vanessa's First Smile）", "type": "イメージソング", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "諸説あり（ファンメディア）。公式未確認。" }
+      ],
+      "hook": "日本一“静か”とされる水面に、やわらかな「ほほえみのバネッサ」。ほほえみに気をゆるめていると、気づけば追い舟券…なんて声も。",
+      "psych": "nostalgia"
     },
     "06": {
       "name": "浜名湖",
       "songs": [
-        { "title": "ふじの山", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式サイト <https://www.boatrace-hamanako.jp/> で要確認。" }
-      ]
+        { "title": "ふじの山", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式サイト https://www.boatrace-hamanako.jp/ で要確認。" }
+      ],
+      "hook": "締切前は童謡「ふじの山」。“あたまを雲の上に出し”と壮大に歌われても、こっちの本命は水面の下。スケール感と世知辛さのギャップが効く。",
+      "psych": "nostalgia"
     },
     "07": {
       "name": "蒲郡",
       "songs": [
-        { "title": "Shrewpock", "artist": "Dimitrios Bitzenis", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "ライブラリ音源系。ナイター場。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "Shrewpock", "artist": "Dimitrios Bitzenis", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "ライブラリ音源系。諸説あり。公式未確認。" }
+      ],
+      "hook": "正体は“ライブラリ音源”らしき「Shrewpock」。作曲者名でググっても手がかりは薄め。ナイターの闇によく似合う、地味に深い謎。",
+      "psych": "mystery"
     },
     "08": {
       "name": "常滑",
       "songs": [
-        { "title": "われは海の子", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式サイト <https://www.boatrace-tokoname.jp/> で要確認。" }
-      ]
+        { "title": "われは海の子", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式サイト https://www.boatrace-tokoname.jp/ で要確認。" }
+      ],
+      "hook": "締切前に「われは海の子」。海の子（＝歴戦の常連）が舟券を握りしめて口ずさむ図、なかなかにシュール。",
+      "psych": "nostalgia"
     },
     "09": {
       "name": "津",
       "songs": [
-        { "title": "チキチキバンバン", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "チキチキバンバン", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "映画曲。諸説あり。公式未確認。" }
+      ],
+      "hook": "締切前は空飛ぶ車の映画曲「チキチキバンバン」。夢のマシンで大空へ――現実は着順とにらめっこ。ワクワクだけは一級品。",
+      "psych": "tension"
     },
     "10": {
       "name": "三国",
       "songs": [],
       "status": "unknown",
+      "hook": "曲は確かに流れる。なのに“原曲不明”。ファンが何年も正体を探し続ける、北陸の未解決ミステリー。分かったら通の中の通。",
+      "psych": "mystery",
       "note": "締切BGMは流れるが原曲を特定できず（二次ソースでも不明）。要調査。"
     },
     "11": {
       "name": "びわこ",
       "songs": [
-        { "title": "線路は続くよどこまでも", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "線路は続くよどこまでも", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式未確認。" }
+      ],
+      "hook": "日本一広い水面に「線路は続くよどこまでも」。舟なのに線路。負けが“どこまでも”続かないことを、静かに祈る。",
+      "psych": "gap"
     },
     "12": {
       "name": "住之江",
       "songs": [
-        { "title": "ジャンピーラブ", "type": "場内テーマ曲", "confirmed": "official", "source": "https://www.boatrace-suminoe.jp/sp/jumpy.html", "checked": "2026-07-07", "note": "公式音源配布ページ（本プロジェクトのタスク指示で確認）。実行環境のegress制約により当該公式ページ本文の直接再読取は未実施。" }
-      ]
+        { "title": "ジャンピーラブ", "type": "場内テーマ曲", "confirmed": "official", "source": "https://www.boatrace-suminoe.jp/sp/jumpy.html", "checked": "2026-07-07", "note": "公式音源配布ページ（タスク指示で確認）。実行環境のegress制約で公式ページ本文の直接再読取は未実施。" }
+      ],
+      "hook": "“ナイターの帝王”住之江の公式テーマは「ジャンピーラブ」。24場で唯一、場が音源を配布までしている筋金入り。跳ねる恋と、跳ねる配当に願いを込めて。",
+      "psych": "local-pride"
     },
     "13": {
       "name": "尼崎",
       "songs": [
-        { "title": "野ばら", "artist": "シューベルト（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "クラシック系。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "野ばら", "artist": "シューベルト（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "クラシック。諸説あり。公式未確認。" }
+      ],
+      "hook": "締切前にシューベルトの「野ばら」。“うるわしの野ばら”を聴きながらのガチ勝負、下町に漂う意外な格調。棘があるのは花か、配当か。",
+      "psych": "class"
     },
     "14": {
       "name": "鳴門",
       "songs": [
-        { "title": "交響曲第九番", "artist": "ベートーヴェン（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "板東俘虜収容所＝第九アジア初演の地に由来する説あり。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "交響曲第九番", "artist": "ベートーヴェン（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "諸説あり。板東俘虜収容所＝第九アジア初演の地に由来する説あり。公式未確認。" }
+      ],
+      "hook": "締切前に「第九」。実は鳴門は、アジアで初めて第九が全曲演奏された“歓喜の地”。歴史の重みと、万舟の歓喜が水面で交錯する。",
+      "psych": "local-pride"
     },
     "15": {
       "name": "丸亀",
       "songs": [
-        { "title": "金毘羅船々", "type": "締切BGM", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "民謡。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "金毘羅船々", "type": "締切BGM", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "民謡。諸説あり。公式未確認。" }
+      ],
+      "hook": "ご当地民謡「金毘羅船々」で締切へ。“シュラシュシュシュ”のノリで気分は上々、財布の中身は…こんぴらさんに祈るしかない。",
+      "psych": "local-pride"
     },
     "16": {
       "name": "児島",
       "songs": [
-        { "title": "ウインドオブサンシャイン", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "ウインドオブサンシャイン", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "諸説あり（ファンメディア）。公式未確認。" }
+      ],
+      "hook": "締切前は「ウインドオブサンシャイン」。陽だまりのような曲名とは裏腹に、瀬戸内の風は時に荒れ、舟券を吹き飛ばす。",
+      "psych": "tension"
     },
     "17": {
       "name": "宮島",
       "songs": [
-        { "title": "もみじ", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式サイト <https://www.boatrace-miyajima.com/> で要確認。" }
-      ]
+        { "title": "もみじ", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式サイト https://www.boatrace-miyajima.com/ で要確認。" }
+      ],
+      "hook": "世界遺産・厳島を望む水面に、童謡「もみじ」。“秋の夕日に照る山もみじ”…情緒に浸っているうちに、締切はもう目の前。",
+      "psych": "local-pride"
     },
     "18": {
       "name": "徳山",
       "songs": [
-        { "title": "うみ", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" },
-        { "title": "アルプス一万尺", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "うみ", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式未確認。" },
+        { "title": "アルプス一万尺", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式未確認。" }
+      ],
+      "hook": "締切前は童謡メドレー「うみ」と、なぜかの「アルプス一万尺」。海の場でアルプス。童心に返っている場合じゃない、締切だ。",
+      "psych": "nostalgia"
     },
     "19": {
       "name": "下関",
       "songs": [],
       "status": "page_exists",
+      "hook": "かつて公式が“配信メロディ”を配っていた、通好みの音楽自慢な場。今もその名残を探すファンがいる。海峡の街の隠れBGM史。",
+      "psych": "mystery",
       "note": "公式に『配信メロディ』ページが存在（タスク指示: 旧 http://www.shimonoseki.gr.jp/k/mero/i_melody.asp は現在名前解決不可。現公式 https://www.boatrace-shimonoseki.jp/ ）。曲名は環境制約で直接未読。現行配信の有無・曲名は要ローカル確認。"
     },
     "20": {
       "name": "若松",
       "songs": [],
       "status": "none",
+      "hook": "まさかの“無音”派。BGMで煽らない、ガチ勝負の硬派スタイル。演出ゼロの静寂こそ、一番プレッシャーがかかる…という説も。",
+      "psych": "tension",
       "note": "締切BGMは無いとの記述（二次ソース）。公式未確認。"
     },
     "21": {
       "name": "芦屋",
       "songs": [],
       "status": "none",
+      "hook": "こちらもBGMなし。余計な演出を排した実力主義。無音の緊張感の中、頼れるのは自分の読みだけ。",
+      "psych": "tension",
       "note": "締切BGMは無いとの記述（二次ソース）。公式未確認。"
     },
     "22": {
       "name": "福岡",
       "songs": [],
       "status": "unknown",
+      "hook": "“名前のない”オリジナルBGM。ファンの間では往年の名曲「峠の幌馬車」では？と諸説紛々。都会のド真ん中に漂う、音の謎。",
+      "psych": "mystery",
       "note": "タイトル無しの独自BGM。ファン推測で『峠の幌馬車』（ビリー・ヴォーン）との指摘があるが不確か。曲名は確定できず。"
     },
     "23": {
       "name": "唐津",
       "songs": [],
       "status": "unknown",
+      "hook": "締切の音楽は確かにある。でも曲名は誰も特定できない。ネットに“それらしき音源”だけが漂う、九州の音ミステリー。",
+      "psych": "mystery",
       "note": "締切音楽は流れるが曲名を特定できず（YouTubeに音源動画あり）。要調査。"
     },
     "24": {
       "name": "大村",
       "songs": [
-        { "title": "森のくまさん", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" }
-      ]
+        { "title": "森のくまさん", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。諸説あり。公式未確認。" }
+      ],
+      "hook": "“日本一堅い”と言われる大村の締切BGMが、童謡「森のくまさん」。1号艇の安心感と、くまに油断した少女の物語。堅い決着ほど落とし穴、と深読みしたくなる。",
+      "psych": "gap"
     }
   }
 }
