@@ -169,6 +169,28 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .watchbtn.on { background:#12233a; color:#ffd166; border-color:#5a4a1a; }
 .watchbtn:active { transform:scale(.92); }
 .hdr-harvest { display:inline-block; margin-top:6px; font-size:11px; font-weight:bold; color:#0b1219; background:#ffd166; border-radius:12px; padding:3px 11px; cursor:pointer; }
+/* ポータルタブ */
+.navtabs { display:flex; gap:7px; overflow-x:auto; margin:10px 0 2px; padding-bottom:3px; -webkit-overflow-scrolling:touch; }
+.navtabs::-webkit-scrollbar { display:none; }
+.navtab { flex:none; font-size:12px; font-weight:bold; text-decoration:none; color:#9fb0c3; background:#101a26; border:1px solid #24344a; border-radius:16px; padding:6px 13px; white-space:nowrap; }
+.navtab.on { color:#0b1219; background:#ffd166; border-color:#ffd166; }
+.navtab:active { background:#182535; }
+.navtab.on:active { background:#e8bd50; }
+/* 今日の運勢（あそび） */
+.fortune { border:1px solid #2a2140; background:linear-gradient(135deg,#171226,#101a26); border-radius:12px; padding:11px 13px; margin:6px 0 4px; }
+.fortune-h { font-size:12px; font-weight:bold; color:#c9b6ff; display:flex; align-items:center; gap:6px; }
+.fortune-tag { font-size:9px; color:#8a7fb0; border:1px solid #3a2f5a; border-radius:8px; padding:0 6px; font-weight:normal; }
+.fortune-body { margin-top:8px; }
+.fortune-stars { font-size:16px; letter-spacing:2px; color:#ffd166; }
+.fortune-msg { font-size:12.5px; color:#e6e0f0; margin-top:5px; line-height:1.6; }
+.fortune-sub { font-size:11px; color:#a99fc4; margin-top:6px; display:flex; gap:12px; flex-wrap:wrap; }
+.fortune-sub b { color:#d8ccf0; }
+.fortune-pick { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.zbtn { font-size:11px; color:#c9b6ff; background:#141026; border:1px solid #33285a; border-radius:12px; padding:4px 9px; cursor:pointer; }
+.zbtn:active { background:#1e1738; }
+.fortune-link { font-size:11px; color:#c9b6ff; text-decoration:none; }
+.fortune-more { font-size:10px; color:#8a7fb0; margin-top:7px; }
+.fortune-reset { font-size:10px; color:#7a7192; cursor:pointer; text-decoration:underline; margin-left:8px; }
 </style>
 </head>
 <body>
@@ -177,6 +199,13 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
   <h1>本日の出走表</h1>
   <div class="sub" id="updated"></div>
 </header>
+<nav class="navtabs">
+  <a class="navtab on">🏁 出走表</a>
+  <a class="navtab" href="../uranai/">🔮 選手占い</a>
+  <a class="navtab" href="../aisho-suminoe/">💞 相性</a>
+  <a class="navtab" href="../shobuun-suminoe/">⚡ 勝負運</a>
+  <a class="navtab" href="../">▦ ポータル</a>
+</nav>
 <div class="crumb" id="crumb"></div>
 <div id="app"><div class="empty">読み込み中…</div></div>
 </div>
@@ -315,6 +344,55 @@ function harvestList(){
   return out;
 }
 
+/* ===== 今日の運勢（あそび・エンタメ。勝敗予想や買い目ではありません） =====
+   端末に保存した星座と日付から決定的に生成（毎日変わる／同じ日は同じ結果）。
+   運勢は“あなたの一日”についてのみ。特定の艇や買い目は一切示さない。 */
+var ZODIAC=["牡羊座","牡牛座","双子座","蟹座","獅子座","乙女座","天秤座","蠍座","射手座","山羊座","水瓶座","魚座"];
+var BR_SIGN=lsGet("br_sign","");
+var FORTUNE_MSG=[
+  ["空回りしやすい日。深追いせず“見”に徹すると吉。","情報は多いほど迷う日。要点だけ拾って身軽に。","急がば回れ。手堅い一手が後で効いてくる。"],
+  ["ペースは掴みにくいが、粘れば形になる。","小さな発見がある日。メモしておくと後で活きる。","足元を固めるほど安定する一日。"],
+  ["まずまずの流れ。いつも通りが一番強い。","可もなく不可もなく。基本に忠実がベスト。","淡々と積み上げると良い巡り合わせ。"],
+  ["調子は上向き。直感が冴える日。","チャンスに気づきやすい日。動けば拾える。","流れは味方。思い切りが良い結果に。"],
+  ["絶好調。読みがピタッとハマる日。","視界良好、直感も理屈も噛み合う一日。","勢いそのまま突き抜けて良い日。"]
+];
+function hashStr(s){ var h=2166136261; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*16777619)>>>0; } return h>>>0; }
+function todayYmdStr(){ var n=nowJST(); return ""+n.getUTCFullYear()+("0"+(n.getUTCMonth()+1)).slice(-2)+("0"+n.getUTCDate()).slice(-2); }
+function dailyFortune(sign){
+  var seed=hashStr(sign+"|"+todayYmdStr());
+  var level=seed%5;                     /* 0..4 → ★1..5 */
+  var msgArr=FORTUNE_MSG[level], msg=msgArr[(seed>>3)%msgArr.length];
+  var aisho=40+((seed>>7)%61);          /* 相性運 40-100 */
+  var shobu=40+((seed>>13)%61);         /* 勝負運 40-100 */
+  return {stars:level+1, msg:msg, aisho:aisho, shobu:shobu};
+}
+function buildFortune(){
+  var h='<div class="fortune"><div class="fortune-h">🔮 今日の運勢 <span class="fortune-tag">あそび</span></div>';
+  if(!BR_SIGN){
+    h+='<div class="fortune-msg" style="margin-top:6px">星座をえらぶと、今日の運勢が出ます（毎日変わる）。</div>'
+      +'<div class="fortune-pick">'+ZODIAC.map(function(z){return '<span class="zbtn" data-sign="'+esc(z)+'">'+esc(z)+'</span>';}).join("")+'</div>';
+  } else {
+    var f=dailyFortune(BR_SIGN);
+    var stars="★★★★★".slice(0,f.stars)+"☆☆☆☆☆".slice(0,5-f.stars);
+    h+='<div class="fortune-body">'
+      +'<div class="fortune-stars">'+stars+'　<span style="font-size:12px;color:#c9b6ff">'+esc(BR_SIGN)+'</span>'
+      +'<span class="fortune-reset" id="fortuneReset">変更</span></div>'
+      +'<div class="fortune-msg">'+esc(f.msg)+'</div>'
+      +'<div class="fortune-sub"><span>相性運 <b>'+f.aisho+'</b></span><span>勝負運 <b>'+f.shobu+'</b></span></div>'
+      +'<div class="fortune-more">🔮 <a class="fortune-link" href="../uranai/">選手占いでもっと占う →</a>　'
+      +'💞 <a class="fortune-link" href="../shobuun-suminoe/">勝負運ランキング →</a></div>'
+      +'</div>';
+  }
+  return h+'</div>';
+}
+function wireFortune(app){
+  Array.prototype.forEach.call(app.querySelectorAll(".zbtn"),function(el){
+    el.onclick=function(){ BR_SIGN=el.getAttribute("data-sign"); lsSet("br_sign",BR_SIGN); render(); };
+  });
+  var rs=app.querySelector("#fortuneReset");
+  if(rs) rs.onclick=function(){ BR_SIGN=""; lsSet("br_sign",""); render(); };
+}
+
 function isClosed(hd,dl){
   var dm=toMin(dl); if(dm===null||!/^\d{8}$/.test(hd)) return false;
   var cur=curYmd();
@@ -378,7 +456,7 @@ function renderVenues(app,crumb,keys){
   keys.forEach(function(k){ var v=venues[k]; (byDate[v.hd]=byDate[v.hd]||[]).push(v); });
   var dates=Object.keys(byDate).sort();
   var todayJST=(function(){ var n=nowJST(); return n.getUTCFullYear()+("0"+(n.getUTCMonth()+1)).slice(-2)+("0"+n.getUTCDate()).slice(-2); })();
-  var html=buildMyPanel();
+  var html=buildFortune()+buildMyPanel();
   dates.forEach(function(hd){
     var list=byDate[hd].sort(function(a,b){return a.jcd<b.jcd?-1:1;});
     var mm=hd.slice(4,6),dd=hd.slice(6,8);
@@ -399,6 +477,7 @@ function renderVenues(app,crumb,keys){
     el.onclick=function(){ view={page:"races",key:el.getAttribute("data-k"),rno:null,sort:view.sort}; render(); window.scrollTo(0,0); };
   });
   wireMyPanel(app);
+  wireFortune(app);
 }
 
 /* 「気になる/最近見た/回収」パネルのHTML */
