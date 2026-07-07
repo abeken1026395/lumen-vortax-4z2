@@ -21,7 +21,7 @@ const ARARE_COLOR = { "低":"#3fb950", "中":"#d29922", "高":"#f85149" };
 const WATER_COLOR = { "淡水":"#58a6ff", "海水":"#3fb1c9", "汽水":"#a371f7" };
 const PSYCH = { "gap":{label:"射幸心×童謡",c:"#ffd166"}, "nostalgia":{label:"郷愁",c:"#7fe0a0"}, "tension":{label:"緊張・高揚",c:"#f85149"}, "local-pride":{label:"ご当地",c:"#58a6ff"}, "mystery":{label:"ミステリー",c:"#a371f7"}, "class":{label:"格調",c:"#e59ac9"} };
 const STATUS_LABEL = { "none":"締切BGMなし", "unknown":"曲名は未特定", "page_exists":"公式ページに記載あり（曲名は未確認）" };
-const PRESENT = { "yes":{label:"場立ちあり",c:"#3fb950"}, "official":{label:"公式記載",c:"#58a6ff"}, "paper":{label:"予想紙",c:"#d29922"} };
+const PRESENT = { "yes":{label:"場立ちあり",c:"#3fb950"}, "official":{label:"公式記載",c:"#58a6ff"}, "advisor":{label:"解説アドバイザー",c:"#a371f7"}, "paper":{label:"予想紙",c:"#d29922"} };
 
 function App() {
   const [q, setQ] = useState("");
@@ -254,7 +254,7 @@ function App() {
                     </div>
                     );
                   })()}
-                  {yosouya && yosouya.venues && yosouya.venues[s.code] && ["yes","official","paper"].includes(yosouya.venues[s.code].present) && (() => {
+                  {yosouya && yosouya.venues && yosouya.venues[s.code] && ["yes","official","advisor","paper"].includes(yosouya.venues[s.code].present) && (() => {
                     const y = yosouya.venues[s.code];
                     const pr = PRESENT[y.present];
                     const off = y.confirmed==="official";
