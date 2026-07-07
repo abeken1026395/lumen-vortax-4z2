@@ -21,8 +21,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - run: python scripts/fetch_weather.py
+      - run: python scripts/probe_beforeinfo.py 20260705   # 一時プローブ（直前情報HTML現物確認）。後で戻す
       - name: commit and push
+        if: false   # プローブ中はコミットしない
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
