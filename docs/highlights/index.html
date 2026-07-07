@@ -34,6 +34,9 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .deadline{color:var(--sub);font-size:12px;margin-left:auto}
 .kikaku{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(255,209,102,.16);color:var(--acc);margin-left:6px}
 .vsetsu{font-size:12px;color:var(--sub);padding:2px 12px 8px;line-height:1.4}
+.livewx{font-size:11.5px;color:var(--sub);background:rgba(120,180,220,.10);border:1px solid var(--line);border-radius:9px;padding:5px 9px;margin:7px 0 2px;line-height:1.5}
+.windsig{font-size:11.5px;color:var(--sub);background:rgba(255,209,102,.10);border:1px solid rgba(255,209,102,.35);border-radius:9px;padding:5px 9px;margin:4px 0 2px;line-height:1.5}
+.windsig .cav{opacity:.7}
 .badge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px}
 .b-hot{background:rgba(255,107,91,.16);color:var(--hot);border:1px solid rgba(255,107,91,.4)}
 .b-firm{background:rgba(74,168,255,.16);color:var(--firm);border:1px solid rgba(74,168,255,.4)}
@@ -197,10 +200,30 @@ function badge(r){
   return `<span class="badge b-in">波乱 ${r['波乱']}</span>`;
 }
 
+function liveWx(code){
+  const w=LIVEW[code]; if(!w) return '';
+  const it=[];
+  if(w['天候']) it.push(`天候 ${w['天候']}`);
+  if(w['風速']!=null) it.push(`風 ${w['風速']}m`);   // ※風向は未検証のため非表示
+  if(w['波高']!=null) it.push(`波 ${w['波高']}cm`);
+  if(w['気温']!=null) it.push(`気温 ${w['気温']}℃`);
+  if(w['水温']!=null) it.push(`水温 ${w['水温']}℃`);
+  if(!it.length) return '';
+  const t=w['時刻']?`${w['時刻']}現在`:'直近';
+  return `<div class="livewx">🌊 実況（${t}・${w['レース']||''}時点の水面気象）｜ ${it.join(' ／ ')}</div>`;
+}
+function windSignal(code){
+  const w=LIVEW[code]; const th=(WINDTEND&&WINDTEND['閾値'])||5;
+  const t=WINDTEND&&WINDTEND['場']&&WINDTEND['場'][code];
+  if(!w||w['風速']==null||!t||w['風速']<th) return '';
+  return `<div class="windsig">🌀 実測傾向：この水面は強風（${th}m/s〜）時に万舟率が高め（${t['平均万舟率']}%→<b>${t['強風時万舟率']}%</b>／過去${t['件数']}レース・場平均比）。ただいま実況${w['風速']}m。<span class="cav">傾向であり予想・断定ではありません。判定には使っていません。</span></div>`;
+}
 function renderCard(r){
   return `<div class="card">
     <div class="chead"><span class="rname">${r['場名']} ${r['レース']}</span>${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}
       ${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}</div>
+    ${liveWx(r['場コード'])}
+    ${windSignal(r['場コード'])}
     <div class="boats">${r['艇'].map(b=>boatRow(b, r['場名'])).join('')}</div>
     <div class="headline"><span class="lbl">見立て</span><span>${r['見立て']}</span></div>
     <div class="tenkai"><div class="t">展開の筋</div>${r['展開'].map(p=>`<p>${p}</p>`).join('')}</div>
@@ -323,6 +346,18 @@ document.addEventListener('click',function(e){
 
 let SRC='highlights.json';
 var SRCS=['highlights.json','highlights_prev.json','highlights_prev2.json'];
+var LIVEW={};
+// 実況天候（別系統・予報でない実測水面気象）。取れなくても本体表示は継続。
+fetch('../data/liveWeather.json?_='+Date.now())
+.then(r=>r.ok?r.json():null)
+.then(doc=>{ if(doc&&doc['stadiums']){LIVEW=doc['stadiums']; if(typeof render==='function') render();} })
+.catch(()=>{});
+var WINDTEND={};
+// 強風シグナルの実測傾向（予想でない・判定に不使用）。実況風速と連動して提示。
+fetch('../data/windTendency.json?_='+Date.now())
+.then(r=>r.ok?r.json():null)
+.then(doc=>{ if(doc){WINDTEND=doc; if(typeof render==='function') render();} })
+.catch(()=>{});
 function setDay(d){
   SRC=SRCS[d];
   document.querySelectorAll('.dsw-btn').forEach(function(b){b.classList.toggle('on', (+b.dataset.d)===d);});
