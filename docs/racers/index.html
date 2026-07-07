@@ -201,6 +201,7 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .oshibtn.on { color:#ffd166; }
 .oshibtn:active { transform:scale(1.3); }
 .boat.oshi-on { border-color:#5a4a1a; box-shadow:0 0 0 1px #5a4a1a inset; }
+.my-row.oshi-row { background:#191408; border:1px solid #4a3a10; }
 </style>
 </head>
 <body>
@@ -342,14 +343,26 @@ function recordViewed(v,rno){
 function isCollected(jcd,hd,rno){ return COLLECTED.indexOf(rkey(jcd,hd,rno))>=0; }
 function markCollected(jcd,hd,rno){ var k=rkey(jcd,hd,rno); if(COLLECTED.indexOf(k)<0){ COLLECTED.push(k); lsSet("br_collected",COLLECTED); } }
 function resultUrl(jcd,hd,rno){ return "https://www.boatrace.jp/owpc/pc/race/raceresult?rno="+rno+"&jcd="+jcd+"&hd="+hd; }
-/* 「気になる/見た」レースのうち結果確定・未回収の一覧（回収対象） */
+/* 回収対象＝結果確定・未回収のレース。
+   ソース: 気になる(WATCH) / 最近見た(VIEWED) / 推しの出走(自動)。
+   推しが走ったレースはフォローだけで自動的に回収対象になる（明示操作不要）。 */
 function harvestList(){
-  var seen={}, out=[];
-  WATCH.concat(VIEWED).forEach(function(x){
+  var map={};
+  function add(x, oshiName){
+    if(!x.hd || raceStatus(x.hd,x.deadline)!=='done') return;
+    if(isCollected(x.jcd,x.hd,x.rno)) return;
     var k=rkey(x.jcd,x.hd,x.rno);
-    if(seen[k]) return; seen[k]=1;
-    if(raceStatus(x.hd,x.deadline)==='done' && !isCollected(x.jcd,x.hd,x.rno))
-      out.push(x);
+    if(!map[k]) map[k]={jcd:x.jcd,hd:x.hd,rno:x.rno,venue:x.venue||"",deadline:x.deadline||"",kikaku:x.kikaku||"",oshi:false,oshiNames:[]};
+    if(oshiName){ map[k].oshi=true; if(map[k].oshiNames.indexOf(oshiName)<0) map[k].oshiNames.push(oshiName); }
+  }
+  WATCH.forEach(function(x){ add(x); });
+  VIEWED.forEach(function(x){ add(x); });
+  oshiEntries().forEach(function(x){ add(x, x.name); });
+  var out=Object.keys(map).map(function(k){ return map[k]; });
+  out.sort(function(a,b){
+    if(a.oshi!==b.oshi) return a.oshi?-1:1;               /* 推し優先 */
+    var ka=a.hd+("0"+a.deadline).slice(-5), kb=b.hd+("0"+b.deadline).slice(-5);
+    return ka>kb?-1:1;                                     /* 新しい順 */
   });
   return out;
 }
@@ -544,11 +557,16 @@ function buildMyPanel(){
   if(!harvest.length && !waiting.length && !recent.length) return "";
   var h='<div class="my">';
   if(harvest.length){
-    h+='<div class="my-sec harvest"><div class="my-h">🎣 結果が出た<span class="cnt">'+harvest.length+'</span></div>';
+    var oshiN=harvest.filter(function(x){return x.oshi;}).length;
+    h+='<div class="my-sec harvest"><div class="my-h">🎣 結果が出た<span class="cnt">'+harvest.length+'</span>'
+      +(oshiN?'<span class="oshi-cnt" style="margin-left:2px">⭐'+oshiN+'</span>':'')+'</div>';
     h+=harvest.map(function(x){
       var k=rkey(x.jcd,x.hd,x.rno);
-      return '<div class="my-row">'
-        +'<div class="my-rl" data-open="'+esc(k)+'"><div class="my-rt">'+esc(x.venue)+' '+x.rno+'R</div><div class="my-rs">'+esc(x.kikaku||"")+(x.kikaku?'｜':'')+'締切 '+esc(x.deadline||"")+'</div></div>'
+      var title=(x.oshi?'⭐ ':'')+esc(x.venue)+' '+x.rno+'R';
+      var sub=x.oshi&&x.oshiNames.length?'推し '+esc(x.oshiNames.join("・"))+'｜締切 '+esc(x.deadline||"")
+                                        :esc(x.kikaku||"")+(x.kikaku?'｜':'')+'締切 '+esc(x.deadline||"");
+      return '<div class="my-row'+(x.oshi?' oshi-row':'')+'">'
+        +'<div class="my-rl" data-open="'+esc(k)+'"><div class="my-rt">'+title+'</div><div class="my-rs">'+sub+'</div></div>'
         +'<a class="harvest-link" data-collect="'+esc(k)+'" href="'+resultUrl(x.jcd,x.hd,x.rno)+'" target="_blank" rel="noopener">結果 →</a>'
         +'<button class="harvest-x" data-collect="'+esc(k)+'" title="回収済みにする">✓</button>'
         +'</div>';
