@@ -21,10 +21,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: marine probe（一時）
-        run: python scripts/probe_marine.py
+      - run: python scripts/fetch_weather.py
       - name: commit and push
-        if: false
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
