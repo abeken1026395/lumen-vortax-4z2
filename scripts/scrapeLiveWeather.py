@@ -15,10 +15,6 @@ OUT    = sys.argv[2] if len(sys.argv) > 2 else "docs/data/liveWeather.json"
 SLEEP  = 1.0
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-# is-directionNN(1..16) を16方位へ。1=北、時計回り(boatrace公式の矢印番号順)。
-DIR16 = ["北","北北東","北東","東北東","東","東南東","南東","南南東",
-         "南","南南西","南西","西南西","西","西北西","北西","北北西"]
-
 def jst_now():
     return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 
@@ -33,8 +29,9 @@ def parse_weather(html):
     if 'class="weather1"' not in html:
         return None
     w = {}
-    m = re.search(r'weather1_title">([^<]*?)(\d{1,2}:\d{2})\s*現在', html)
-    w["時刻"] = m.group(2) if m else None
+    # 実況時刻：weather1_title 内の HH:MM（"現在"有無・全半角空白差を許容）
+    tm = re.search(r'weather1_title">[^<]*?(\d{1,2}:\d{2})', html)
+    w["時刻"] = tm.group(1) if tm else None
     # ラベル対（Title→Data）
     pairs = re.findall(
         r'weather1_bodyUnitLabelTitle">([^<]*)</span>\s*'
@@ -59,14 +56,13 @@ def parse_weather(html):
                        r'<span[^>]*>([^<]*)</span>', html)
         tenkou = wm.group(1).strip() if wm else None
     w["天候"] = tenkou
-    # 風向：is-directionNN 矢印番号 → 16方位
+    # 風向：is-directionNN 矢印番号のみ保持（番号→方位のマッピングは未検証のため
+    # 方位テキストは出さない。サイト哲学=誤情報を出さない／検証できるまで非表示）。
     dm = re.search(r'weather1_bodyUnitImage is-direction(\d+)', html)
-    if dm:
-        n = int(dm.group(1))
-        w["風向"] = DIR16[(n - 1) % 16] if 1 <= n <= 16 else None
-        w["風向番号"] = n
-    else:
-        w["風向"] = None
+    w["風向番号"] = int(dm.group(1)) if dm else None
+    # 天候の &nbsp;（未掲載）は空扱い
+    if w.get("天候") in (" ", "&nbsp;", ""):
+        w["天候"] = None
     # 有効判定：時刻または風速/天候のいずれか取得できたら有効
     if w.get("時刻") or w.get("風速") is not None or w.get("天候"):
         return w
@@ -105,8 +101,9 @@ def main():
         upcoming = sorted([rno for rno in races if close_min(rno) >= now_min], key=close_min)
         target = upcoming[0] if upcoming else max(races)
         got = None
-        # target から遡って実況のある最新レースを拾う（直前情報未掲載対策）
-        for rno in [target] + [x for x in sorted(races, reverse=True) if x < target]:
+        # target から最大3レース遡って実況のある最新を拾う（未掲載対策・取得数を抑制）
+        fallback = [x for x in sorted(races, reverse=True) if x < target][:3]
+        for rno in [target] + fallback:
             try:
                 html = fetch(jcd, rno, hd)
             except Exception as e:
@@ -117,7 +114,7 @@ def main():
                 w["レース"] = f"{rno}R"; w["場名"] = v["場名"]; got = w; break
         if got:
             stad[jcd] = got
-            print(f"  {jcd} {v['場名']} {got['レース']} {got.get('時刻')} 風{got.get('風速')}m {got.get('風向')} {got.get('天候')} 波{got.get('波高')}cm")
+            print(f"  {jcd} {v['場名']} {got['レース']} {got.get('時刻')} 風{got.get('風速')}m(向#{got.get('風向番号')}) {got.get('天候')} 波{got.get('波高')}cm 気温{got.get('気温')} 水温{got.get('水温')}")
     doc = {"updatedJst": now.strftime("%Y-%m-%d %H:%M"), "開催日": hd,
            "source": "boatrace.jp beforeinfo（実況・水面気象）", "stadiums": stad}
     import os
