@@ -21,6 +21,7 @@ const ARARE_COLOR = { "低":"#3fb950", "中":"#d29922", "高":"#f85149" };
 const WATER_COLOR = { "淡水":"#58a6ff", "海水":"#3fb1c9", "汽水":"#a371f7" };
 const PSYCH = { "gap":{label:"射幸心×童謡",c:"#ffd166"}, "nostalgia":{label:"郷愁",c:"#7fe0a0"}, "tension":{label:"緊張・高揚",c:"#f85149"}, "local-pride":{label:"ご当地",c:"#58a6ff"}, "mystery":{label:"ミステリー",c:"#a371f7"}, "class":{label:"格調",c:"#e59ac9"} };
 const STATUS_LABEL = { "none":"締切BGMなし", "unknown":"曲名は未特定", "page_exists":"公式ページに記載あり（曲名は未確認）" };
+const PRESENT = { "yes":{label:"場立ちあり",c:"#3fb950"}, "official":{label:"公式記載",c:"#58a6ff"}, "paper":{label:"予想紙",c:"#d29922"} };
 
 function App() {
   const [q, setQ] = useState("");
@@ -33,6 +34,8 @@ function App() {
   const [fanfare, setFanfare] = useState(null);
   const [bOpen, setBOpen] = useState(null);
   const [fanIntro, setFanIntro] = useState(false);
+  const [yosouya, setYosouya] = useState(null);
+  const [yOpen, setYOpen] = useState(null);
 
   useEffect(() => {
     fetch("../announcers/announcers.json?v=" + Date.now())
@@ -47,6 +50,10 @@ function App() {
       .then(r => r.json())
       .then(setFanfare)
       .catch(() => setFanfare(null));
+    fetch("../data/yosouya.json?v=" + Date.now())
+      .then(r => r.json())
+      .then(setYosouya)
+      .catch(() => setYosouya(null));
   }, []);
   const ancByVenue = (name) => (announcers || []).filter(a => (a.venues||[]).includes(name));
 
@@ -243,6 +250,40 @@ function App() {
                         })}
                         {songs.length===0 && bg.note && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{bg.note}</div>}
                         <div style={{marginTop:4,fontSize:10.5,color:"#8a7d9a",lineHeight:1.5}}>「諸説あり」は二次ソース（ファンメディア等）での言及で公式未確認。「🔍原曲(参考)」は原曲そのものの検索で、場で流れるアレンジ/音源そのものとは限りません。曲名・心理の話は読み物であり、断定・買い目ではありません。{songs[0]&&songs[0].checked?"（確認 "+songs[0].checked+"）":""}</div>
+                      </div>)}
+                    </div>
+                    );
+                  })()}
+                  {yosouya && yosouya.venues && yosouya.venues[s.code] && ["yes","official","paper"].includes(yosouya.venues[s.code].present) && (() => {
+                    const y = yosouya.venues[s.code];
+                    const pr = PRESENT[y.present];
+                    const off = y.confirmed==="official";
+                    return (
+                    <div style={{marginTop:8,background:"#221a12",border:"1px solid #4a3a26",borderRadius:8,padding:"8px 10px"}}>
+                      <div onClick={e=>{e.stopPropagation();setYOpen(yOpen===s.code?null:s.code);}} style={{display:"flex",alignItems:"center",cursor:"pointer",flexWrap:"wrap",gap:4}}>
+                        <span style={{color:"#d9b382",fontWeight:700}}>🎫 場内予想屋</span>
+                        {pr && <span style={{fontSize:10,fontWeight:700,color:pr.c,background:pr.c+"18",border:"1px solid "+pr.c+"66",borderRadius:5,padding:"1px 6px"}}>{pr.label}</span>}
+                        {y.count && <span style={{fontSize:11,color:"#b39a78"}}>{y.count}</span>}
+                        <span style={{marginLeft:"auto",fontSize:11,color:"#d9b382"}}>{yOpen===s.code?"▲ 閉じる":"▼ 見る"}</span>
+                      </div>
+                      {yOpen===s.code && (<div style={{marginTop:6}}>
+                        {y.hook && <div style={{fontSize:12.5,color:"#ecd9b8",lineHeight:1.7,marginBottom:6,fontStyle:"italic"}}>{y.hook}</div>}
+                        {y.people && y.people.length>0 && (
+                        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:6}}>
+                          {y.people.map((p,i)=>(
+                            <span key={i} title={p.note||""} style={{fontSize:12,background:"#0b1219",border:"1px solid #4a3a26",borderRadius:6,padding:"2px 8px",color:"#ecd9b8"}}>
+                              {p.name}{p.kind?<span style={{fontSize:10,color:"#b39a78"}}>（{p.kind}）</span>:null}
+                            </span>
+                          ))}
+                        </div>
+                        )}
+                        {(y.count||y.fee) && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{y.count?"在籍："+y.count:""}{y.count&&y.fee?"／":""}{y.fee?"料金："+y.fee:""}</div>}
+                        {y.note && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{y.note}</div>}
+                        <div style={{marginTop:4}}>
+                          <span style={{fontSize:10,fontWeight:700,color:off?"#3fb950":"#d29922",background:(off?"#3fb950":"#d29922")+"18",border:"1px solid "+(off?"#3fb950":"#d29922")+"66",borderRadius:5,padding:"1px 6px"}}>{off?"公式記載":"諸説あり"}</span>
+                          {y.source && <a href={y.source} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} style={{marginLeft:6,fontSize:11,color:"#d9b382"}}>出典→</a>}
+                        </div>
+                        <div style={{marginTop:4,fontSize:10.5,color:"#8a7d6a",lineHeight:1.5}}>予想屋の“存在・屋号・文化”の紹介で、買い目・的中は載せません（保証もしません）。在籍・料金・顔ぶれは変動します。{y.checked?"（確認 "+y.checked+"）":""}</div>
                       </div>)}
                     </div>
                     );
