@@ -269,17 +269,11 @@ def main():
 
         # 混戦の主役を①と④で判断（機力差→実力(当地)差→決まり手）
         if hero is None:
-            m1v, m4v = mt[0], mt[3]
-            loc1, loc4 = f(bo[0]['当地勝率']), f(bo[3]['当地勝率'])
-            kt4 = kim_type(bo[3]['登録番号'])
-            if use_m and m1v > 0 and m4v > 0 and abs(m1v - m4v) >= 8:
-                hero = 1 if m1v > m4v else 4  # 機力差が明確
-            elif loc1 > 0 and loc4 > 0 and abs(loc1 - loc4) >= 1.0:
-                hero = 1 if loc1 > loc4 else 4  # 実力(当地)差が明確
-            elif kt4 == 'makuri' and ba in NARROW:
-                hero = 4  # ④まくり型×狭水面は外に振る
-            else:
-                hero = 1  # 拮抗は内(実測で混戦の1着は①最多)
+            # 混戦の主役は①固定。逆算実測(20250715-20260705)：混戦で④に主役を振った
+            # 条件(機力+8/当地+1.0/まくり型狭水面)でも④の1着率は9.6%・3着内45.8%に留まり、
+            # 同レースの①は1着53.9%・3着内81.0%。④選定は誤りのため①へ据える。
+            # （④の脅威は見出し/展開/波及で別途言及するので物語は損なわない）
+            hero = 1
         if it >= 60: seeds = max(0, seeds-1)
         elif it <= 50: seeds += 1
         if ba in MAKURI: seeds += 1
@@ -458,7 +452,17 @@ def main():
 
         # 〔死角〕必ず1つ（実装テーブルA④：F・級・機力から。同文を避け条件で散らす）
         saten = None; skw = None; sid = None
-        f_out = [t for t in threats if t['w'] >= 4 and int(bo[t['w']-1]['F数']) >= 1]
+        # f_out：カド勢(w>=4)のF持ち。A級を優先、カドF単独(5のみ/6のみ)は死角として弱く除外
+        _fout_all = [t for t in threats if t['w'] >= 4 and int(bo[t['w']-1]['F数']) >= 1]
+        # A級F艇を最内優先、次に非A級F艇を最内優先
+        _fA = sorted([t for t in _fout_all if bo[t['w']-1]['級別'] in ('A1','A2')], key=lambda x: x['w'])
+        _fB = sorted([t for t in _fout_all if bo[t['w']-1]['級別'] not in ('A1','A2')], key=lambda x: x['w'])
+        # カドF単独（F艇がカドで5のみ/6のみ＝他にF艇なし）は除外＝f_outを空にしてD3等へ流す
+        # 実測(programs全期間)：5号艇F単独34.6%/6号艇F単独23.1%と4号艇F42%台より明確に低い弱層
+        if len(_fout_all) == 1 and _fout_all[0]['w'] in (5, 6):
+            f_out = []
+        else:
+            f_out = _fA + _fB
         f_in  = [b for b in bo if int(b['枠']) in (2,3) and int(b['F数']) >= 1]
         o4top = o4[0] if o4 else None
         o4kt = kim_type(toban_by_w.get(o4top['w'], '')) if o4top else None
@@ -484,8 +488,10 @@ def main():
             if il > 0 and il < ina: wl.append('当地')
             if in_lo: wl.append('機力')
             if o4top and o4kt == 'makuri' and ba in NARROW:
-                saten = f"死角は⑥までの一気。狭水面で{K[o4top['w']-1]}のまくりが決まれば、内は総崩れの目もある。"
-                skw = 6; sid = 'D5'
+                # 死角艇は実際にまくる外脅威(o4top)に付け替え＝旧⑥ハードコード(絡み30%)は過剰。
+                # 実測：D5該当レースで6号艇3着内30.1%に対しo4top(多くは4号)は48.3%。文言も弱化。
+                saten = f"死角は{K[o4top['w']-1]}のまくり。狭水面で決まれば内の隊形は乱れ、着順が入れ替わる目もある。"
+                skw = o4top['w']; sid = 'D5'
             elif o4top and o4kt == 'makuri':
                 saten = f"死角は{K[o4top['w']-1]}の握り込み。まくりが決まりきれば内の粘りごと連れ去る一撃もある。"
                 skw = o4top['w']; sid = 'D6'
@@ -505,8 +511,9 @@ def main():
                 saten = "死角は①の粘り。Sが五分なら外の攻めが不発になり、①残しもある。"
                 skw = 1; sid = 'D11'
         elif any(t['w'] >= 4 for t in threats):
-            # 外の仕掛けを担う筆頭＝threatsのw>=4で最も脅威度の高い艇
-            out_thr = sorted([t for t in threats if t['w'] >= 4], key=lambda x: -x['w'])
+            # 外の仕掛けを担う筆頭＝threatsのw>=4で最内の艇（実測：D12死角艇は内ほど絡む
+            # 4号57.8%>5号42.9%>6号29.3%。最外選択は6号偏重で弱いため最内優先に変更）
+            out_thr = sorted([t for t in threats if t['w'] >= 4], key=lambda x: x['w'])
             saten = "外の仕掛けは一考。Sが決まれば隊形は乱れるが、そのまま連まで届くかは別問題。"
             skw = out_thr[0]['w']; sid = 'D12'
         else:
