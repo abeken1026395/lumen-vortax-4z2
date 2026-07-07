@@ -39,6 +39,12 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .race-head .rt { font-size:18px; font-weight:bold; color:#ffd166; }
 .race-head .kikaku { font-size:13px; color:#e0e6ed; }
 .race-head .dl { font-size:12px; color:#9fb0c3; margin-top:4px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.race-links { margin-top:9px; display:flex; gap:8px; flex-wrap:wrap; }
+.offlink { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:bold; text-decoration:none; border-radius:6px; padding:5px 12px; }
+.offlink-result { color:#0b1219; background:#ffd166; }
+.offlink-result:active { background:#e8bd50; }
+.offlink-pend { color:#8a94a3; background:#0f1a26; border:1px solid #2a3a4d; }
+.offlink-card { color:#a9c6dd; background:#0f1a26; border:1px solid #24344a; }
 .cd { font-size:12px; font-weight:bold; border-radius:5px; padding:2px 8px; }
 .cd-open { background:#12301f; color:#69db7c; border:1px solid #1e5c38; }
 .cd-soon { background:#3a2a12; color:#ffd166; border:1px solid #6a4d18; }
@@ -391,8 +397,19 @@ function renderRace(app,crumb,v){
   else { cdCls="cd-open"; cdTxt="締切まで"+fmtMins(mins); }
   var cdHtml=cdTxt?'<span class="cd '+cdCls+'">'+esc(cdTxt)+'</span>':'';
 
+  /* 公式リンク（出走表・結果）。結果は締切後を金CTA、締切前は確定待ちの淡色表示 */
+  var links="";
+  if(/^\d{8}$/.test(v.hd)){
+    var base="https://www.boatrace.jp/owpc/pc/race/", q="?rno="+view.rno+"&jcd="+v.jcd+"&hd="+v.hd;
+    var closed=isClosed(v.hd,rc.deadline);
+    links='<div class="race-links">'
+      +'<a class="offlink '+(closed?"offlink-result":"offlink-pend")+'" href="'+base+'raceresult'+q+'" target="_blank" rel="noopener">🏁 '+(closed?"レース結果（公式）":"結果（締切後に確定）")+' ↗</a>'
+      +'<a class="offlink offlink-card" href="'+base+'racelist'+q+'" target="_blank" rel="noopener">公式出走表 ↗</a>'
+      +'</div>';
+  }
   var html='<div class="race-head"><div class="line1"><span class="rt">'+esc(v.name)+' '+view.rno+'R</span><span class="kikaku">'+esc(rc.kikaku)+'</span></div>'
-    +'<div class="dl">'+cdHtml+'<span>締切 '+esc(rc.deadline||"-")+'</span><span>'+esc(v.setsu)+' '+esc(v.day)+'</span></div></div>';
+    +'<div class="dl">'+cdHtml+'<span>締切 '+esc(rc.deadline||"-")+'</span><span>'+esc(v.setsu)+' '+esc(v.day)+'</span></div>'
+    +links+'</div>';
 
   /* サマリーチップ */
   var ar=findArare(v.jcd,view.rno,v.hd), wd=findWind(v.jcd,v.hd,rc.deadline);
