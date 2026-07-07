@@ -1,14 +1,28 @@
 name: レース結果 随時更新（日中）
 
 # 当日分の確定レースを日中に随時取り込み、結果表ページを実質リアルタイム化する。
-# 元データ BoatraceOpenAPI はレース確定ごとに更新されるため、1時間おきに当日分を
-# 取得し直し、確定済みレースを順次 results/ と docs/results/data/ に反映する。
+# 元データ BoatraceOpenAPI はレース確定ごとに更新されるため、当日分を取得し直し、
+# 確定済みレースを順次 results/ と docs/results/data/ に反映する。
 # 見立て検証(verifyPredictions 等)は夜の updateResults.yml に任せ、ここでは触れない。
+#
+# 発火は二重化して取りこぼしを防ぐ:
+#   1) schedule(毎時) … 主。ただし GitHub の schedule は遅延・スキップが起きやすい。
+#   2) workflow_run … 既に高頻度で回る他ジョブ(気象=3時間毎/出走表/モーター/荒れ指数)の
+#      完了に相乗り。schedule が不発でも、これらが走るたびに結果更新も走る。
 
 on:
   schedule:
     # JST 11:15〜23:15 の毎時（UTC 02:15〜14:15）。デイ〜ナイター終了までをカバー。
     - cron: "15 2-14 * * *"
+  workflow_run:
+    # 高頻度で走る既存ジョブの完了に相乗りして発火機会を増やす(schedule 不発対策)。
+    workflows:
+      - "気象データ自動更新"
+      - "出走表データ自動更新"
+      - "モーターデータ自動更新"
+      - "荒れ指数 更新"
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       hd:
