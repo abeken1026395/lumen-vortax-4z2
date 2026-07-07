@@ -20,9 +20,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: fetch tide history（一時・潮汐実測の土台）
-        run: python scripts/scrapeTideHistory.py
+      - name: tide probe（一時）
+        run: python scripts/probe_tide.py
       - name: commit tideHistory
+        if: false
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
