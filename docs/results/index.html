@@ -272,7 +272,10 @@ async function init(){
       sel.appendChild(o);
     });
     sel.addEventListener('change',()=>loadDay(sel.value));
-    loadDay(days[0]['開催日']);
+    // レースがある最新日を既定表示(空の日は選ばない)
+    const first = days.find(d=>(d['レース数']||0)>0) || days[0];
+    sel.value = first['開催日'];
+    loadDay(first['開催日']);
   }catch(e){
     document.getElementById('out').innerHTML='<div class="empty">日付一覧の取得に失敗しました。</div>';
   }

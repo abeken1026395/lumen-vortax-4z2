@@ -75,6 +75,15 @@ def main():
         except Exception as e:
             print("skip", hd, e)
             continue
+        # 確定レースが1つも無い日(早朝の未確定など)は公開しない。
+        # 当日分はレース確定ごとに随時再生成され、順次公開に載る。
+        if day["レース数"] <= 0:
+            # 既に空データを公開済みなら取り除く(過去に空で載った日の後始末)。
+            stale = os.path.join(OUT_DIR, "%s.json" % hd)
+            if os.path.exists(stale):
+                os.remove(stale)
+            print("skip empty", hd)
+            continue
         outpath = os.path.join(OUT_DIR, "%s.json" % hd)
         with io.open(outpath, "w", encoding="utf-8") as f:
             json.dump(day, f, ensure_ascii=False, separators=(",", ":"))
