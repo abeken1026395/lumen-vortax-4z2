@@ -1,0 +1,49 @@
+name: 締切一覧メッセージ自動生成
+
+on:
+  schedule:
+    # JST 23:45（= UTC 14:45）。夜のうちに翌日分の締切一覧を生成する。
+    # 直前（JST 23:37）に出走表更新が走るが、cron遅延に備えこのジョブ内でも最新化する。
+    - cron: '45 14 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 YYYYMMDD（空なら翌日JST）'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: boatrace-deadline-message
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 pandas lxml
+      # 最新の公開カード（遅く公開されるナイター/ミッドナイトを含む）を取り込む
+      - name: refresh racers
+        run: python scripts/scrape_racers.py
+      - name: build deadline message
+        env:
+          DEADLINE_DATE: ${{ github.event.inputs.date }}
+        run: python scripts/build_deadline_message.py
+      - name: commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --staged --quiet && echo "no change" && exit 0
+          git commit -m "締切一覧メッセージ自動生成 $(date +'%Y-%m-%d %H:%M')"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin main && break
+            echo "push retry $i ..."
+            sleep 5
+          done
