@@ -15,13 +15,19 @@ for jcd in [f"{i:02d}" for i in range(1,25)]:
         url,code,html=fetch(jcd,1,HD)
     except Exception as e:
         print(f"jcd{jcd}: ERR {e}"); continue
-    # 気象ブロック抽出（weather1 系のdivを想定。無ければ天候/風速の周辺を出す）
-    m=re.search(r'(<div class="weather1[\s\S]{0,2500}?</div>\s*</div>)', html)
-    has_kisho = ('風' in html and ('m' in html or '波' in html))
-    print(f"\n==== jcd{jcd} rno1 hd{HD} HTTP{code} len{len(html)} 気象語={has_kisho} ====")
+    # 気象ブロック抽出（weather1 全体）
+    m=re.search(r'<div class="weather1">([\s\S]*?)<!--/weather1-->', html) or re.search(r'<div class="weather1">([\s\S]{0,4000}?)</div>\s*</div>\s*</div>', html)
+    print(f"\n==== jcd{jcd} rno1 hd{HD} HTTP{code} len{len(html)} ====")
     if m:
-        block=re.sub(r'\s+',' ', m.group(1))
-        print("weather1ブロック:", block[:1800])
+        block=m.group(1)
+        tm=re.search(r'weather1_title">([^<]+)<', html)
+        print("実況時刻ラベル:", tm.group(1) if tm else "?")
+        # 各bodyUnit: Title/Data と 付随class(is-direction/is-weather)
+        for u in re.findall(r'<div class="weather1_bodyUnit([^"]*)">([\s\S]*?)</div>\s*</div>', html):
+            cls=u[0].strip(); body=u[1]
+            title=re.search(r'LabelTitle">([^<]*)<',body); data=re.search(r'LabelData">([^<]*)<',body)
+            img=re.search(r'weather1_bodyUnitImage ([\w-]+)',body)
+            print(f"  unit[{cls}] title={title.group(1) if title else '-'} data={data.group(1) if data else '-'} img={img.group(1) if img else '-'}")
         break
     else:
         # class名の候補を洗い出す
