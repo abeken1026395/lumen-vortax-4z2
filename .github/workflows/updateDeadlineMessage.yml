@@ -22,6 +22,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # 未設定なら LINE 投稿ステップはスキップ（＝トークン登録まで無害）
+      LINE_CHANNEL_TOKEN: ${{ secrets.LINE_CHANNEL_TOKEN }}
+      LINE_TARGET_ID: ${{ secrets.LINE_TARGET_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,6 +39,10 @@ jobs:
         env:
           DEADLINE_DATE: ${{ github.event.inputs.date }}
         run: python scripts/build_deadline_message.py
+      # トークンが登録されている場合のみ LINE に投稿
+      - name: post to LINE
+        if: ${{ env.LINE_CHANNEL_TOKEN != '' }}
+        run: python scripts/post_line_message.py
       - name: commit and push
         run: |
           git config user.name "github-actions[bot]"
