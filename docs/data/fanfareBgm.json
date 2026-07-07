@@ -1,7 +1,17 @@
 {
   "updated": "2026-07-07",
-  "_policy": "検証可能な事実のみ掲載。曲名・作曲者名の記載はOK、歌詞・音源の転載はNG。venuesには『公式サイトで曲名を確認できた場』のみ収録し、二次ソース止まりの場は入れない（詳細は docs/data/fanfareBgmMemo.md を参照）。",
-  "_collection_note": "本データ収集時（2026-07-07）の実行環境では、egressポリシーにより boatrace.jp / boatrace-*.jp など全公式ドメインおよび archive.org・macour.jp への直接アクセスが遮断されており（CONNECT 403）、公式ページ本文を直接読取できなかった。common.fanfare は複数ソースで裏取りできる周知の事実。venues は本プロジェクトのタスク指示（オーナー）が公式ページの存在と曲名を明示していた住之江のみを収録。他場の公式確認は、ネットワーク制約のないローカル環境からの再巡回で追記する想定（fanfareBgmMemo.md にチェックリスト）。",
+  "_policy": "検証可能な事実のみ掲載。曲名・作曲者名の記載はOK、歌詞・音源の転載はNG。各曲は confirmed で信頼度を明示する（official=公式サイトで確認 / secondary=二次ソース止まり・公式未確認）。secondary はUI上で必ず『未確認（二次ソース）』と分かる表示にし、断定しないこと。詳細な調査ログは docs/data/fanfareBgmMemo.md を参照。",
+  "_schema": {
+    "confirmed": {
+      "official": "公式サイト（各場公式・boatrace.jp等）で曲名を確認できたもの。",
+      "secondary": "ファンメディア/ブログ/投稿など二次ソースでのみ曲名が挙がるもの。公式未確認のため断定しない。",
+      "none": "締切BGM・場内曲が『無い』とされるもの（二次ソース）。",
+      "unknown": "曲が流れるが曲名を特定できていない、または公式ページの存在のみ確認で曲名未読。"
+    },
+    "song_fields": "title / artist(原曲者・任意) / type / confirmed / source / checked / note",
+    "venue_status": "songs が空の場合は status と note で状況（none / unknown / page_exists）を示す。"
+  },
+  "_collection_note": "本データ収集時（2026-07-07）の実行環境は egress ポリシーにより boatrace.jp / boatrace-*.jp など全公式ドメインおよび archive.org・macour.jp への直接アクセスが遮断（CONNECT 403）。そのため secondary の曲名は『二次ソース（主にファンメディア）での言及』を Web 検索経由で把握したもので、公式ページ本文での一次確認は未実施。ネットワーク制約のないローカル環境から各公式サイトを再巡回し、確認できたものを confirmed:official へ格上げする運用を想定（fanfareBgmMemo.md がチェックリスト）。",
   "common": {
     "fanfare": {
       "note": "ピットアウト時のファンファーレは2010年6月から全国共通の10種類。曲名は付けられていない。グレード（一般/G3/G2/G1/SG/ルーキー等）と予選/優勝戦で使い分ける。",
@@ -22,16 +32,149 @@
     }
   },
   "venues": {
+    "01": {
+      "name": "桐生",
+      "songs": [
+        { "title": "ジ・エンターテイナー", "artist": "スコット・ジョプリン（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "02": {
+      "name": "戸田",
+      "songs": [
+        { "title": "エレクトリック・カウンターポイント 第3楽章", "artist": "スティーヴ・ライヒ（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "03": {
+      "name": "江戸川",
+      "songs": [
+        { "title": "リバーサイドドリーム", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "オリジナル系（タイトル無しの独自曲との記述もあり）。二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "04": {
+      "name": "平和島",
+      "songs": [
+        { "title": "僕たちのお祭り前線", "type": "イメージソング", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "05": {
+      "name": "多摩川",
+      "songs": [
+        { "title": "ほほえみのバネッサ（Vanessa's First Smile）", "type": "イメージソング", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "06": {
+      "name": "浜名湖",
+      "songs": [
+        { "title": "ふじの山", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式サイト <https://www.boatrace-hamanako.jp/> で要確認。" }
+      ]
+    },
+    "07": {
+      "name": "蒲郡",
+      "songs": [
+        { "title": "Shrewpock", "artist": "Dimitrios Bitzenis", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "ライブラリ音源系。ナイター場。二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "08": {
+      "name": "常滑",
+      "songs": [
+        { "title": "われは海の子", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式サイト <https://www.boatrace-tokoname.jp/> で要確認。" }
+      ]
+    },
+    "09": {
+      "name": "津",
+      "songs": [
+        { "title": "チキチキバンバン", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "10": {
+      "name": "三国",
+      "songs": [],
+      "status": "unknown",
+      "note": "締切BGMは流れるが原曲を特定できず（二次ソースでも不明）。要調査。"
+    },
+    "11": {
+      "name": "びわこ",
+      "songs": [
+        { "title": "線路は続くよどこまでも", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" }
+      ]
+    },
     "12": {
       "name": "住之江",
       "songs": [
-        {
-          "title": "ジャンピーラブ",
-          "type": "場内テーマ曲",
-          "source": "https://www.boatrace-suminoe.jp/sp/jumpy.html",
-          "checked": "2026-07-07",
-          "note": "本プロジェクトのタスク指示が公式音源配布ページ（上記URL）と曲名を明示。実行環境のegress制約により当該公式ページの本文は直接再読取できていない（要ローカル再確認）。"
-        }
+        { "title": "ジャンピーラブ", "type": "場内テーマ曲", "confirmed": "official", "source": "https://www.boatrace-suminoe.jp/sp/jumpy.html", "checked": "2026-07-07", "note": "公式音源配布ページ（本プロジェクトのタスク指示で確認）。実行環境のegress制約により当該公式ページ本文の直接再読取は未実施。" }
+      ]
+    },
+    "13": {
+      "name": "尼崎",
+      "songs": [
+        { "title": "野ばら", "artist": "シューベルト（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "クラシック系。二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "14": {
+      "name": "鳴門",
+      "songs": [
+        { "title": "交響曲第九番", "artist": "ベートーヴェン（原曲）", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "板東俘虜収容所＝第九アジア初演の地に由来する説あり。二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "15": {
+      "name": "丸亀",
+      "songs": [
+        { "title": "金毘羅船々", "type": "締切BGM", "confirmed": "secondary", "source": "https://sp.macour.jp/columns/macour/155419/", "checked": "2026-07-07", "note": "民謡。二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "16": {
+      "name": "児島",
+      "songs": [
+        { "title": "ウインドオブサンシャイン", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "17": {
+      "name": "宮島",
+      "songs": [
+        { "title": "もみじ", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式サイト <https://www.boatrace-miyajima.com/> で要確認。" }
+      ]
+    },
+    "18": {
+      "name": "徳山",
+      "songs": [
+        { "title": "うみ", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" },
+        { "title": "アルプス一万尺", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" }
+      ]
+    },
+    "19": {
+      "name": "下関",
+      "songs": [],
+      "status": "page_exists",
+      "note": "公式に『配信メロディ』ページが存在（タスク指示: 旧 http://www.shimonoseki.gr.jp/k/mero/i_melody.asp は現在名前解決不可。現公式 https://www.boatrace-shimonoseki.jp/ ）。曲名は環境制約で直接未読。現行配信の有無・曲名は要ローカル確認。"
+    },
+    "20": {
+      "name": "若松",
+      "songs": [],
+      "status": "none",
+      "note": "締切BGMは無いとの記述（二次ソース）。公式未確認。"
+    },
+    "21": {
+      "name": "芦屋",
+      "songs": [],
+      "status": "none",
+      "note": "締切BGMは無いとの記述（二次ソース）。公式未確認。"
+    },
+    "22": {
+      "name": "福岡",
+      "songs": [],
+      "status": "unknown",
+      "note": "タイトル無しの独自BGM。ファン推測で『峠の幌馬車』（ビリー・ヴォーン）との指摘があるが不確か。曲名は確定できず。"
+    },
+    "23": {
+      "name": "唐津",
+      "songs": [],
+      "status": "unknown",
+      "note": "締切音楽は流れるが曲名を特定できず（YouTubeに音源動画あり）。要調査。"
+    },
+    "24": {
+      "name": "大村",
+      "songs": [
+        { "title": "森のくまさん", "type": "締切BGM", "confirmed": "secondary", "source": "https://freeboatrace.com/column/data/110/", "checked": "2026-07-07", "note": "童謡。二次ソースでの言及。公式未確認。" }
       ]
     }
   }
