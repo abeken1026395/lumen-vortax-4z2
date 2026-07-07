@@ -28,7 +28,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add e30PlayerStats.json
+          git add docs/data/e30PlayerStats.json
           git diff --staged --quiet || git commit -m "update e30PlayerStats.json"
           git pull --rebase origin ${{ github.ref_name }} || true
           git push origin HEAD:${{ github.ref_name }}

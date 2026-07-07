@@ -235,6 +235,9 @@ function App() {
   const [prof, setProf] = useState({});
   const [mon, setMon] = useState(null);
   const [monMeta, setMonMeta] = useState(null);
+  const [e30, setE30] = useState(null);
+  const [e30Meta, setE30Meta] = useState(null);
+  const [e30All, setE30All] = useState(false);
   useEffect(()=>{
     fetch("racerKimarite.csv").then(r=>r.ok?r.text():Promise.reject()).then(t=>{
       const lines=t.trim().split(/\r?\n/); if(lines.length<2) return;
@@ -263,6 +266,13 @@ function App() {
     fetch("../data/playerMonthly.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>{
       if(j && j.選手){ setMon(j.選手); setMonMeta({months:j.対象月||[], days:j.対象日数, src:j.出典}); }
     }).catch(()=>{ setMon({}); });
+  },[open]);
+  // E30該当場成績JSONも詳細を開いた時だけ遅延読込（事実の生データ・出典/期間/N併記）
+  useEffect(()=>{
+    if(!open || e30!==null) return;
+    fetch("../data/e30PlayerStats.json").then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+      if(j && j.選手成績){ setE30(j.選手成績); setE30Meta({期間:j.集計期間, 出典:j.出典, 対象場:j.対象場||{}, 注記:j.注記}); }
+    }).catch(()=>{ setE30({}); });
   },[open]);
   // URLに ?toban=登番 があれば、その選手を検索欄にプリセットして開く（モーター等からのリンク用）
   useEffect(()=>{
@@ -485,6 +495,53 @@ function App() {
                               );
                             })}
                             <div style={{fontSize:10,color:"#6b7f95",marginTop:6,lineHeight:1.5}}>2連率＝2連対数÷出走。平均STはF/L等の非数値を除外。出典：公式競走成績（results/配下）。</div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {(()=>{
+                    const ep = e30 && e30[p.no] ? e30[p.no] : null;
+                    const venueNames = e30Meta ? Object.values(e30Meta.対象場).map(v=>v.場名).join("・") : "";
+                    const period = e30Meta && e30Meta.期間 ? e30Meta.期間 : null;
+                    const fmtP = d=> d? (d.slice(0,4)+"."+d.slice(4,6)+"."+d.slice(6,8)) : "-";
+                    const courseKeys = ep ? Object.keys(ep.コース別).sort((a,b)=>(+a)-(+b)) : [];
+                    const shown = courseKeys.filter(c=> e30All || ep.コース別[c].出走数>=10);
+                    const KTECH=["逃げ","差し","まくり","まくり差し","抜き","恵まれ"];
+                    return (
+                      <div>
+                        <div style={{fontSize:11,color:"#8faabe",fontWeight:700,margin:"16px 0 6px"}}>■ E30該当場成績　<span style={{color:"#6b7f95",fontWeight:400}}>{period?fmtP(period.開始)+"〜"+fmtP(period.終了):""} / 進入コース別</span></div>
+                        {e30===null ? (
+                          <div style={{fontSize:11,color:"#6b7f95",background:"#0b1219",borderRadius:8,padding:"12px"}}>読み込み中…</div>
+                        ) : !ep ? (
+                          <div style={{fontSize:11,color:"#6b7f95",background:"#0b1219",borderRadius:8,padding:"12px"}}>E30該当場での出走データがありません。</div>
+                        ) : (
+                          <div style={{background:"#0b1219",borderRadius:8,padding:"8px 10px"}}>
+                            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                              <span style={{fontSize:11,color:"#c5d2e0",fontWeight:700}}>総 {ep.総出走数} 走</span>
+                              <span onClick={e=>{e.stopPropagation();setE30All(v=>!v);}} style={{fontSize:10,fontWeight:700,cursor:"pointer",borderRadius:6,padding:"3px 9px",border:"1px solid #2a3d52",color:e30All?"#ffd166":"#8faabe",background:e30All?"#ffd16618":"#101a26"}}>{e30All?"N≥10のみ":"N<10も表示"}</span>
+                            </div>
+                            <div style={{display:"flex",fontSize:10,color:"#6b7f95",fontWeight:700,padding:"0 0 5px",borderBottom:"1px solid #1a2535"}}>
+                              <span style={{width:40}}>コース</span><span style={{width:40,textAlign:"right"}}>出走</span><span style={{width:36,textAlign:"right"}}>1着</span><span style={{width:44,textAlign:"right"}}>2連対</span><span style={{width:52,textAlign:"right"}}>平均ST</span><span style={{flex:1,paddingLeft:10}}>決まり手</span>
+                            </div>
+                            {shown.length===0 ? (
+                              <div style={{fontSize:11,color:"#6b7f95",padding:"8px 0"}}>全コースN&lt;10。「N&lt;10も表示」で確認できます。</div>
+                            ) : shown.map(c=>{
+                              const r=ep.コース別[c]; const few=r.出走数<10;
+                              const tech=KTECH.filter(t=>r.決まり手[t]).map(t=>t+r.決まり手[t]).join("・");
+                              return (
+                                <div key={c} style={{display:"flex",alignItems:"center",fontSize:12,padding:"5px 0",borderBottom:"1px solid #131f2e",opacity:few?0.55:1}}>
+                                  <span style={{width:40,color:"#c5d2e0",fontWeight:700}}>{c}号艇</span>
+                                  <span style={{width:40,textAlign:"right",color:"#e0e6ed"}}>{r.出走数}{few&&<span style={{fontSize:9,color:"#c98"}}> 少</span>}</span>
+                                  <span style={{width:36,textAlign:"right",color:r["1着数"]>0?"#ffd166":"#6b7f95",fontWeight:700}}>{r["1着数"]}</span>
+                                  <span style={{width:44,textAlign:"right",color:"#3fb1c9",fontWeight:700}}>{r["2連対数"]}</span>
+                                  <span style={{width:52,textAlign:"right",color:"#e0e6ed"}}>{r.平均ST!=null?r.平均ST.toFixed(2):"-"}</span>
+                                  <span style={{flex:1,paddingLeft:10,color:"#8faabe",fontSize:11}}>{tech||"-"}</span>
+                                </div>
+                              );
+                            })}
+                            <div style={{fontSize:10,color:"#6b7f95",marginTop:6,lineHeight:1.6}}>E30該当場（{venueNames}）での成績。1着数のうちの決まり手内訳を併記。平均STはF/欠場等の非数値を除外。<b>N数の小さいコースは参考値</b>。出典：{e30Meta?e30Meta.出典:"BoatraceOpenAPI/resultsミラー（mbrace由来）"}。</div>
                           </div>
                         )}
                       </div>

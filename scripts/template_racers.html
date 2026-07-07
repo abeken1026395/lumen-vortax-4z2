@@ -118,6 +118,28 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .meter-val { font-size:10px; color:#9fb0c3; width:46px; flex:none; text-align:right; }
 .meter-best { color:#ffd166; font-weight:bold; }
 
+/* E30該当場成績（事実の生データ・二層表示） */
+.e30d { margin-top:8px; border:1px solid #24344a; border-radius:8px; background:#0f1a26; overflow:hidden; }
+.e30d > summary { list-style:none; cursor:pointer; padding:7px 10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.e30d > summary::-webkit-details-marker { display:none; }
+.e30-badge { font-size:10px; font-weight:bold; color:#0b1219; background:#8fd6c0; border-radius:4px; padding:1px 6px; flex:none; }
+.e30-sum { font-size:11px; color:#a9c6dd; }
+.e30-sum b { color:#e0e6ed; }
+.e30-few { font-size:9px; color:#c98; margin-left:2px; }
+.e30-caret { margin-left:auto; font-size:10px; color:#6f8aa3; }
+.e30d[open] .e30-caret::after { content:"閉じる ▲"; } .e30d:not([open]) .e30-caret::after { content:"内訳 ▼"; }
+.e30-body { padding:2px 10px 9px; }
+.e30-row { display:flex; align-items:center; font-size:11px; padding:4px 0; border-top:1px solid #16273a; }
+.e30-row.hd { color:#6f8aa3; font-weight:bold; border-top:none; }
+.e30-row .c { width:40px; color:#c5d2e0; font-weight:bold; }
+.e30-row .n { width:38px; text-align:right; color:#e0e6ed; }
+.e30-row .w1 { width:30px; text-align:right; color:#ffd166; font-weight:bold; }
+.e30-row .w2 { width:40px; text-align:right; color:#3fb1c9; font-weight:bold; }
+.e30-row .st { width:46px; text-align:right; color:#e0e6ed; }
+.e30-row .tk { flex:1; padding-left:8px; color:#8faabe; }
+.e30-row.dim { opacity:.5; }
+.e30-note { font-size:9px; color:#6f8aa3; margin-top:5px; line-height:1.5; }
+
 /* 決まり手構成バー */
 .kmr { margin-top:8px; }
 .kmr-ttl { font-size:10px; color:#8a94a3; margin-bottom:3px; display:flex; justify-content:space-between; }
@@ -255,10 +277,12 @@ var KMR={};        /* 登録番号 -> 決まり手/被され等 */
 var HL={};         /* 場コード_レース -> レース見どころ（機力/波乱/展開 等） */
 var PROF={};       /* 登録番号 -> あだ名/note */
 var HL_META={fix:[], hd:""};
+var E30=null, E30META=null;  /* E30該当場成績（生データ・事実提示のみ） */
 
 function loadJSON(u){ return fetch(u).then(function(r){return r.json();}); }
 function loadText(u){ return fetch(u).then(function(r){return r.text();}); }
 
+loadJSON("../data/e30PlayerStats.json").then(function(j){ if(j&&j["選手成績"]){E30=j["選手成績"];E30META={期間:j["集計期間"],出典:j["出典"],対象場:j["対象場"]||{}};} rerender(); }).catch(function(){});
 loadJSON("../data/arare.json").then(function(j){arare=j;arareHd=String(j&&j.generated||"").slice(0,10).replace(/-/g,"");rerender();}).catch(function(){});
 loadJSON("../data/weather.json").then(function(j){weather=j;rerender();}).catch(function(){});
 loadJSON("../players/profile.json").then(function(j){PROF=j||{};rerender();}).catch(function(){});
@@ -643,6 +667,39 @@ function kimariteBar(km){
     +'<div class="kmr-bar">'+segs+'</div><div class="kmr-legend">'+legend+'</div></div>';
 }
 
+/* E30該当場成績（この場がE30該当場のときのみ・事実の生データ・二層表示） */
+var E30_TECH=["逃げ","差し","まくり","まくり差し","抜き","恵まれ"];
+function e30Block(toban,jcd){
+  if(!E30||!E30META) return "";
+  if(!E30META.対象場||!E30META.対象場[jcd]) return "";   /* 該当場のみ */
+  var ep=E30[toban]; if(!ep) return "";
+  var courses=Object.keys(ep["コース別"]).map(Number).sort(function(a,b){return a-b;});
+  var w1=0,w2=0;
+  courses.forEach(function(c){ var r=ep["コース別"][c]; w1+=r["1着数"]; w2+=r["2連対数"]; });
+  var tot=ep["総出走数"], few=tot<10;
+  var rows=courses.map(function(c){
+    var r=ep["コース別"][c], rf=r["出走数"]<10;
+    var tech=E30_TECH.filter(function(t){return r["決まり手"][t];}).map(function(t){return t+r["決まり手"][t];}).join("・");
+    var st=(r["平均ST"]!=null)?r["平均ST"].toFixed(2):"-";
+    return '<div class="e30-row'+(rf?' dim':'')+'"><span class="c">'+c+'号</span>'
+      +'<span class="n">'+r["出走数"]+(rf?'<span class="e30-few">少</span>':'')+'</span>'
+      +'<span class="w1">'+r["1着数"]+'</span><span class="w2">'+r["2連対数"]+'</span>'
+      +'<span class="st">'+st+'</span><span class="tk">'+esc(tech||"-")+'</span></div>';
+  }).join("");
+  var per=E30META.期間, fmtP=function(d){return d?(d.slice(0,4)+"."+d.slice(4,6)+"."+d.slice(6,8)):"-";};
+  var venue=E30META.対象場[jcd]["場名"];
+  return '<details class="e30d"><summary>'
+    +'<span class="e30-badge">E30該当場</span>'
+    +'<span class="e30-sum">当地'+esc(venue)+'含む該当場 <b>'+tot+'</b>走 ・ 1着<b>'+w1+'</b> ・ 2連対<b>'+w2+'</b>'+(few?'<span class="e30-few"> N少</span>':'')+'</span>'
+    +'<span class="e30-caret"></span></summary>'
+    +'<div class="e30-body">'
+    +'<div class="e30-row hd"><span class="c">コース</span><span class="n">出走</span><span class="w1">1着</span><span class="w2">2連対</span><span class="st">平均ST</span><span class="tk">決まり手</span></div>'
+    +rows
+    +'<div class="e30-note">E30該当場（'+esc(Object.keys(E30META.対象場).map(function(k){return E30META.対象場[k]["場名"];}).join("・"))+'）通算の進入コース別・生データ。'
+    +(per?fmtP(per["開始"])+'〜'+fmtP(per["終了"]):'')+'。1着の決まり手内訳を併記。平均STはF/欠場等を除外。N数の小さいコースは参考値。出典：'+esc(E30META.出典||"BoatraceOpenAPI/resultsミラー（mbrace由来）")+'。</div>'
+    +'</div></details>';
+}
+
 /* 今節成績ミニテーブル（進入/着、着色） */
 var SHU_COLS=["1日目成績","2日目成績","3日目成績","4日目成績","5日目成績","6日目成績"];
 var SHU_LABELS=["初日","2日","3日","4日","5日","最終"];
@@ -828,6 +885,7 @@ function boatCard(row,v,hl,minST,maxST,maxMotor){
     +'</div>'
     +meter
     +kimariteBar(km)
+    +e30Block(toban,v.jcd)
     +shuTable(row)
     +'</div></div>';
 }
