@@ -50,6 +50,49 @@ function renderNote(text, jump){
   return out;
 }
 
+// noteから師匠/弟子/家族/同期の関係を抽出→チップ表示用。
+// ①名前（登番）の名前部分をマスク（名前に含まれる父/夫/兄等の誤検出を防ぐ）
+// ②同一文内で「名前に最も近い役割語」で判定（師匠語と名前が離れても拾える）
+function extractRelations(note){
+  if(!note) return [];
+  const pink="#ff9ec4";
+  const re=/[（(](\d{4})[）)]/g; let m;
+  const toks=[]; const arr=note.split("");
+  while((m=re.exec(note))){
+    const no=m[1], pl=NO_MAP[no]; if(!pl) continue;
+    const before=note.slice(0,m.index);
+    if(before.endsWith(pl.name)) for(let i=m.index-pl.name.length;i<m.index;i++) arr[i]="＊"; // 名前をマスク
+    toks.push({at:m.index, no, pl});
+  }
+  const masked=arr.join("");
+  const out=[]; const seen=new Set();
+  const push=(role,color,no,name)=>{ const key=role+no; if(seen.has(key))return; seen.add(key); out.push({role,color,no,name}); };
+  for(const t of toks){
+    // 後方文脈（名前の直後）を優先判定：「Xに師事/門下」「Xが師匠」→Xが師匠、「Xの師匠」「Xを弟子」→Xが弟子
+    const af=masked.slice(t.at+6, t.at+16);
+    if(/^に師事|^に弟子入り|^門下|^が師匠|^が師と|^に師事/.test(af)){ push("師匠","#d2a8ff",t.no,t.pl.name); continue; }
+    if(/^の師匠|^を弟子|^の弟子/.test(af)){ push("弟子","#7ee787",t.no,t.pl.name); continue; }
+    let bf=masked.slice(0,t.at);
+    const sb=Math.max(bf.lastIndexOf("。"),bf.lastIndexOf("！"),bf.lastIndexOf("？"));
+    if(sb>=0) bf=bf.slice(sb+1); // 同一文に限定
+    const c=[]; const put=(pos,role,color)=>{ if(pos>=0) c.push({pos,role,color}); };
+    put(bf.lastIndexOf("弟子"),"弟子","#7ee787");
+    put(Math.max(bf.lastIndexOf("師匠"),bf.lastIndexOf("師事")),"師匠","#d2a8ff");
+    put(bf.lastIndexOf("同期"),"同期","#8faabe");
+    let jf=-1; { const fm=/従(兄弟|姉妹|兄|姉|弟|妹)/g; let mm; while((mm=fm.exec(bf))) jf=mm.index; }
+    put(jf,"親戚","#ffd166");
+    for(const kw of ["息子","娘","姉","妹","父","母","夫","妻","兄"]){
+      const p=bf.lastIndexOf(kw); if(p>=0 && !(jf>=0 && p>=jf && p<=jf+2)) put(p,kw,pink);
+    }
+    // 単独の「弟」（弟子・従弟・師弟を除外）
+    for(let i=bf.length-1;i>=0;i--){ if(bf[i]==="弟" && bf[i+1]!=="子" && bf[i-1]!=="従" && bf[i-1]!=="師" && !(jf>=0 && i>=jf && i<=jf+2)){ put(i,"弟",pink); break; } }
+    if(!c.length) continue;
+    c.sort((a,b)=>b.pos-a.pos);
+    const r=c[0]; push(r.role,r.color,t.no,t.pl.name);
+  }
+  return out;
+}
+
 const KIM=[["nige","逃げ","#ffd166"],["makuri","まくり","#4593e5"],["sashi","差し","#3fb950"],["makurizashi","まくり差し","#d29922"],["nuki","抜き","#8957e5"],["megumare","恵まれ","#56607a"]];
 function BranchPanel({bsort,setBsort,kim}){
   const stat = useMemo(()=>{
@@ -315,6 +358,16 @@ function App() {
                   {pf&&pf.hobby&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:-4}}>🎣 趣味：{pf.hobby}</div>}
                   {pf&&pf.food&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:4}}>🍴 好物：{pf.food}</div>}
                   {pf&&pf.note&&<div style={{fontSize:12,color:"#c5d2e0",marginTop:4,lineHeight:1.6}}>💬 {renderNote(pf.note, jump)}</div>}
+                  {pf&&pf.note&&(()=>{const rels=extractRelations(pf.note);if(!rels.length)return null;return (
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6,alignItems:"center",marginTop:8}}>
+                      <span style={{fontSize:10,color:"#6b7f95",fontWeight:700}}>関係</span>
+                      {rels.map((r,i)=>(
+                        <span key={i} onClick={e=>{e.stopPropagation();jump(r.no);}} title={"→ "+r.name} style={{fontSize:11,fontWeight:700,cursor:"pointer",borderRadius:6,padding:"2px 8px",background:r.color+"1e",border:"1px solid "+r.color+"55",color:r.color}}>
+                          <span style={{opacity:0.65,marginRight:3,fontWeight:600}}>{r.role}</span>{r.name}
+                        </span>
+                      ))}
+                    </div>
+                  );})()}
                   {pf&&(pf.hobby||pf.food||pf.note)&&<div style={{height:14}}></div>}
                   <div style={{fontSize:11,color:"#8faabe",fontWeight:700,marginBottom:6}}>■ 成績</div>
                   <div style={{display:"flex",gap:14,flexWrap:"wrap",marginBottom:14,background:"#0b1219",borderRadius:8,padding:"10px 12px"}}>
