@@ -159,6 +159,14 @@ function App(){
   const metaFor = (jcd) => venueMeta ? (venueMeta[String(jcd||"").padStart(2,"0")]||null) : null;
 
   const allVenues = useMemo(()=>[...new Set(R.data.map(r=>r[CI.venue]))].filter(Boolean),[]);
+  // 当日CSVの最新開催日（YYYYMMDD最大）。これ未満の開催日の場＝前節記録として区別する。
+  const maxHd = useMemo(()=>{
+    let mx="";
+    for(const r of R.data){ const h=String(r[CI.hd]||""); if(h.length===8 && h>mx) mx=h; }
+    return mx;
+  },[]);
+  // その場の開催日が最新開催日 未満なら「前節記録」。実開催日の実値だけで判定（推測しない）。
+  const isPrevSetsu = (hd) => { const h=String(hd||""); return maxHd && h.length===8 && h<maxHd; };
   const topCount = useMemo(()=>{
     const g={};
     for(const r of R.data){ const v=r[CI.venue]||"その他"; (g[v]=g[v]||[]).push(r); }
@@ -215,7 +223,7 @@ function App(){
         <div key={venue} style={{marginBottom:14,background:"#0d1622",border:"1px solid #16222f",borderRadius:12,overflow:"hidden"}}>
           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,padding:"9px 12px",background:"#132030",borderBottom:"1px solid #1e2d3d"}}>
             <div style={{display:"flex",flexDirection:"column",minWidth:0}}>
-              <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}<E30Badge info={e30For(rows[0][CI.jcd], rows[0][CI.hd])}/><span style={{fontSize:11,fontWeight:600,color:"#7d94a8",marginLeft:8}}>{(()=>{const h=String(rows[0][CI.hd]||"");return h.length===8?`${+h.slice(4,6)}/${+h.slice(6,8)}時点`:"";})()}</span></span>
+              <span style={{fontSize:15,fontWeight:800,color:"#ffd166"}}>{venue}{isPrevSetsu(rows[0][CI.hd])&&<span style={{fontSize:10,fontWeight:700,color:"#9fb0c0",background:"#26333f",border:"1px solid #33475a",borderRadius:3,padding:"1px 6px",marginLeft:6,verticalAlign:"middle"}}>前節記録</span>}<E30Badge info={e30For(rows[0][CI.jcd], rows[0][CI.hd])}/><span style={{fontSize:11,fontWeight:600,color:"#7d94a8",marginLeft:8}}>{(()=>{const h=String(rows[0][CI.hd]||"");return h.length===8?`${+h.slice(4,6)}/${+h.slice(6,8)}時点`:"";})()}</span></span>
               <VenueMetaLine meta={metaFor(rows[0][CI.jcd])}/>
             </div>
             <span style={{fontSize:11,color:"#6b7f95",flex:"none",whiteSpace:"nowrap",paddingTop:2}}>{rows.length}艇　<span style={{color:"#8faabe"}}>モーター2連率 →</span></span>
