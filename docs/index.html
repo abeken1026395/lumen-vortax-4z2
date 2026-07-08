@@ -34,6 +34,17 @@ body {
 }
 .trustbar b { color:#ffd166; font-weight:700; }
 .trustbar .asof { display:inline-block; margin-left:4px; font-size:11px; color:#6b7f95; font-weight:400; letter-spacing:0; }
+.trustbar .metric { cursor:pointer; border-bottom:1px dotted #ffd16688; }
+.trustbar .metric:hover, .trustbar .metric:focus-visible { border-bottom-color:#ffd166; outline:none; }
+.tb-panel { display:grid; grid-template-rows:0fr; transition:grid-template-rows .22s ease; }
+.tb-panel.open { grid-template-rows:1fr; }
+.tb-panel .tb-inner { overflow:hidden; }
+.tb-panel .tb-body { margin-top:12px; padding-top:12px; border-top:1px solid #24384f; text-align:left; font-size:12px; color:#8faabe; line-height:1.7; }
+.tb-panel .tb-body p { margin:0; }
+.tb-panel .tb-list { margin:8px 0; }
+.tb-panel .tb-list p { margin:6px 0; }
+.tb-panel .tb-body b { color:#ffd166; font-weight:700; }
+.tb-panel .tb-foot { margin-top:8px; color:#6b7f95; }
 .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width:100%; max-width: 560px; }
 @media (max-width: 480px){ .grid{ grid-template-columns: 1fr; } .title{ font-size:52px; } }
 .card {
@@ -79,8 +90,19 @@ body {
   <div class="subtitle"><span class="en">boatrace data</span> ─ 競艇を、読む。</div>
 
   <div class="trustbar">
-    波乱の的中はまだ <b id="v-harai">36.1%</b>。それも隠さない。堅め <b id="v-kata">74.8%</b>・主役連対 <b id="v-shu">77.5%</b><br>
+    波乱の的中はまだ <b class="metric" id="v-harai" role="button" tabindex="0" aria-controls="tb-panel" aria-expanded="false">36.1%</b>。それも隠さない。堅め <b class="metric" id="v-kata" role="button" tabindex="0" aria-controls="tb-panel" aria-expanded="false">74.8%</b>・主役連対 <b class="metric" id="v-shu" role="button" tabindex="0" aria-controls="tb-panel" aria-expanded="false">77.5%</b><br>
     ─ <b id="v-total">53,142</b> レースで自己採点継続中。<span class="asof" id="v-asof">（2026/7/5現在）</span>
+    <div class="tb-panel" id="tb-panel">
+      <div class="tb-inner"><div class="tb-body">
+        <p>このサイトは毎朝、全レースを機械的に3つに分類し、夜に結果と答え合わせしています。管理人の予想ではありません。その実測値です。</p>
+        <div class="tb-list">
+          <p><b>堅め的中</b>：「堅め」と分類したレースのうち、実際に本命寄りの決着（3連単5,000円未満）だった割合</p>
+          <p><b>波乱的中</b>：「波乱」と分類したレースのうち、実際に高配当（3連単5,000円以上）が出た割合。まだ3回に1回強しか当たりません</p>
+          <p><b>主役連対</b>：展開の中心と置いた艇が2着以内に入った割合</p>
+        </div>
+        <p class="tb-foot">分類は結果が出る前に保存し、あとから書き換えません。外れも全部残しています。</p>
+      </div></div>
+    </div>
   </div>
 
   <div class="pwa-hint">
@@ -173,6 +195,21 @@ body {
       }
     })
     .catch(function(){ /* 固定値のまま */ });
+})();
+// 信頼バーの注釈パネル開閉（3数値のいずれをタップしても同一パネルをその場で開閉）。
+(function(){
+  var panel = document.getElementById("tb-panel");
+  if(!panel) return;
+  var triggers = ["v-harai","v-kata","v-shu"].map(function(id){ return document.getElementById(id); });
+  function toggle(){
+    var open = panel.classList.toggle("open");
+    triggers.forEach(function(t){ if(t) t.setAttribute("aria-expanded", open ? "true" : "false"); });
+  }
+  triggers.forEach(function(t){
+    if(!t) return;
+    t.addEventListener("click", toggle);
+    t.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); } });
+  });
 })();
 if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("/boatrace/sw.js").catch(function(){}); }); }
 </script>
