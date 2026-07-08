@@ -33,6 +33,12 @@ OUTPUT_DIR = os.path.join("docs", "motor")
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(SCRIPT_DIR, "template.html")
 
+# motors_all.csv の固定列順（累積マージ時の列構成を保証）
+CSV_COLUMNS = [
+    "順位", "登録番号", "選手名", "級別",
+    "モーター番号", "モーター2連対率", "場コード", "場名", "開催日",
+]
+
 JST = datetime.timezone(datetime.timedelta(hours=9))
 
 
@@ -182,15 +188,41 @@ def main():
         time.sleep(0.8)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    csv_path = os.path.join(OUTPUT_DIR, "motors_all.csv")
+
+    def _load_existing():
+        """既存 motors_all.csv を文字列で読む（場コードの桁落ち防止）。無ければ空。"""
+        if os.path.exists(csv_path):
+            old = pd.read_csv(csv_path, encoding="utf-8-sig", dtype=str).fillna("")
+            if "場コード" in old.columns:
+                old["場コード"] = old["場コード"].astype(str).str.zfill(2)
+            return old
+        return pd.DataFrame(columns=CSV_COLUMNS)
 
     if not all_records:
-        print("\nデータを取得できませんでした。")
-        if os.path.exists(os.path.join(OUTPUT_DIR, "index.html")):
+        # 全場取得失敗：既存CSVを一切変更しない（消さない・推測で埋めない）
+        print("\nデータを取得できませんでした。既存CSVを保持します。")
+        if os.path.exists(csv_path) or os.path.exists(os.path.join(OUTPUT_DIR, "index.html")):
             return
+        df = pd.DataFrame(columns=CSV_COLUMNS)
+    else:
+        # 累積マージ：今回取得できた開催場だけ最新へ差し替え、非開催場は前節記録を温存。
+        new_df = pd.DataFrame(all_records)
+        new_df["場コード"] = new_df["場コード"].astype(str).str.zfill(2)
+        fetched_jcds = set(new_df["場コード"].unique())  # 今回実際に取得できた場
+        old_df = _load_existing()
+        # 既存から「今回取得できた場」の古い当節データだけ除去（非開催場の行はそのまま残す）
+        kept = old_df[~old_df["場コード"].isin(fetched_jcds)].copy() if len(old_df) else old_df
+        df = pd.concat([kept, new_df], ignore_index=True)
+        df = df.reindex(columns=CSV_COLUMNS)  # 列構成を固定順に統一
+        # 場コード→モーター番号順で安定ソート（表示側は場内で2連率再ソートするため実害なし）
+        df["__m"] = pd.to_numeric(df["モーター番号"], errors="coerce")
+        df = df.sort_values(["場コード", "__m"], kind="stable").drop(columns="__m").reset_index(drop=True)
+        print("\n累積マージ: 差し替え {} 場 / 温存 {} 場".format(
+            len(fetched_jcds), df["場コード"].nunique() - len(fetched_jcds)))
 
-    df = pd.DataFrame(all_records)
-    df.to_csv(os.path.join(OUTPUT_DIR, "motors_all.csv"), index=False, encoding="utf-8-sig")
-    print("\nCSV保存: {}/motors_all.csv ({}件)".format(OUTPUT_DIR, len(df)))
+    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    print("CSV保存: {}/motors_all.csv ({}件 / {}場)".format(OUTPUT_DIR, len(df), df["場コード"].nunique() if len(df) else 0))
 
     cols = [str(c) for c in df.columns.tolist()]
     data = df.fillna("").values.tolist()
