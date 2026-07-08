@@ -198,21 +198,27 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .navtab.on { color:#0b1219; background:#ffd166; border-color:#ffd166; }
 .navtab:active { background:#182535; }
 .navtab.on:active { background:#e8bd50; }
-/* 今日の運勢（あそび） */
-.fortune { border:1px solid #2a2140; background:linear-gradient(135deg,#171226,#101a26); border-radius:12px; padding:11px 13px; margin:6px 0 4px; }
-.fortune-h { font-size:12px; font-weight:bold; color:#c9b6ff; display:flex; align-items:center; gap:6px; }
-.fortune-tag { font-size:9px; color:#8a7fb0; border:1px solid #3a2f5a; border-radius:8px; padding:0 6px; font-weight:normal; }
-.fortune-body { margin-top:8px; }
-.fortune-stars { font-size:16px; letter-spacing:2px; color:#ffd166; }
-.fortune-msg { font-size:12.5px; color:#e6e0f0; margin-top:5px; line-height:1.6; }
-.fortune-sub { font-size:11px; color:#a99fc4; margin-top:6px; display:flex; gap:12px; flex-wrap:wrap; }
-.fortune-sub b { color:#d8ccf0; }
-.fortune-pick { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-.zbtn { font-size:11px; color:#c9b6ff; background:#141026; border:1px solid #33285a; border-radius:12px; padding:4px 9px; cursor:pointer; }
-.zbtn:active { background:#1e1738; }
-.fortune-link { font-size:11px; color:#c9b6ff; text-decoration:none; }
-.fortune-more { font-size:10px; color:#8a7fb0; margin-top:7px; }
-.fortune-reset { font-size:10px; color:#7a7192; cursor:pointer; text-decoration:underline; margin-left:8px; }
+/* 今日の運勢（あそび）：既定は折りたたみの控えめ表示 */
+.fortune { border:1px solid #1f2b3a; background:#101a26; border-radius:10px; margin:6px 0 4px; }
+.fortune-bar { display:flex; align-items:center; gap:7px; padding:8px 12px; cursor:pointer; font-size:12px; color:#9fb0c3; }
+.fortune-dot { font-size:13px; opacity:.85; }
+.fortune-title { font-weight:bold; color:#b9c4d2; }
+.fortune-tag { font-size:9px; color:#7a7192; border:1px solid #2f2a44; border-radius:8px; padding:0 6px; }
+.fortune-inline { font-size:12px; color:#c8b57a; letter-spacing:1px; }
+.fortune-cta { font-size:11px; color:#8a94a3; }
+.fortune-caret { margin-left:auto; color:#6f7d8c; font-size:11px; }
+.fortune.open .fortune-bar { border-bottom:1px solid #1b2735; }
+.fortune-body, .fortune-pick, .fortune-nopick { padding:0 12px; }
+.fortune-nopick { font-size:12px; color:#9fb0c3; padding-top:8px; }
+.fortune-msg { font-size:12.5px; color:#dfe5ee; padding:9px 12px 0; line-height:1.6; }
+.fortune-sub { font-size:11px; color:#9fb0c3; padding:6px 12px 0; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.fortune-sub b { color:#cdd6e0; }
+.fortune-pick { display:flex; gap:6px; flex-wrap:wrap; padding-top:8px; padding-bottom:2px; }
+.zbtn { font-size:11px; color:#a9b4c4; background:#0d1622; border:1px solid #24344a; border-radius:12px; padding:4px 9px; cursor:pointer; }
+.zbtn:active { background:#182535; }
+.fortune-link { font-size:11px; color:#9db2c9; text-decoration:none; }
+.fortune-more { font-size:10px; color:#6f7d8c; padding:7px 12px 11px; }
+.fortune-reset { font-size:10px; color:#7a828f; cursor:pointer; text-decoration:underline; }
 /* 推し */
 .oshi { border-radius:12px; margin:6px 0 4px; border:1px solid #4a3a10; background:linear-gradient(135deg,#231a0e,#141c26); padding:10px 12px; }
 .oshi-h { font-size:12px; font-weight:bold; color:#ffd166; display:flex; align-items:center; gap:7px; }
@@ -437,31 +443,36 @@ function dailyFortune(sign){
   var shobu=40+((seed>>13)%61);         /* 勝負運 40-100 */
   return {stars:level+1, msg:msg, aisho:aisho, shobu:shobu};
 }
+var FORT_OPEN=lsGet("br_fortune_open",false);
 function buildFortune(){
-  var h='<div class="fortune"><div class="fortune-h">🔮 今日の運勢 <span class="fortune-tag">あそび</span></div>';
-  if(!BR_SIGN){
-    h+='<div class="fortune-msg" style="margin-top:6px">星座をえらぶと、今日の運勢が出ます（毎日変わる）。</div>'
-      +'<div class="fortune-pick">'+ZODIAC.map(function(z){return '<span class="zbtn" data-sign="'+esc(z)+'">'+esc(z)+'</span>';}).join("")+'</div>';
+  var hasSign=!!BR_SIGN, f=hasSign?dailyFortune(BR_SIGN):null;
+  var starsInline=f?("★★★★★".slice(0,f.stars)+"☆☆☆☆☆".slice(0,5-f.stars)):"";
+  var bar='<div class="fortune-bar" id="fortuneToggle">'
+    +'<span class="fortune-dot">🔮</span><span class="fortune-title">今日の運勢</span><span class="fortune-tag">あそび</span>'
+    +(hasSign?'<span class="fortune-inline">'+starsInline+' '+esc(BR_SIGN)+'</span>':'<span class="fortune-cta">タップで占う</span>')
+    +'<span class="fortune-caret">'+(FORT_OPEN?'▴':'▾')+'</span></div>';
+  if(!FORT_OPEN) return '<div class="fortune">'+bar+'</div>';
+  var body='';
+  if(!hasSign){
+    body='<div class="fortune-nopick">星座をえらぶと、今日の運勢が出ます（毎日変わる・あそび）。</div>'
+      +'<div class="fortune-pick">'+ZODIAC.map(function(z){return '<span class="zbtn" data-sign="'+esc(z)+'">'+esc(z)+'</span>';}).join("")+'</div>'
+      +'<div style="height:8px"></div>';
   } else {
-    var f=dailyFortune(BR_SIGN);
-    var stars="★★★★★".slice(0,f.stars)+"☆☆☆☆☆".slice(0,5-f.stars);
-    h+='<div class="fortune-body">'
-      +'<div class="fortune-stars">'+stars+'　<span style="font-size:12px;color:#c9b6ff">'+esc(BR_SIGN)+'</span>'
-      +'<span class="fortune-reset" id="fortuneReset">変更</span></div>'
-      +'<div class="fortune-msg">'+esc(f.msg)+'</div>'
-      +'<div class="fortune-sub"><span>相性運 <b>'+f.aisho+'</b></span><span>勝負運 <b>'+f.shobu+'</b></span></div>'
-      +'<div class="fortune-more">🔮 <a class="fortune-link" href="../uranai/">選手占いでもっと占う →</a>　'
-      +'💞 <a class="fortune-link" href="../shobuun-suminoe/">勝負運ランキング →</a></div>'
-      +'</div>';
+    body='<div class="fortune-msg">'+esc(f.msg)+'</div>'
+      +'<div class="fortune-sub"><span>相性運 <b>'+f.aisho+'</b></span><span>勝負運 <b>'+f.shobu+'</b></span>'
+      +'<span class="fortune-reset" id="fortuneReset">星座変更</span></div>'
+      +'<div class="fortune-more">🔮 <a class="fortune-link" href="../uranai/">選手占いでもっと占う →</a></div>';
   }
-  return h+'</div>';
+  return '<div class="fortune open">'+bar+body+'</div>';
 }
 function wireFortune(app){
+  var tg=app.querySelector("#fortuneToggle");
+  if(tg) tg.onclick=function(){ FORT_OPEN=!FORT_OPEN; lsSet("br_fortune_open",FORT_OPEN); render(); };
   Array.prototype.forEach.call(app.querySelectorAll(".zbtn"),function(el){
-    el.onclick=function(){ BR_SIGN=el.getAttribute("data-sign"); lsSet("br_sign",BR_SIGN); render(); };
+    el.onclick=function(){ BR_SIGN=el.getAttribute("data-sign"); lsSet("br_sign",BR_SIGN); FORT_OPEN=true; lsSet("br_fortune_open",true); render(); };
   });
   var rs=app.querySelector("#fortuneReset");
-  if(rs) rs.onclick=function(){ BR_SIGN=""; lsSet("br_sign",""); render(); };
+  if(rs) rs.onclick=function(e){ e.stopPropagation(); BR_SIGN=""; lsSet("br_sign",""); render(); };
 }
 
 /* 推しの本日パネル */
