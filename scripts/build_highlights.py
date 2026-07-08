@@ -213,8 +213,10 @@ def main():
 
     out_races = []
     pred_list = []
-    for (ba, rc), bo in races.items():
-        if len(bo) != 6: continue
+    # 部分成功許容：1レース(場)分の生成を関数に切り出し、呼び出し側で例外を握る。
+    # 一部の場/レースが壊れても「取れた分だけ」出力し、失敗はログする（全滅時のみ点1の自己検査で非ゼロ）。
+    def _one(ba, rc, bo):
+        if len(bo) != 6: return None
         bo.sort(key=lambda b: int(b['枠']))
         # --- 検証ログ：①総合力 − ④総合力（標準化・等重み）---
         diff = round(total_power(bo[0]) - total_power(bo[3]), 3)
@@ -565,11 +567,11 @@ def main():
         tenkai.append(shime)
 
         # --- 検証ログ（拡張）：対抗・死角・文パターンIDまで保存し、書き方自体を検証可能に ---
-        pred_list.append({'場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
+        pred_entry = {'場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
                           '判定': verdict, '主役艇': hero, 'スコア': diff,
                           '対抗艇': (th2[1]['w'] if len(th2) > 1 else None),
                           '死角艇': skw,
-                          '見出しID': hid, '死角ID': sid, '波及ID': fid, '締めID': cid})
+                          '見出しID': hid, '死角ID': sid, '波及ID': fid, '締めID': cid}
 
         boats = []
         for b in bo:
@@ -588,14 +590,34 @@ def main():
                 'まくりさされ率': y.get('まくりさされ率'), 'イン数': y.get('イン数')
             })
 
-        out_races.append({
+        out_entry = {
             '場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
             '締切時刻': bo[0].get('締切時刻', ''),
             '節名': bo[0].get('節名', ''), '企画名': bo[0].get('企画名', ''),
             '日目': bo[0].get('日目', ''),
             '波乱': seeds, 'イン堅': in_strong, 'モーター使用': use_m, 'イン1着率': it,
             '艇': boats, '見立て': headline, '展開': tenkai, '波及': suji
-        })
+        }
+        return out_entry, pred_entry
+
+    # 呼び出し：場×レース単位に例外を握って「取れた分だけ」蓄積。失敗はログ。
+    failed = []
+    for (ba, rc), bo in races.items():
+        try:
+            _res = _one(ba, rc, bo)
+        except Exception as e:
+            failed.append((ba, rc, repr(e)))
+            continue
+        if _res is None:
+            continue
+        _out, _pred = _res
+        out_races.append(_out)
+        pred_list.append(_pred)
+    if failed:
+        vs = sorted(set(ba for ba, _rc, _e in failed))
+        print("部分成功: {}レースをスキップ（例外を握って継続）／該当場: {}".format(len(failed), '・'.join(vs)))
+        for ba, rc, err in failed[:50]:
+            print("  SKIP {} {} : {}".format(ba, rc, err))
 
     kaisai = rac[0]['開催日'] if rac else ''
     doc = {
