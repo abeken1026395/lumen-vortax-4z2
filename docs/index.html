@@ -137,5 +137,8 @@ body {
     買い目は出しません。判断するのは、あなた。<br>
     毎朝、開催前に数字だけ更新されます。
   </div>
+<script>
+if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("/boatrace/sw.js").catch(function(){}); }); }
+</script>
 </body>
 </html>
