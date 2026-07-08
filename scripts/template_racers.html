@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>本日の出走表 | BOATRACE データポータル</title>
+<title>本日の出走表 | データ攻め</title>
+<link rel="manifest" href="/boatrace/manifest.json">
+<meta name="theme-color" content="#0b1219">
+<link rel="apple-touch-icon" href="/boatrace/icon180.png">
+<link rel="icon" href="/boatrace/icon192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="データ攻め">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#0b1219; color:#e0e6ed; font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',Meiryo,sans-serif; padding-bottom:60px; -webkit-text-size-adjust:100%; }
@@ -232,9 +240,17 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .oshibtn:active { transform:scale(1.3); }
 .boat.oshi-on { border-color:#5a4a1a; box-shadow:0 0 0 1px #5a4a1a inset; }
 .my-row.oshi-row { background:#191408; border:1px solid #4a3a10; }
+/* ホーム画面に追加（PWA導線） */
+.a2hs { max-width:660px; margin:0 auto; padding:9px 12px; display:flex; align-items:center; gap:10px; background:#12233a; border-bottom:1px solid #24344a; font-size:12px; color:#cdd6e0; }
+.a2hs img { width:26px; height:26px; border-radius:6px; flex:none; }
+.a2hs .a2t { flex:1; line-height:1.5; }
+.a2hs .a2t b { color:#ffd166; }
+.a2hs .a2add { flex:none; font-size:12px; font-weight:bold; color:#0b1219; background:#ffd166; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
+.a2hs .a2x { flex:none; font-size:16px; color:#8a94a3; background:none; border:none; cursor:pointer; padding:2px 4px; }
 </style>
 </head>
 <body>
+<div id="a2hs" class="a2hs" hidden></div>
 <div class="wrap">
 <header>
   <h1>本日の出走表</h1>
@@ -911,6 +927,43 @@ function rerender(){ render(); }
 render();
 /* 締切カウントダウンを毎分更新（race画面のみ再描画） */
 setInterval(function(){ if(view.page==="race") render(); }, 30000);
+</script>
+<script>
+/* PWA: Service Worker 登録 ＋「ホーム画面に追加」導線 */
+(function(){
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",function(){ navigator.serviceWorker.register("/boatrace/sw.js").catch(function(){}); });
+  }
+  var el=document.getElementById("a2hs");
+  if(!el) return;
+  function standalone(){ return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone===true; }
+  function dismissed(){ try{ return localStorage.getItem("br_a2hs")==="1"; }catch(e){ return false; } }
+  function dismiss(){ try{ localStorage.setItem("br_a2hs","1"); }catch(e){} el.hidden=true; }
+  if(standalone()||dismissed()) return;
+  var ICON='<img src="/boatrace/icon180.png" alt="">';
+  var deferred=null;
+  window.addEventListener("beforeinstallprompt",function(ev){
+    ev.preventDefault(); deferred=ev;
+    el.innerHTML=ICON+'<div class="a2t"><b>ホーム画面に追加</b>：アプリのように1タップで開けます。</div>'
+      +'<button class="a2add" id="a2add">追加</button><button class="a2x" id="a2x">×</button>';
+    el.hidden=false;
+    document.getElementById("a2x").onclick=dismiss;
+    document.getElementById("a2add").onclick=function(){
+      el.hidden=true; deferred.prompt();
+      deferred.userChoice.finally(function(){ deferred=null; dismiss(); });
+    };
+  });
+  // iOS Safari は beforeinstallprompt が無いので手順を案内
+  var ua=navigator.userAgent||"";
+  var isIOS=/iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+  var isSafari=/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  if(isIOS && isSafari){
+    el.innerHTML=ICON+'<div class="a2t"><b>ホーム画面に追加</b>：共有 <span style="font-size:14px">⬆️</span> →「ホーム画面に追加」でアプリのように使えます。</div>'
+      +'<button class="a2x" id="a2x">×</button>';
+    el.hidden=false;
+    document.getElementById("a2x").onclick=dismiss;
+  }
+})();
 </script>
 </body>
 </html>
