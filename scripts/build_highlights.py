@@ -605,6 +605,16 @@ def main():
         'レース数': len(out_races),
         'レース': out_races
     }
+    # ---- 自己検査(生成前) ----
+    # 出走表が空 / 0レース＝生成失敗。既存 highlights・predictions を壊さず非ゼロ終了する
+    # （上書きゼロ・鉄則厳守）。夜間の翌日分プレビュー(kaisai!=today)は下の日付ガードで正当スキップ。
+    n_races = len(out_races)
+    n_venues = len(set(r.get('場コード') for r in out_races))
+    if not rac or n_races == 0:
+        print("SELFCHECK NG: 出走表{}行 / 生成{}レース ＝ 生成失敗。"
+              "既存 highlights・predictions は保持（上書きせず）".format(len(rac), n_races))
+        sys.exit(3)
+
     # 壁時計（JST）が今日になっている開催日のときだけ当日を書き換える。
     # 出走表が夜に翌日分へ更新されても、当日タブを前倒しで繰り上げない。
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y%m%d')
@@ -631,10 +641,11 @@ def main():
         pass
     with open(OUT, 'w', encoding='utf-8') as fp:
         json.dump(doc, fp, ensure_ascii=False, separators=(',', ':'))
-    print(f"OK: {len(out_races)}レース → {OUT}")
+    print(f"OK: {n_races}レース/{n_venues}場 → {OUT}")
 
     # --- 検証ログ：予測を確定保存（結果を見る前・一度書いたら動かさない）---
     # 公開highlights.jsonには判定/主役艇を入れず、非公開predictions/にだけ残す。
+    pred_written = None
     if pred_list:
         os.makedirs('predictions', exist_ok=True)
         pred_path = os.path.join('predictions', f'{kaisai}.json')
@@ -646,7 +657,32 @@ def main():
                         '予測': pred_list}
             with open(pred_path, 'w', encoding='utf-8') as pf:
                 json.dump(pred_doc, pf, ensure_ascii=False, separators=(',', ':'))
+            pred_written = pred_path
             print(f"PRED: {len(pred_list)}レース → {pred_path}")
+
+    # ---- 自己検査(生成後) ----
+    # 書いたファイルを読み直し、JSONとして開けて中身が空でないことを確認。
+    # 破損/空なら非ゼロ終了して以降(コミット等)を止める。既存predictionsは検査対象外(不変)。
+    try:
+        with open(OUT, encoding='utf-8') as _cf:
+            _c = json.load(_cf)
+        if not (_c.get('レース数', 0) > 0 and _c.get('レース')):
+            raise ValueError("highlights.json のレースが空")
+    except Exception as e:
+        print(f"SELFCHECK NG(生成後): highlights.json 再読込検査に失敗: {e}")
+        sys.exit(4)
+    if pred_written:
+        try:
+            with open(pred_written, encoding='utf-8') as _pf:
+                _p = json.load(_pf)
+            if not _p.get('予測'):
+                raise ValueError("predictions の予測が空")
+        except Exception as e:
+            print(f"SELFCHECK NG(生成後): {pred_written} 再読込検査に失敗: {e}")
+            sys.exit(4)
+    print("SELFCHECK OK: highlights {}レース/{}場, predictions {}".format(
+        n_races, n_venues,
+        f"{len(pred_list)}レース(新規)" if pred_written else "既存保持/対象なし"))
 
 if __name__ == '__main__':
     main()
