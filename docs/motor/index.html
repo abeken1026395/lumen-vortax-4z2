@@ -90,17 +90,19 @@ function MotorRow({row,rk,fem}){
 }
 
 // E30該当場バッジ（生データ・事実提示のみ）。二層：summary=E30／深層=開始日＋出典注記。
-// info は {startDate:"YYYY-MM-DD"} または null。null なら非表示。
+// info は {startDate:"YYYYMMDD"}（8桁）または null。null なら非表示。表示時は YYYY-MM-DD に整形。
 function E30Badge({info}){
   if(!info) return null;
   const stop = e=>e.stopPropagation();
+  const s = String(info.startDate);
+  const disp = s.length===8 ? `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}` : s;
   return (
     <details onClick={stop} style={{display:"inline-block",marginLeft:8,verticalAlign:"middle"}}>
       <summary onClick={stop} style={{listStyle:"none",cursor:"pointer",display:"inline-flex",alignItems:"center"}}>
         <span style={{fontSize:10,fontWeight:800,color:"#0b1219",background:"#8fd6c0",borderRadius:4,padding:"1px 6px"}}>E30</span>
       </summary>
       <div style={{marginTop:6,fontSize:11,lineHeight:1.6,color:"#a9c6dd",background:"#0f1a26",border:"1px solid #24344a",borderRadius:6,padding:"7px 10px",fontWeight:400}}>
-        {`この場はE30該当場（開始 ${info.startDate}）。出典：公式。数値は生データのみ。`}
+        {`この場はE30該当場（開始 ${disp}）。出典：公式。数値は生データのみ。`}
       </div>
     </details>
   );
@@ -111,13 +113,14 @@ function App(){
   const [q,setQ]=useState("");
   const [showHelp,setShowHelp]=useState(false);
   const [females,setFemales]=useState(null);
-  const [e30map,setE30map]=useState(null);  // jcd(2桁) -> {startDate:"YYYY-MM-DD"}
+  const [e30map,setE30map]=useState(null);  // jcd(2桁) -> {startDate:"YYYYMMDD"}（8桁）
   useEffect(()=>{
     fetch("../players/female.json").then(r=>r.ok?r.json():Promise.reject())
       .then(a=>{ if(Array.isArray(a)) setFemales(new Set(a.map(String))); }).catch(()=>{});
-    // e30Schedule.json はリポジトリルート配置（docs/motor/index.html 基準で ../../）
-    fetch("../../e30Schedule.json").then(r=>r.ok?r.json():Promise.reject())
-      .then(j=>{ if(j&&Array.isArray(j.venues)){ const m={}; for(const v of j.venues){ if(v&&v.jcd&&v.startDate) m[String(v.jcd).padStart(2,"0")]={startDate:v.startDate}; } setE30map(m); } }).catch(()=>{});
+    // E30該当場は Pages 配信済みの docs/data/e30PlayerStats.json の「対象場」を参照
+    //（docs/motor/index.html 基準で ../data/。ルート直下の e30Schedule.json は Pages 非公開のため使わない）
+    fetch("../data/e30PlayerStats.json").then(r=>r.ok?r.json():Promise.reject())
+      .then(j=>{ const tv=j&&j["対象場"]; if(tv&&typeof tv==="object"){ const m={}; for(const k in tv){ const v=tv[k]; if(v&&v["E30開始日"]) m[String(k).padStart(2,"0")]={startDate:String(v["E30開始日"])}; } setE30map(m); } }).catch(()=>{});
   },[]);
 
   // 該当場かつ開催日が開始日以降のときのみバッジ情報を返す（開始日前は除外・照合はjcd基準）。
@@ -125,7 +128,7 @@ function App(){
     if(!e30map) return null;
     const info = e30map[String(jcd||"").padStart(2,"0")];
     if(!info) return null;
-    const start = String(info.startDate).replace(/-/g,"");
+    const start = String(info.startDate);  // 8桁 YYYYMMDD
     if(String(hd||"") < start) return null;  // 開始日前除外
     return info;
   };
