@@ -140,8 +140,12 @@ def main():
     if hd_env:
         days = [x.strip() for x in hd_env.replace("\u3001", ",").split(",") if x.strip()]
     else:
-        today = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
-        days = [today.date().strftime("%Y%m%d")]
+        # \u76f4\u8fd1N\u65e5\u306e\u7a93\uff08\u65e2\u5b9a3\uff09\u3067\u53d6\u5f97\u3002GitHub Actions\u306e\u30b9\u30b1\u30b8\u30e5\u30fc\u30eb\u9045\u5ef6\u3067\u767a\u706b\u304c
+        # JST\u65e9\u671d\u306b\u305a\u308c\u8fbc\u307f\u300c\u5f53\u65e5\u306e\u307f\u300d\u3060\u3068\u7d42\u4e86\u76f4\u5f8c\u306e\u65e5\u3092\u90e8\u5206\u53d6\u5f97\u306e\u307e\u307e\u53d6\u308a\u3053\u307c\u3059\u554f\u984c\u3078\u306e\u5bfe\u7b56\u3002
+        # \u30df\u30e9\u30fc\u306f\u78ba\u5b9a\u65e5\u306e\u5168\u7d50\u679c\u3092\u6301\u3064\u305f\u3081\u3001\u518d\u53d6\u5f97\u306f\u51aa\u7b49\uff08\u540c\u4e00\u30c7\u30fc\u30bf\u3067\u4e0a\u66f8\u304d\uff09\u3002
+        win = max(1, int(os.environ.get("RESULTS_WINDOW", "3")))
+        today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).date()
+        days = [(today - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(win)]
 
     for hd in days:
         data = fetch_json(hd)

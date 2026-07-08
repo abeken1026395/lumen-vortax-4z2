@@ -17,8 +17,13 @@ LOG = "verify_log.csv"
 def load(path):
     if not os.path.exists(path):
         return None
-    with io.open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with io.open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        # 破損JSON（例: 衝突マーカー混入）でも全体を落とさず、その日をスキップ。
+        print("load失敗(スキップ):", path, e)
+        return None
 
 
 def main():
@@ -26,7 +31,12 @@ def main():
     if hd_env:
         days = [x.strip() for x in hd_env.replace("、", ",").split(",") if x.strip()]
     else:
-        days = [(datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y%m%d")]
+        # 直近N日の窓（既定3）を照合。スケジュール遅延で発火がJST早朝にずれ込み
+        # 「当日のみ」だと終了済みの日を照合し損ねる問題への対策。
+        # 追記は (日付,場,レース) で重複排除＝冪等。予測or結果が無い日は自動スキップ。
+        win = max(1, int(os.environ.get("VERIFY_WINDOW", "3")))
+        today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).date()
+        days = [(today - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(win)]
     for hd in days:
         verify_one(hd)
 
