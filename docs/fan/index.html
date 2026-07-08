@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>場文化コレクション｜BGM・予想屋・アナ</title>
+<meta name="description" content="24場の締切BGM・場内予想屋・実況アナ。買い目も勝敗も出さない、競艇場の“文化”を横断で読むファン向けコレクション。">
+<meta name="theme-color" content="#0b1219">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#0b1219; font-family:'Helvetica Neue',Arial,sans-serif; color:#e0e6ed; }</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo, useEffect } = React;
+
+const PSYCH = { "gap":{label:"射幸心×童謡",c:"#ffd166"}, "nostalgia":{label:"郷愁",c:"#7fe0a0"}, "tension":{label:"緊張・高揚",c:"#f85149"}, "local-pride":{label:"ご当地",c:"#58a6ff"}, "mystery":{label:"ミステリー",c:"#a371f7"}, "class":{label:"格調",c:"#e59ac9"} };
+const STATUS_LABEL = { "none":"締切BGMなし", "unknown":"曲名は未特定", "page_exists":"公式ページに記載あり（曲名は未確認）" };
+const PRESENT = { "yes":{label:"場立ちあり",c:"#3fb950"}, "official":{label:"公式記載",c:"#58a6ff"}, "advisor":{label:"解説アドバイザー",c:"#a371f7"}, "paper":{label:"予想紙",c:"#d29922"}, "unknown":{label:"未確認",c:"#6b7f95"} };
+
+function Tab({id, cur, set, children, c}) {
+  const on = cur === id;
+  return (
+    <button onClick={()=>set(id)} style={{
+      flex:1, minWidth:100, padding:"9px 10px", cursor:"pointer",
+      background: on ? c+"22" : "#111d2b", color: on ? c : "#8faabe",
+      border:"1px solid "+(on ? c : "#1e2d3d"), borderRadius:8, fontSize:13, fontWeight:800
+    }}>{children}</button>
+  );
+}
+
+function BgmSection({data}) {
+  const [open, setOpen] = useState(null);
+  const [intro, setIntro] = useState(false);
+  const [pf, setPf] = useState("ALL");
+  const col = data.column;
+  const codes = Object.keys(data.venues).sort();
+  const psychs = useMemo(() => [...new Set(codes.map(c=>data.venues[c].psych).filter(Boolean))], [data]);
+  const filtered = codes.filter(c => pf === "ALL" || data.venues[c].psych === pf);
+
+  return (
+    <div>
+      {col && (
+      <div style={{marginBottom:12,background:"#1a1222",border:"1px solid #4a2f5a",borderRadius:10,padding:"11px 13px"}}>
+        <div onClick={()=>setIntro(!intro)} style={{display:"flex",alignItems:"center",cursor:"pointer",gap:8}}>
+          <span style={{fontSize:14,fontWeight:800,color:"#e59ac9"}}>🎵 {col.title}</span>
+          <span style={{marginLeft:"auto",fontSize:11,color:"#c98fd0"}}>{intro?"▲ 閉じる":"▼ 読む"}</span>
+        </div>
+        <div style={{fontSize:12,color:"#d8c5e0",lineHeight:1.7,marginTop:6}}>{col.lead}</div>
+        {intro && (
+        <div style={{marginTop:8}}>
+          {(col.angles||[]).map((a,i)=>(
+            <div key={i} style={{marginBottom:6,paddingLeft:8,borderLeft:"2px solid "+((PSYCH[a.key]&&PSYCH[a.key].c)||"#a371f7")}}>
+              <span style={{fontSize:12,fontWeight:700,color:(PSYCH[a.key]&&PSYCH[a.key].c)||"#c9a8ff"}}>{a.label}</span>
+              <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{a.text}</div>
+            </div>
+          ))}
+          {data.common && data.common.fanfare && (
+          <div style={{marginTop:8,background:"#0f1a26",border:"1px solid #2a3d52",borderRadius:8,padding:"8px 10px"}}>
+            <div style={{fontSize:12,fontWeight:700,color:"#e59ac9",marginBottom:3}}>🎺 ピットアウトのファンファーレ（全国共通）</div>
+            {data.common.fanfare.hook && <div style={{fontSize:12,color:"#e6d0ee",lineHeight:1.7,marginBottom:5}}>{data.common.fanfare.hook}</div>}
+            <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{data.common.fanfare.note}</div>
+            <div style={{fontSize:11,color:"#9a8db0",lineHeight:1.6,marginTop:4}}>作曲：{(data.common.fanfare.composers||[]).join(" ／ ")}</div>
+            <div style={{fontSize:11,color:"#9a8db0",lineHeight:1.6}}>{data.common.fanfare.history}</div>
+          </div>
+          )}
+          {col.disclaimer && <div style={{marginTop:6,fontSize:10.5,color:"#8a7d9a",lineHeight:1.5}}>※ {col.disclaimer}</div>}
+        </div>
+        )}
+      </div>
+      )}
+
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
+        <button onClick={()=>setPf("ALL")} style={{padding:"5px 11px",cursor:"pointer",background:pf==="ALL"?"#e59ac922":"#111d2b",color:pf==="ALL"?"#e59ac9":"#8faabe",border:"1px solid "+(pf==="ALL"?"#e59ac9":"#1e2d3d"),borderRadius:999,fontSize:12,fontWeight:700}}>すべて</button>
+        {psychs.map(k=>(
+          <button key={k} onClick={()=>setPf(k)} style={{padding:"5px 11px",cursor:"pointer",background:pf===k?PSYCH[k].c+"22":"#111d2b",color:pf===k?PSYCH[k].c:"#8faabe",border:"1px solid "+(pf===k?PSYCH[k].c:"#1e2d3d"),borderRadius:999,fontSize:12,fontWeight:700}}>{PSYCH[k]?PSYCH[k].label:k}</button>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gap:8}}>
+        {filtered.map(code => {
+          const bg = data.venues[code];
+          const songs = bg.songs || [];
+          const ps = bg.psych && PSYCH[bg.psych];
+          const isOpen = open === code;
+          return (
+            <div key={code} onClick={()=>setOpen(isOpen?null:code)} style={{background:"#1a1222",border:"1px solid #3a2748",borderRadius:10,padding:"11px 13px",cursor:"pointer"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <span style={{fontSize:11,fontWeight:700,color:"#a880b0",background:"#0b1219",border:"1px solid #4a2f5a",borderRadius:6,padding:"2px 7px",minWidth:30,textAlign:"center"}}>{parseInt(code,10)}</span>
+                <span style={{fontSize:16,fontWeight:800,color:"#f0d8f6",minWidth:54}}>{bg.name}</span>
+                {ps && <span style={{fontSize:10,fontWeight:700,color:ps.c,background:ps.c+"18",border:"1px solid "+ps.c+"66",borderRadius:5,padding:"1px 6px"}}>{ps.label}</span>}
+                <span style={{fontSize:11,color:"#a880b0"}}>{songs.length?songs.length+"曲":(STATUS_LABEL[bg.status]||"")}</span>
+                <span style={{marginLeft:"auto",fontSize:11,color:"#c98fd0"}}>{isOpen?"▲":"▼"}</span>
+              </div>
+              {bg.hook && <div style={{fontSize:12.5,color:"#e6d0ee",lineHeight:1.7,marginTop:6,fontStyle:"italic"}}>{bg.hook}</div>}
+              {isOpen && (
+              <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid #3a2748"}}>
+                {songs.map((sg,i)=>{
+                  const off = sg.confirmed==="official";
+                  return (
+                  <div key={i} style={{marginBottom:6,paddingLeft:8,borderLeft:"2px solid #4a2f5a"}}>
+                    <span style={{color:"#f0d8f6",fontWeight:700}}>{sg.title}</span>
+                    {sg.artist && <span style={{fontSize:11,color:"#b090b8"}}>（{sg.artist}）</span>}
+                    {sg.type && <span style={{marginLeft:6,fontSize:10,color:"#9fb5c9",background:"#0b1219",border:"1px solid #2a3d52",borderRadius:5,padding:"1px 5px"}}>{sg.type}</span>}
+                    <span style={{marginLeft:6,fontSize:10,fontWeight:700,color:off?"#3fb950":"#d29922",background:(off?"#3fb950":"#d29922")+"18",border:"1px solid "+(off?"#3fb950":"#d29922")+"66",borderRadius:5,padding:"1px 6px"}}>{off?"公式確認":"諸説あり"}</span>
+                    {sg.source && <a href={sg.source} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} style={{marginLeft:6,fontSize:11,color:"#c98fd0"}}>出典→</a>}
+                    {sg.listen && <a href={sg.listen.url} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} title={sg.listen.kind==="official"?"公式が配信/配布する音源":"原曲そのものの検索（場の音源そのものとは限りません）"} style={{marginLeft:6,fontSize:11,fontWeight:700,color:sg.listen.kind==="official"?"#7fe0a0":"#9fb5c9"}}>{sg.listen.kind==="official"?"▶ 公式音源":"🔍 原曲(参考)"}</a>}
+                  </div>
+                  );
+                })}
+                {songs.length===0 && bg.note && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{bg.note}</div>}
+                <div style={{marginTop:4,fontSize:10.5,color:"#8a7d9a",lineHeight:1.5}}>「諸説あり」は二次ソース（ファンメディア等）での言及で公式未確認。「🔍原曲(参考)」は原曲そのものの検索で、場で流れるアレンジ/音源そのものとは限りません。曲名・心理の話は読み物であり、断定・買い目ではありません。{songs[0]&&songs[0].checked?"（確認 "+songs[0].checked+"）":""}</div>
+              </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function YosouyaSection({data}) {
+  const [open, setOpen] = useState(null);
+  const [intro, setIntro] = useState(false);
+  const [pf, setPf] = useState("ALL");
+  const it = data.intro;
+  const codes = Object.keys(data.venues).sort();
+  const present = ["yes","official","advisor","paper"];
+  const filtered = codes.filter(c => {
+    const p = data.venues[c].present;
+    if (pf === "ALL") return true;
+    if (pf === "unknown") return !present.includes(p);
+    return p === pf;
+  });
+
+  return (
+    <div>
+      {it && (
+      <div style={{marginBottom:12,background:"#221a12",border:"1px solid #4a3a26",borderRadius:10,padding:"11px 13px"}}>
+        <div onClick={()=>setIntro(!intro)} style={{display:"flex",alignItems:"center",cursor:"pointer",gap:8}}>
+          <span style={{fontSize:14,fontWeight:800,color:"#d9b382"}}>🎫 {it.title}</span>
+          <span style={{marginLeft:"auto",fontSize:11,color:"#c9a870"}}>{intro?"▲ 閉じる":"▼ 読む"}</span>
+        </div>
+        <div style={{fontSize:12,color:"#ecd9b8",lineHeight:1.7,marginTop:6}}>{it.lead}</div>
+        {intro && (
+        <div style={{marginTop:8}}>
+          {it.note_absent && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.7,background:"#1a140c",border:"1px solid #3a2f1a",borderRadius:8,padding:"8px 10px"}}>{it.note_absent}</div>}
+          {it.disclaimer && <div style={{marginTop:6,fontSize:10.5,color:"#8a7d6a",lineHeight:1.5}}>※ {it.disclaimer}</div>}
+        </div>
+        )}
+      </div>
+      )}
+
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
+        {[["ALL","すべて","#d9b382"],["yes",PRESENT.yes.label,PRESENT.yes.c],["official",PRESENT.official.label,PRESENT.official.c],["advisor",PRESENT.advisor.label,PRESENT.advisor.c],["paper",PRESENT.paper.label,PRESENT.paper.c],["unknown",PRESENT.unknown.label,PRESENT.unknown.c]].map(([k,lb,c])=>(
+          <button key={k} onClick={()=>setPf(k)} style={{padding:"5px 11px",cursor:"pointer",background:pf===k?c+"22":"#111d2b",color:pf===k?c:"#8faabe",border:"1px solid "+(pf===k?c:"#1e2d3d"),borderRadius:999,fontSize:12,fontWeight:700}}>{lb}</button>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gap:8}}>
+        {filtered.map(code => {
+          const y = data.venues[code];
+          const pr = PRESENT[y.present] || PRESENT.unknown;
+          const off = y.confirmed==="official";
+          const hasDetail = ["yes","official","advisor","paper"].includes(y.present);
+          const isOpen = open === code;
+          return (
+            <div key={code} onClick={()=>hasDetail&&setOpen(isOpen?null:code)} style={{background:"#221a12",border:"1px solid "+(hasDetail?"#4a3a26":"#2a2418"),borderRadius:10,padding:"11px 13px",cursor:hasDetail?"pointer":"default",opacity:hasDetail?1:0.72}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <span style={{fontSize:11,fontWeight:700,color:"#b39a78",background:"#0b1219",border:"1px solid #4a3a26",borderRadius:6,padding:"2px 7px",minWidth:30,textAlign:"center"}}>{parseInt(code,10)}</span>
+                <span style={{fontSize:16,fontWeight:800,color:"#ecd9b8",minWidth:54}}>{y.name}</span>
+                <span style={{fontSize:10,fontWeight:700,color:pr.c,background:pr.c+"18",border:"1px solid "+pr.c+"66",borderRadius:5,padding:"1px 6px"}}>{pr.label}</span>
+                {y.count && <span style={{fontSize:11,color:"#b39a78"}}>{y.count}</span>}
+                {hasDetail && <span style={{marginLeft:"auto",fontSize:11,color:"#d9b382"}}>{isOpen?"▲":"▼"}</span>}
+              </div>
+              {y.hook && <div style={{fontSize:12.5,color:"#ecd9b8",lineHeight:1.7,marginTop:6,fontStyle:"italic"}}>{y.hook}</div>}
+              {!hasDetail && y.note && <div style={{fontSize:12,color:"#a89878",lineHeight:1.6,marginTop:5}}>{y.note}</div>}
+              {isOpen && hasDetail && (
+              <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid #4a3a26"}}>
+                {y.people && y.people.length>0 && (
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:6}}>
+                  {y.people.map((p,i)=>(
+                    <span key={i} title={p.note||""} style={{fontSize:12,background:"#0b1219",border:"1px solid #4a3a26",borderRadius:6,padding:"3px 9px",color:"#ecd9b8"}}>
+                      {p.name}{p.kind?<span style={{fontSize:10,color:"#b39a78"}}>（{p.kind}）</span>:null}
+                    </span>
+                  ))}
+                </div>
+                )}
+                {y.people && y.people.length>0 && y.people.some(p=>p.note) && (
+                <div style={{marginBottom:6}}>
+                  {y.people.filter(p=>p.note).map((p,i)=>(
+                    <div key={i} style={{marginBottom:4,paddingLeft:8,borderLeft:"2px solid #4a3a26"}}>
+                      <span style={{fontSize:12,fontWeight:700,color:"#f0e0c0"}}>{p.name}</span>
+                      <span style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>　{p.note}</span>
+                    </div>
+                  ))}
+                </div>
+                )}
+                {(y.count||y.fee) && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{y.count?"在籍："+y.count:""}{y.count&&y.fee?"／":""}{y.fee?"料金："+y.fee:""}</div>}
+                {y.note && <div style={{fontSize:12,color:"#c5d2e0",lineHeight:1.6}}>{y.note}</div>}
+                <div style={{marginTop:4}}>
+                  <span style={{fontSize:10,fontWeight:700,color:off?"#3fb950":"#d29922",background:(off?"#3fb950":"#d29922")+"18",border:"1px solid "+(off?"#3fb950":"#d29922")+"66",borderRadius:5,padding:"1px 6px"}}>{off?"公式記載":"諸説あり"}</span>
+                  {y.source && <a href={y.source} target="_blank" rel="noopener" onClick={e=>e.stopPropagation()} style={{marginLeft:6,fontSize:11,color:"#d9b382"}}>出典→</a>}
+                </div>
+                <div style={{marginTop:4,fontSize:10.5,color:"#8a7d6a",lineHeight:1.5}}>予想屋の“存在・屋号・文化”の紹介で、買い目・的中は載せません（保証もしません）。在籍・料金・顔ぶれは変動します。{y.checked?"（確認 "+y.checked+"）":""}</div>
+              </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [tab, setTab] = useState("bgm");
+  const [fanfare, setFanfare] = useState(undefined);
+  const [yosouya, setYosouya] = useState(undefined);
+
+  useEffect(() => {
+    fetch("../data/fanfareBgm.json?v=" + Date.now()).then(r=>r.json()).then(setFanfare).catch(()=>setFanfare(null));
+    fetch("../data/yosouya.json?v=" + Date.now()).then(r=>r.json()).then(setYosouya).catch(()=>setYosouya(null));
+  }, []);
+
+  return (
+    <div style={{minHeight:"100vh",padding:"12px",maxWidth:900,margin:"0 auto"}}>
+      <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:4,flexWrap:"wrap"}}>
+        <span style={{fontSize:20,fontWeight:800,color:"#e59ac9"}}>場文化コレクション</span>
+        <a href="../" style={{marginLeft:"auto",fontSize:12,fontWeight:700,color:"#8faabe",background:"#111d2b",border:"1px solid #24384f",borderRadius:999,padding:"4px 10px",textDecoration:"none",whiteSpace:"nowrap"}}>← トップ</a>
+      </div>
+      <div style={{fontSize:11.5,color:"#8faabe",marginBottom:12,lineHeight:1.6}}>締切BGM、場立ち予想屋、実況アナ——数字には出ない“場の文化”を24場横断で。買い目・勝敗・的中は出しません。</div>
+
+      <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+        <Tab id="bgm" cur={tab} set={setTab} c="#e59ac9">🎵 場内BGM・締切曲</Tab>
+        <Tab id="yosouya" cur={tab} set={setTab} c="#d9b382">🎫 場内予想屋</Tab>
+        <a href="../announcers/" style={{flex:1,minWidth:100,padding:"9px 10px",display:"flex",alignItems:"center",justifyContent:"center",textDecoration:"none",background:"#111d2b",color:"#3fb56b",border:"1px solid #1e2d3d",borderRadius:8,fontSize:13,fontWeight:800}}>🎙 実況アナ図鑑 →</a>
+      </div>
+
+      {tab==="bgm" && (
+        fanfare===undefined ? <Loading/> : fanfare ? <BgmSection data={fanfare}/> : <Err/>
+      )}
+      {tab==="yosouya" && (
+        yosouya===undefined ? <Loading/> : yosouya ? <YosouyaSection data={yosouya}/> : <Err/>
+      )}
+
+      <div style={{marginTop:14,background:"#111d2b",border:"1px solid #24384f",borderRadius:10,padding:"10px 12px"}}>
+        <div style={{fontSize:12,color:"#8faabe",lineHeight:1.6}}>各場の水面特性・グルメ・アナと合わせて読むなら</div>
+        <div style={{marginTop:6,display:"flex",gap:10,flexWrap:"wrap"}}>
+          <a href="../stadium/" style={{fontSize:12,fontWeight:700,color:"#f0883e",textDecoration:"none",borderBottom:"1px dotted #f0883e88"}}>🌊 24場特性＆場グルメ →</a>
+          <a href="../announcers/" style={{fontSize:12,fontWeight:700,color:"#3fb56b",textDecoration:"none",borderBottom:"1px dotted #3fb56b88"}}>🎙 実況アナ図鑑 →</a>
+        </div>
+      </div>
+
+      <div style={{fontSize:11,color:"#4a6070",marginTop:14,lineHeight:1.6}}>
+        ※ 本ページは競艇場の“文化・雰囲気”を紹介する読み物です。曲名・屋号は公式未確認のもの（諸説あり・出典明記）を含みます。心理の話は一般論・俗説を含み、効果には個人差があります。在籍・料金・顔ぶれ・曲は変動します。買い目・確率・勝敗の断定は一切しません。
+      </div>
+    </div>
+  );
+}
+
+function Loading(){ return <div style={{padding:"30px 0",textAlign:"center",fontSize:13,color:"#6b7f95"}}>読み込み中…</div>; }
+function Err(){ return <div style={{padding:"30px 0",textAlign:"center",fontSize:13,color:"#f85149"}}>データを読み込めませんでした。時間をおいて再度お試しください。</div>; }
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script></body></html>
