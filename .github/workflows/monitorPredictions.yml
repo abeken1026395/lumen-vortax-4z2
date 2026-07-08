@@ -1,0 +1,54 @@
+name: predictions 昼の監視
+
+# 絶対防衛 2/4。JST昼に当日predictionsの存在・妥当性を検査し、
+# 欠落時は「当日に限り」再生成を試行（生成は無い場合のみ＝既存に触れない）。
+# 日をまたいだ欠番は対象外・埋め戻し禁止。再生成不可なら欠番記録のみ。
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # JST 12:00
+    - cron: "0 6 * * *"   # JST 15:00（締切前の再チェック）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: boatrace-highlights   # update_highlights と同一グループで生成の同時実行を避ける
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 当日predictionsを監視・当日に限り再生成
+        run: python scripts/monitorPredictions.py
+
+      - name: commit and push
+        if: always()
+        env:
+          BR: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add predictions/ docs/highlights/ predictions_gaps.csv 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "no changes"; exit 0
+          fi
+          git commit -m "monitor: predictions 昼の監視（当日救済/欠番記録）"
+          # 生成物のタイムスタンプ差による衝突は commit先取り＋rebase(ours優先)で解消（マーカー混入を防ぐ）
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            if git rebase -X theirs "origin/$BR"; then
+              if git push origin "HEAD:$BR"; then echo "pushed (try $i)"; exit 0; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $(( (RANDOM % 6) + 3 ))
+          done
+          echo "push retries exhausted"; exit 1
