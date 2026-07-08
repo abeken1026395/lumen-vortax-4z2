@@ -66,6 +66,11 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .chip-arare-中 { border-color:#5a4a1a; color:#ffd166; }
 .chip-arare-低 { border-color:#1e5c38; color:#7fe0a0; }
 .chip-fix { border-color:#3a4d63; color:#cdd6e0; }
+/* ファン化：見どころへの導線チップ */
+.chip-link { border-color:#4a370f; color:#ffd166; text-decoration:none; background:rgba(255,209,102,.06); }
+/* ファン化：読む派の一言 */
+.reader-line { font-size:11px; color:#8a94a3; margin-top:2px; }
+.reader-line b { color:#cdd6e0; font-weight:600; }
 /* 企画レース（進入固定/A級系/選抜）＝teal。事実の当日判定・生名称由来 */
 .chip-plan { border-color:#2f5d55; color:#7fe0c8; background:rgba(127,224,200,.06); }
 /* 節ステージ（準優勝戦/優勝戦）＝gold。企画系と区分を分け「企画」と誤読させない */
@@ -268,6 +273,7 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 <header>
   <h1>本日の出走表</h1>
   <div class="sub" id="updated"></div>
+  <div class="reader-line"><b>読む派</b>のための出走表。予想は載せない、数字だけ。</div>
 </header>
 <nav class="navtabs">
   <a class="navtab on">🏁 出走表</a>
@@ -856,6 +862,7 @@ function renderRace(app,crumb,v){
   if(venueIsFix) chips.push('<span class="chip chip-fix">進入固定</span>');
   kikakuChips(rc.kikaku, venueIsFix).forEach(function(c){ chips.push(c); });
   if(wd) chips.push('<span class="chip">風 <b>'+esc(windArrow(wd.dir)+" "+wd.dir)+'</b> '+esc(wd.wind)+'m</span>');
+  if(hl) chips.push('<a class="chip chip-link" href="../highlights/">📖 見立てを読む</a>');
   if(chips.length) html+='<div class="chips">'+chips.join("")+'</div>';
 
   /* 荒れ要因 */
