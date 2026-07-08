@@ -521,6 +521,33 @@ def main():
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
     print("\nCSV保存: {}/racers_today.csv ({}件)".format(OUTPUT_DIR, len(df)))
 
+    # 場メタJSON（jcd→節名・企画名・日目）を docs/data/venueMeta.json に出力（方式B）。
+    # モーターページが実行順に非依存で参照するための軽量JSON。追記のみで、
+    # 既存のCSV出力・index.html生成・重複排除・ソートには一切影響しない。
+    try:
+        meta_venues = {}
+        if len(df) > 0 and "場コード" in df.columns:
+            for jcd, grp in df.groupby(df["場コード"].astype(str)):
+                first = grp.iloc[0]  # 場内で節名・日目は共通のため先頭行から取る
+                meta_venues[str(jcd).zfill(2)] = {
+                    "場名": str(first.get("場名", "") or ""),
+                    "開催日": str(first.get("開催日", "") or ""),
+                    "節名": str(first.get("節名", "") or ""),
+                    "企画名": str(first.get("企画名", "") or ""),
+                    "日目": str(first.get("日目", "") or ""),
+                }
+        meta_dir = os.path.join("docs", "data")
+        os.makedirs(meta_dir, exist_ok=True)
+        meta = {
+            "updated": datetime.datetime.now(JST).strftime("%Y-%m-%d %H:%M"),
+            "venues": meta_venues,
+        }
+        with open(os.path.join(meta_dir, "venueMeta.json"), "w", encoding="utf-8") as f:
+            json.dump(meta, f, ensure_ascii=False, indent=2)
+        print("場メタ保存: {}/venueMeta.json ({}場)".format(meta_dir, len(meta_venues)))
+    except Exception as e:
+        print("venueMeta生成スキップ:", e)
+
     cols = [str(c) for c in df.columns.tolist()]
     data = df.fillna("").values.tolist()
     updated = datetime.datetime.now(JST).strftime("%Y-%m-%d %H:%M")
