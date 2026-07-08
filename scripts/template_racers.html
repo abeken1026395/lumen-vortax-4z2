@@ -66,6 +66,10 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .chip-arare-中 { border-color:#5a4a1a; color:#ffd166; }
 .chip-arare-低 { border-color:#1e5c38; color:#7fe0a0; }
 .chip-fix { border-color:#3a4d63; color:#cdd6e0; }
+/* 企画レース（進入固定/A級系/選抜）＝teal。事実の当日判定・生名称由来 */
+.chip-plan { border-color:#2f5d55; color:#7fe0c8; background:rgba(127,224,200,.06); }
+/* 節ステージ（準優勝戦/優勝戦）＝gold。企画系と区分を分け「企画」と誤読させない */
+.chip-stage { border-color:#6a5320; color:#ffd166; background:rgba(255,209,102,.06); }
 
 /* パネル */
 .panel { border-radius:10px; padding:10px 12px; margin-top:8px; font-size:12px; line-height:1.7; }
@@ -733,6 +737,21 @@ function kinMotorLine(row){
     +'<span class="km-tsu">／通算2連率 '+fmtPct(tsu)+'</span></div>';
 }
 
+/* 企画レースの当日判定（企画名文字列のキーワードのみ・保守的）。
+   企画系(進入固定/A級系/選抜)=teal、節ステージ(準優/優勝戦)=gold で区分を分ける。
+   場別マーケ名(エイトビート等)は名称から形式を判定できないため型バッジを付けない（誤情報回避）。 */
+function kikakuChips(kikaku, venueIsFix){
+  var s=String(kikaku||""); var out=[];
+  // 企画系（teal）
+  if(/進入固定/.test(s) && !venueIsFix) out.push('<span class="chip chip-plan">進入固定</span>');
+  if(/Ａ級|A級|三Ａ|３Ａ/.test(s))       out.push('<span class="chip chip-plan">A級系</span>');
+  if(/選抜/.test(s))                      out.push('<span class="chip chip-plan">選抜</span>');
+  // 節ステージ（gold・企画とは別区分）。準優勝戦は「優勝戦」を含むため先に判定。
+  if(/準優/.test(s))          out.push('<span class="chip chip-stage">準優勝戦</span>');
+  else if(/優勝戦/.test(s))   out.push('<span class="chip chip-stage">優勝戦</span>');
+  return out;
+}
+
 /* E30該当場成績（この場がE30該当場のときのみ・事実の生データ・二層表示） */
 var E30_TECH=["逃げ","差し","まくり","まくり差し","抜き","恵まれ"];
 function e30Block(toban,jcd){
@@ -828,7 +847,9 @@ function renderRace(app,crumb,v){
   if(ar) chips.push('<span class="chip chip-arare-'+esc(ar.level)+'">荒れ <b>'+esc(ar.level)+'</b> '+esc(ar.score)+'/'+esc((arare&&arare.max_score)||"-")+'</span>');
   if(hl&&hl.in1!=null) chips.push('<span class="chip">イン1着率 <b>'+esc(hl.in1)+'%</b></span>');
   if(hl&&hl.haran!=null) chips.push('<span class="chip">波乱度 <b>'+esc(hl.haran)+'</b></span>');
-  if(HL_META.fix.indexOf(v.name)>=0) chips.push('<span class="chip chip-fix">進入固定</span>');
+  var venueIsFix=HL_META.fix.indexOf(v.name)>=0;
+  if(venueIsFix) chips.push('<span class="chip chip-fix">進入固定</span>');
+  kikakuChips(rc.kikaku, venueIsFix).forEach(function(c){ chips.push(c); });
   if(wd) chips.push('<span class="chip">風 <b>'+esc(windArrow(wd.dir)+" "+wd.dir)+'</b> '+esc(wd.wind)+'m</span>');
   if(chips.length) html+='<div class="chips">'+chips.join("")+'</div>';
 
