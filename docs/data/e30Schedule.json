@@ -1,0 +1,15 @@
+{
+  "note": "E30該当期間の場別開始日（確定10場・公式出典）。startDate(YYYY-MM-DD)以降・該当場のみ集計対象。推測ゼロ。",
+  "venues": [
+    {"jcd": "03", "name": "江戸川", "startDate": "2026-05-11"},
+    {"jcd": "04", "name": "平和島", "startDate": "2026-06-18"},
+    {"jcd": "05", "name": "多摩川", "startDate": "2026-04-18"},
+    {"jcd": "06", "name": "浜名湖", "startDate": "2026-04-09"},
+    {"jcd": "11", "name": "びわこ", "startDate": "2025-05-01"},
+    {"jcd": "13", "name": "尼崎",   "startDate": "2026-04-17"},
+    {"jcd": "18", "name": "徳山",   "startDate": "2026-04-20"},
+    {"jcd": "19", "name": "下関",   "startDate": "2026-04-29"},
+    {"jcd": "21", "name": "芦屋",   "startDate": "2026-04-16"},
+    {"jcd": "24", "name": "大村",   "startDate": "2025-06-22"}
+  ]
+}

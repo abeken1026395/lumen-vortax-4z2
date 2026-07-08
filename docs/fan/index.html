@@ -31,7 +31,7 @@ function Tab({id, cur, set, children, c}) {
   );
 }
 
-function BgmSection({data}) {
+function BgmSection({data, e30}) {
   const [open, setOpen] = useState(null);
   const [intro, setIntro] = useState(false);
   const [pf, setPf] = useState("ALL");
@@ -94,6 +94,7 @@ function BgmSection({data}) {
                 <span style={{fontSize:11,color:"#a880b0"}}>{songs.length?songs.length+"曲":(STATUS_LABEL[bg.status]||"")}</span>
                 <span style={{marginLeft:"auto",fontSize:11,color:"#c98fd0"}}>{isOpen?"▲":"▼"}</span>
               </div>
+              {e30 && e30[code] && <div style={{fontSize:11,fontWeight:700,color:"#8fd6c0",marginTop:5}}>E30切替：{e30[code]}〜</div>}
               {bg.hook && <div style={{fontSize:12.5,color:"#e6d0ee",lineHeight:1.7,marginTop:6,fontStyle:"italic"}}>{bg.hook}</div>}
               {isOpen && (
               <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid #3a2748"}}>
@@ -122,7 +123,7 @@ function BgmSection({data}) {
   );
 }
 
-function YosouyaSection({data}) {
+function YosouyaSection({data, e30}) {
   const [open, setOpen] = useState(null);
   const [intro, setIntro] = useState(false);
   const [pf, setPf] = useState("ALL");
@@ -176,6 +177,7 @@ function YosouyaSection({data}) {
                 {y.count && <span style={{fontSize:11,color:"#b39a78"}}>{y.count}</span>}
                 {hasDetail && <span style={{marginLeft:"auto",fontSize:11,color:"#d9b382"}}>{isOpen?"▲":"▼"}</span>}
               </div>
+              {e30 && e30[code] && <div style={{fontSize:11,fontWeight:700,color:"#8fd6c0",marginTop:5}}>E30切替：{e30[code]}〜</div>}
               {y.hook && <div style={{fontSize:12.5,color:"#ecd9b8",lineHeight:1.7,marginTop:6,fontStyle:"italic"}}>{y.hook}</div>}
               {!hasDetail && y.note && <div style={{fontSize:12,color:"#a89878",lineHeight:1.6,marginTop:5}}>{y.note}</div>}
               {isOpen && hasDetail && (
@@ -220,10 +222,15 @@ function App() {
   const [tab, setTab] = useState("bgm");
   const [fanfare, setFanfare] = useState(undefined);
   const [yosouya, setYosouya] = useState(undefined);
+  const [e30, setE30] = useState(null); // 場コード(2桁) -> "YYYY-MM-DD"（確定10場のみ）。取得失敗時は null＝E30表示を省略
 
   useEffect(() => {
     fetch("../data/fanfareBgm.json?v=" + Date.now()).then(r=>r.json()).then(setFanfare).catch(()=>setFanfare(null));
     fetch("../data/yosouya.json?v=" + Date.now()).then(r=>r.json()).then(setYosouya).catch(()=>setYosouya(null));
+    // E30切替日（生データ・事実提示のみ）。startDate がある場だけ収録。失敗時は丸ごと省略。
+    fetch("../data/e30Schedule.json?v=" + Date.now()).then(r=>r.json()).then(j=>{
+      if(j && Array.isArray(j.venues)){ const m={}; for(const v of j.venues){ if(v && v.jcd && v.startDate) m[String(v.jcd).padStart(2,"0")]=v.startDate; } setE30(m); }
+    }).catch(()=>setE30(null));
   }, []);
 
   return (
@@ -241,10 +248,10 @@ function App() {
       </div>
 
       {tab==="bgm" && (
-        fanfare===undefined ? <Loading/> : fanfare ? <BgmSection data={fanfare}/> : <Err/>
+        fanfare===undefined ? <Loading/> : fanfare ? <BgmSection data={fanfare} e30={e30}/> : <Err/>
       )}
       {tab==="yosouya" && (
-        yosouya===undefined ? <Loading/> : yosouya ? <YosouyaSection data={yosouya}/> : <Err/>
+        yosouya===undefined ? <Loading/> : yosouya ? <YosouyaSection data={yosouya} e30={e30}/> : <Err/>
       )}
 
       <div style={{marginTop:14,background:"#111d2b",border:"1px solid #24384f",borderRadius:10,padding:"10px 12px"}}>
