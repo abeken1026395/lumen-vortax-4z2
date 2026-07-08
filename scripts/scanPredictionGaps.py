@@ -4,8 +4,9 @@
 scanPredictionGaps.py
 predictions生成の絶対防衛 4/4「夜間の欠番台帳スキャン（検知・記録専用）」。
 
-全レース終了後（夜）に、直近N日(既定3)の predictions/YYYYMMDD.json を検査し、
+全レース終了後（夜）に、前日からN日前まで(既定3日)の predictions/YYYYMMDD.json を検査し、
 欠落/無効な日を predictions_gaps.csv に「欠番」として記録する。
+（当日は朝生成前/ドリフト時に未生成が正常なため対象外＝誤検知を避ける。）
 
 役割分担（点2 昼監視との住み分け）:
   ・当日・日中の救済は点2(monitorPredictions.py)＋通常生成が担う。
@@ -60,8 +61,11 @@ def recorded_days():
 
 
 def main():
+    # 当日は朝の通常生成の前（早朝実行やスケジュール・ドリフト時）だと未生成が正常なため、
+    # 欠番判定から除外する。対象は「前日〜N日前」の“生成が完了しているべき”日のみ。
+    # 当日の欠落は点2(昼監視)＋通常生成が担う。
     today = jst_now().date()
-    days = [(today - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(WINDOW)]
+    days = [(today - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(1, WINDOW + 1)]
     already = recorded_days()
 
     missing = []
