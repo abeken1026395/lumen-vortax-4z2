@@ -33,6 +33,7 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .rname{font-weight:800;font-size:15.5px}
 .deadline{color:var(--sub);font-size:12px;margin-left:auto}
 .kikaku{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(255,209,102,.16);color:var(--acc);margin-left:6px}
+.nichi{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(120,180,220,.14);color:#8fb8d6;margin-left:6px}
 .vsetsu{font-size:12px;color:var(--sub);padding:2px 12px 8px;line-height:1.4}
 .livewx{font-size:11.5px;color:var(--sub);background:rgba(120,180,220,.10);border:1px solid var(--line);border-radius:9px;padding:5px 9px;margin:7px 0 2px;line-height:1.5}
 .windsig{font-size:11.5px;color:var(--sub);background:rgba(255,209,102,.10);border:1px solid rgba(255,209,102,.35);border-radius:9px;padding:5px 9px;margin:4px 0 2px;line-height:1.5}
@@ -269,7 +270,7 @@ function e30Info(r){
 }
 function renderCard(r){
   return `<div class="card">
-    <div class="chead"><span class="rname">${r['場名']} ${r['レース']}</span>${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}
+    <div class="chead"><span class="rname">${r['場名']} ${r['レース']}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}
       ${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}</div>
     ${liveWx(r['場コード'])}
     ${windSignal(r['場コード'])}
