@@ -186,6 +186,8 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .recent-chips { display:flex; gap:6px; flex-wrap:wrap; }
 .rchip { font-size:11px; color:#a9c6dd; background:#0d1622; border:1px solid #24344a; border-radius:14px; padding:3px 10px; cursor:pointer; }
 .my-empty { font-size:11px; color:#6f7d8c; }
+.my-note { font-size:10px; color:#6f7d8c; margin:2px 2px 4px; line-height:1.5; }
+.oshi-result { color:#0b1219; background:#ffd166; font-size:11px; font-weight:bold; border-radius:6px; padding:5px 10px; text-decoration:none; white-space:nowrap; flex:none; }
 /* スター（気になる）ボタン */
 .watchbtn { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:bold; border-radius:6px; padding:5px 12px; cursor:pointer; border:1px solid #3a5170; background:#0f1a26; color:#7ec8ff; transition:transform .12s; }
 .watchbtn.on { background:#12233a; color:#ffd166; border-color:#5a4a1a; }
@@ -379,7 +381,8 @@ function resultUrl(jcd,hd,rno){ return "https://www.boatrace.jp/owpc/pc/race/rac
 function harvestList(){
   var map={};
   function add(x, oshiName){
-    if(!x.hd || raceStatus(x.hd,x.deadline)!=='done') return;
+    /* 締切を過ぎたレースは公式結果リンクで確認（確定判定はアプリでは持たない） */
+    if(!x.hd || raceStatus(x.hd,x.deadline)==='pre') return;
     if(isCollected(x.jcd,x.hd,x.rno)) return;
     var k=rkey(x.jcd,x.hd,x.rno);
     if(!map[k]) map[k]={jcd:x.jcd,hd:x.hd,rno:x.rno,venue:x.venue||"",deadline:x.deadline||"",kikaku:x.kikaku||"",oshi:false,oshiNames:[]};
@@ -485,11 +488,14 @@ function buildOshiToday(){
   } else {
     h+=ent.map(function(x){
       var st=raceStatus(x.hd,x.deadline);
-      var pill=st==='done'?'<span class="pill pill-done">結果</span>':st==='wait'?'<span class="pill pill-wait">結果待ち</span>':'<span class="pill pill-pre">締切前</span>';
       var pf=PROF[x.toban]||{}, nick=pf.nickname||pf.tagline||"";
+      /* 締切前=ピル、締切後=公式結果リンク（確定は公式が持つ） */
+      var right=st==='pre'
+        ? '<span class="pill pill-pre">締切前</span>'
+        : '<a class="oshi-result" href="'+resultUrl(x.jcd,x.hd,x.rno)+'" target="_blank" rel="noopener">🏁 結果 →</a>';
       return '<div class="my-row"><div class="my-rl" data-open="'+esc(rkey(x.jcd,x.hd,x.rno))+'">'
         +'<div class="my-rt">'+esc(x.name)+(nick?' <span class="oshi-nick">“'+esc(nick)+'”</span>':'')+'</div>'
-        +'<div class="my-rs">'+esc(x.venue)+' '+x.rno+'R｜締切 '+esc(x.deadline||"")+'</div></div>'+pill+'</div>';
+        +'<div class="my-rs">'+esc(x.venue)+' '+x.rno+'R｜締切 '+esc(x.deadline||"")+'</div></div>'+right+'</div>';
     }).join("");
   }
   return h+'</div>';
@@ -586,15 +592,16 @@ function renderVenues(app,crumb,keys){
 function buildMyPanel(){
   pruneOld();
   var harvest=harvestList();
-  var waiting=WATCH.filter(function(x){ var s=raceStatus(x.hd,x.deadline); return s==='pre'||s==='wait'; });
+  var waiting=WATCH.filter(function(x){ return raceStatus(x.hd,x.deadline)==='pre'; });
   var hset={}; harvest.forEach(function(x){ hset[rkey(x.jcd,x.hd,x.rno)]=1; });
   var recent=VIEWED.filter(function(x){ return !hset[rkey(x.jcd,x.hd,x.rno)]; }).slice(0,8);
   if(!harvest.length && !waiting.length && !recent.length) return "";
   var h='<div class="my">';
   if(harvest.length){
     var oshiN=harvest.filter(function(x){return x.oshi;}).length;
-    h+='<div class="my-sec harvest"><div class="my-h">🎣 結果が出た<span class="cnt">'+harvest.length+'</span>'
-      +(oshiN?'<span class="oshi-cnt" style="margin-left:2px">⭐'+oshiN+'</span>':'')+'</div>';
+    h+='<div class="my-sec harvest"><div class="my-h">🏁 結果を見る<span class="cnt">'+harvest.length+'</span>'
+      +(oshiN?'<span class="oshi-cnt" style="margin-left:2px">⭐'+oshiN+'</span>':'')+'</div>'
+      +'<div class="my-note">締切を過ぎたレース。確定結果は公式ページで（発走直後は未掲示のことがあります）。</div>';
     h+=harvest.map(function(x){
       var k=rkey(x.jcd,x.hd,x.rno);
       var title=(x.oshi?'⭐ ':'')+esc(x.venue)+' '+x.rno+'R';
@@ -602,17 +609,16 @@ function buildMyPanel(){
                                         :esc(x.kikaku||"")+(x.kikaku?'｜':'')+'締切 '+esc(x.deadline||"");
       return '<div class="my-row'+(x.oshi?' oshi-row':'')+'">'
         +'<div class="my-rl" data-open="'+esc(k)+'"><div class="my-rt">'+title+'</div><div class="my-rs">'+sub+'</div></div>'
-        +'<a class="harvest-link" data-collect="'+esc(k)+'" href="'+resultUrl(x.jcd,x.hd,x.rno)+'" target="_blank" rel="noopener">結果 →</a>'
-        +'<button class="harvest-x" data-collect="'+esc(k)+'" title="回収済みにする">✓</button>'
+        +'<a class="harvest-link" data-collect="'+esc(k)+'" href="'+resultUrl(x.jcd,x.hd,x.rno)+'" target="_blank" rel="noopener">🏁 公式結果 →</a>'
+        +'<button class="harvest-x" data-collect="'+esc(k)+'" title="確認済みにする">✓</button>'
         +'</div>';
     }).join("")+'</div>';
   }
   if(waiting.length){
-    h+='<div class="my-sec watch"><div class="my-h">🔖 気になる</div>';
+    h+='<div class="my-sec watch"><div class="my-h">🔖 気になる（締切前）</div>';
     h+=waiting.map(function(x){
-      var s=raceStatus(x.hd,x.deadline), k=rkey(x.jcd,x.hd,x.rno);
-      var pill=s==='wait'?'<span class="pill pill-wait">結果待ち</span>':'<span class="pill pill-pre">締切前</span>';
-      return '<div class="my-row"><div class="my-rl" data-open="'+esc(k)+'"><div class="my-rt">'+esc(x.venue)+' '+x.rno+'R</div><div class="my-rs">締切 '+esc(x.deadline||"")+'</div></div>'+pill+'</div>';
+      var k=rkey(x.jcd,x.hd,x.rno);
+      return '<div class="my-row"><div class="my-rl" data-open="'+esc(k)+'"><div class="my-rt">'+esc(x.venue)+' '+x.rno+'R</div><div class="my-rs">締切 '+esc(x.deadline||"")+'</div></div><span class="pill pill-pre">締切前</span></div>';
     }).join("")+'</div>';
   }
   if(recent.length){
