@@ -69,22 +69,33 @@ def main():
 
     n = len(rows)
 
-    # 判定別の的中率（波乱正誤 = ◯/✕）
-    judge_tot = defaultdict(int)
-    judge_hit = defaultdict(int)
+    # 判定別の的中率（波乱正誤 = ◯/✕）。
+    # 混戦は波乱/堅めの的中判定の対象外（波乱正誤="-"）。的中率は対象行(◯/✕)のみで算出し、
+    # 対象行が0の判定（混戦）は的中率=None・対象外=Trueとして「0.0%」の誤表示を避ける。
+    HIT = ("◯", "○", "OK", "1", "True")
+    NG = ("✕", "×", "x", "X", "NG", "0", "False")
+    judge_tot = defaultdict(int)     # 件数（全行）
+    judge_target = defaultdict(int)  # 判定対象行（◯/✕のみ）
+    judge_hit = defaultdict(int)     # 的中行（◯）
     for r in rows:
         j = (r.get("判定") or "").strip()
         if not j:
             continue
         judge_tot[j] += 1
-        if (r.get("波乱正誤") or "").strip() in ("◯", "○", "OK", "1", "True"):
+        v = (r.get("波乱正誤") or "").strip()
+        if v in HIT:
+            judge_target[j] += 1
             judge_hit[j] += 1
+        elif v in NG:
+            judge_target[j] += 1
 
     judge_rate = {}
     for j in judge_tot:
+        target = judge_target[j]
         judge_rate[j] = {
             "件数": judge_tot[j],
-            "的中率": round(100 * judge_hit[j] / judge_tot[j], 1) if judge_tot[j] else None,
+            "的中率": round(100 * judge_hit[j] / target, 1) if target else None,
+            "対象外": target == 0,   # 混戦=True（波乱/堅め的中の対象外）
         }
 
     # 主役艇の◎(1着)率・連対率（主役正誤 = ◎/◯/✕）
@@ -109,12 +120,14 @@ def main():
 
     # スコア帯 × 荒れ率（配当がHARAN_TH以上を荒れとする。閾値はログ側と揃え5000）
     HARAN_TH = 5000
+    # スコアの実分布は概ね[-0.65,+0.69]（標準偏差0.158）と狭く、旧境界(±1/±3)では
+    # 全件が中央帯に集中して機能しなかった。分布に合わせた細帯(±0.1/±0.3)に変更。
     bands = [
-        ("スコア -3以下", lambda s: s <= -3),
-        ("スコア -3〜-1", lambda s: -3 < s <= -1),
-        ("スコア -1〜+1", lambda s: -1 < s < 1),
-        ("スコア +1〜+3", lambda s: 1 <= s < 3),
-        ("スコア +3以上", lambda s: s >= 3),
+        ("スコア -0.30以下", lambda s: s <= -0.30),
+        ("スコア -0.30〜-0.10", lambda s: -0.30 < s <= -0.10),
+        ("スコア -0.10〜+0.10", lambda s: -0.10 < s < 0.10),
+        ("スコア +0.10〜+0.30", lambda s: 0.10 <= s < 0.30),
+        ("スコア +0.30以上", lambda s: s >= 0.30),
     ]
     band_tot = defaultdict(int)
     band_haran = defaultdict(int)
