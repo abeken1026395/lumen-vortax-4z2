@@ -226,7 +226,21 @@
             0.125
           ],
           "stCareer": 0.14,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 28,
+            "runs": 120,
+            "nige": 18,
+            "sashi": 5,
+            "makuri": 2,
+            "makurisashi": 3,
+            "makuriRate": 7.1,
+            "sashiRate": 17.9,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.03,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -435,7 +449,21 @@
             0.175
           ],
           "stCareer": 0.13,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 29,
+            "runs": 126,
+            "nige": 19,
+            "sashi": 1,
+            "makuri": 6,
+            "makurisashi": 2,
+            "makuriRate": 20.7,
+            "sashiRate": 3.4,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -671,7 +699,21 @@
             0.145
           ],
           "stCareer": 0.17,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 33,
+            "runs": 135,
+            "nige": 16,
+            "sashi": 6,
+            "makuri": 2,
+            "makurisashi": 7,
+            "makuriRate": 6.1,
+            "sashiRate": 18.2,
+            "maezukeRate": 2.2,
+            "maezukeAvg": 0.04,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -890,7 +932,21 @@
             0.185
           ],
           "stCareer": 0.16,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 26,
+            "runs": 109,
+            "nige": 17,
+            "sashi": 3,
+            "makuri": 3,
+            "makurisashi": 2,
+            "makuriRate": 11.5,
+            "sashiRate": 11.5,
+            "maezukeRate": 1.0,
+            "maezukeAvg": 0.03,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -1091,7 +1147,21 @@
             0.155
           ],
           "stCareer": 0.14,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 37,
+            "runs": 148,
+            "nige": 20,
+            "sashi": 4,
+            "makuri": 4,
+            "makurisashi": 7,
+            "makuriRate": 10.8,
+            "sashiRate": 10.8,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.0,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -1313,7 +1383,21 @@
             0.21
           ],
           "stCareer": 0.18,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 27,
+            "runs": 112,
+            "nige": 15,
+            "sashi": 3,
+            "makuri": 4,
+            "makurisashi": 4,
+            "makuriRate": 14.8,
+            "sashiRate": 11.1,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.02,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -1387,7 +1471,21 @@
           "fCount": 0,
           "stSetsu": [],
           "stCareer": 0.15,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 34,
+            "runs": 131,
+            "nige": 19,
+            "sashi": 6,
+            "makuri": 1,
+            "makurisashi": 7,
+            "makuriRate": 2.9,
+            "sashiRate": 17.6,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.03,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -1479,7 +1577,21 @@
           "fCount": 0,
           "stSetsu": [],
           "stCareer": 0.15,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 36,
+            "runs": 127,
+            "nige": 16,
+            "sashi": 7,
+            "makuri": 2,
+            "makurisashi": 6,
+            "makuriRate": 5.6,
+            "sashiRate": 19.4,
+            "maezukeRate": 0.8,
+            "maezukeAvg": -0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -1559,7 +1671,21 @@
           "fCount": 0,
           "stSetsu": [],
           "stCareer": 0.16,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 25,
+            "runs": 126,
+            "nige": 16,
+            "sashi": 0,
+            "makuri": 6,
+            "makurisashi": 0,
+            "makuriRate": 24.0,
+            "sashiRate": 0.0,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.02,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -1832,7 +1958,21 @@
             0.14
           ],
           "stCareer": 0.14,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 42,
+            "runs": 119,
+            "nige": 23,
+            "sashi": 5,
+            "makuri": 10,
+            "makurisashi": 3,
+            "makuriRate": 23.8,
+            "sashiRate": 11.9,
+            "maezukeRate": 2.6,
+            "maezukeAvg": 0.0,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -2044,7 +2184,21 @@
             0.16
           ],
           "stCareer": 0.13,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 41,
+            "runs": 120,
+            "nige": 24,
+            "sashi": 4,
+            "makuri": 9,
+            "makurisashi": 2,
+            "makuriRate": 22.0,
+            "sashiRate": 9.8,
+            "maezukeRate": 3.3,
+            "maezukeAvg": 0.15,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [
@@ -2286,7 +2440,21 @@
             0.055
           ],
           "stCareer": 0.15,
-          "kimariteType": "逃げ型"
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 29,
+            "runs": 111,
+            "nige": 18,
+            "sashi": 4,
+            "makuri": 2,
+            "makurisashi": 2,
+            "makuriRate": 6.9,
+            "sashiRate": 13.8,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
         }
       ],
       "localRacers": [

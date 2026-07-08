@@ -85,6 +85,13 @@ MAN_TH = 10000    # 万舟（三連単配当>10000, payoutsページと統一）
 HARAN_TH = 5000   # 荒れ（三連単配当>=5000, build_verify_summaryと統一）
 
 REQ_TIMEOUT = int(os.environ.get("BKS_TIMEOUT", "15"))
+
+# 司令塔判断①: scoreRank shadow mode。
+# 自己検知(§3.1-3 得点−減点÷走数≒得点率)が実HTMLで確定するまで、pointrankが非nullで
+# 取れてもJSONには書き込まずログ出力のみ（shadow）とする。汚染検証(a)(b)(c)だけで信用して
+# 書き込む状態を作らない。実ページ1件でDOM列と再計算を確定→司令塔確認後に
+# BKS_SCORERANK_WRITE=1 かつ 自己検知passed で書き込み解禁。
+SCORERANK_WRITE = os.environ.get("BKS_SCORERANK_WRITE") == "1"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -317,26 +324,43 @@ def finish_trail_and_st(row):
 
 
 def kimarite_type(toban, kimarite_map):
-    """racerKimarite.csv（直近183日集計）から代表決まり手型を導出。
-    1着数が少ない選手・データ無しはnull。source: racerKimarite.csv。"""
+    """racerKimarite.csv（直近183日集計）から決まり手型ラベル＋生数値を導出。
+    司令塔判断(C): 裸のラベルは素材に入れない＝比較軸となる実数（まくり率/差し率/前づけ等）を同梱。
+    - typeラベルは1着5本未満null（小標本での型断定を避ける）。生数値は標本サイズ(winCount)込みで併記。
+    - racerKimarite.csv に該当登番が無ければ全体null。source は racerKimarite.csv（v2の
+      「profile.json由来」記載は誤りで、決まり手の実体は本CSVにある）。"""
     r = kimarite_map.get(str(toban))
     if not r:
         return None
     wins = to_int(r.get("1着数")) or 0
-    if wins < 5:
-        return None
     cats = [("逃げ", "逃げ型"), ("差し", "差し型"),
             ("まくり", "まくり型"), ("まくり差し", "まくり差し型")]
-    best = None
-    best_n = -1
-    for key, label in cats:
-        n = to_int(r.get(key)) or 0
-        if n > best_n:
-            best_n = n
-            best = label
-    if best_n <= 0:
-        return None
-    return best
+    label = None
+    if wins >= 5:
+        best_n = -1
+        for key, lab in cats:
+            n = to_int(r.get(key)) or 0
+            if n > best_n:
+                best_n = n
+                label = lab
+        if best_n <= 0:
+            label = None
+    return {
+        "type": label,
+        "winCount": wins,
+        "runs": to_int(r.get("出走数")),
+        "nige": to_int(r.get("逃げ")),
+        "sashi": to_int(r.get("差し")),
+        "makuri": to_int(r.get("まくり")),
+        "makurisashi": to_int(r.get("まくり差し")),
+        "makuriRate": to_float(r.get("まくり率")),
+        "sashiRate": to_float(r.get("差し率")),
+        "maezukeRate": to_float(r.get("前づけ率")),
+        "maezukeAvg": to_float(r.get("前づけ平均")),
+        "window": "{}〜{}".format((r.get("集計開始") or "").strip(),
+                                  (r.get("集計終了") or "").strip()),
+        "source": "racerKimarite.csv",
+    }
 
 
 def motor_avg(venue_rows):
@@ -599,21 +623,27 @@ def fetch_pointrank(jcd, hd8, venue_name, series, as_of_day):
     if not rows:
         return None
 
-    # 自己検知: (得点-減点)/走数 ≒ 得点率（許容差0.005）。1件でも不一致なら全破棄。
+    # 自己検知: (得点-減点)/走数 ≒ 得点率（許容差0.005）。1件でも不一致なら全破棄(§3.1-3)。
+    # _recompute は実HTMLのDOM列（得点/減点欄）特定が未確定のため現状 None＝未実行。
+    # checked==0（未実行）のときは self_check.passed=False となり、書き込みは解禁されない。
+    checked = 0
     for row in rows:
         recomputed = row.get("_recompute")
         rate = row.get("rate")
         if recomputed is None or rate is None:
             continue
+        checked += 1
         if abs(recomputed - rate) > 0.005:
             return None
+    self_check = {"ran": checked > 0, "passed": checked > 0, "checked": checked}
 
     top = [{"rank": r["rank"], "toban": r["toban"], "name": r["name"],
             "yomi": None, "grade": r.get("grade"), "rate": r.get("rate"),
             "series_finishes": r.get("series_finishes")} for r in rows]
 
     border = _compute_border(rows, series)
-    return {"asOfDay": as_of_day, "border": border, "top": top}
+    return {"asOfDay": as_of_day, "border": border, "top": top,
+            "_selfCheck": self_check}
 
 
 def _parse_pointrank_rows(soup):
@@ -723,7 +753,19 @@ def build_venue(jcd, venue_rows, results_map, vstats, kimarite_map, profile,
     results_block = build_results_block(results_venue)
     vstat = vstats.get(jcd)
 
-    score_rank = fetch_pointrank(jcd, hd8, VENUES.get(jcd, jcd), series, as_of_day)
+    # scoreRank: shadow mode（判断①）。自己検知passed かつ 書き込み解禁時のみJSONへ。
+    # それ以外は取得できてもログのみで scoreRank=null（focus抽出でも使わない）。
+    score_raw = fetch_pointrank(jcd, hd8, VENUES.get(jcd, jcd), series, as_of_day)
+    score_rank = None
+    if score_raw is not None:
+        sc = score_raw.get("_selfCheck", {})
+        if SCORERANK_WRITE and sc.get("passed"):
+            score_rank = {k: v for k, v in score_raw.items() if not k.startswith("_")}
+        else:
+            print("[shadow] scoreRank {} {}: 取得成功だが書き込み保留 "
+                  "(selfCheck={}, WRITE={}). rows={}".format(
+                      jcd, VENUES.get(jcd, jcd), sc, SCORERANK_WRITE,
+                      len(score_raw.get("top", []))))
 
     motor2avg = motor_avg(venue_rows)
     focus_tobans = pick_focus_tobans(jcd, venue_rows, score_rank,
