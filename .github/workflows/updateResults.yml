@@ -30,7 +30,7 @@ jobs:
           python-version: "3.12"
 
       - name: install deps
-        run: pip install lhafile
+        run: pip install lhafile beautifulsoup4 requests
 
       - name: build results (OpenAPI全場・決まり手/全式別払戻含む)
         run: python scripts/buildResults.py
@@ -51,6 +51,14 @@ jobs:
       - name: build player monthly
         run: python scripts/buildPlayerMonthly.py
 
+      # 観戦記素材JSON（翌朝執筆の唯一の入力）。buildResults の後段で前日結果を取り込む。
+      # optional設計: pointrank失敗・素材欠でもジョブは落とさない（always + continue-on-error）。
+      # scoreRank は自己検知確定まで shadow mode（BKS_SCORERANK_WRITE 未設定＝書き込み保留）。
+      - name: build kansenki source
+        if: always()
+        continue-on-error: true
+        run: python scripts/buildKansenkiSource.py
+
       - name: commit
         if: always()
         run: |
@@ -61,5 +69,6 @@ jobs:
           git add verify_log.csv 2>/dev/null || true
           git add docs/data/verify_summary.json 2>/dev/null || true
           git add docs/data/playerMonthly.json 2>/dev/null || true
+          git add docs/data/kansenki/source/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: results + verify_log + summary"
           git push
