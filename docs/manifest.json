@@ -1,0 +1,12 @@
+{
+  "name": "データ攻め",
+  "short_name": "データ攻め",
+  "start_url": "/boatrace/",
+  "display": "standalone",
+  "background_color": "#0b1219",
+  "theme_color": "#0b1219",
+  "icons": [
+    { "src": "icon180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
