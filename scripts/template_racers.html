@@ -116,6 +116,12 @@ header .sub { font-size:11px; color:#8a94a3; margin-top:4px; }
 .stat.hot .v { color:#ffd166; } .stat.hot .lb { color:#ffd166; }
 .stat.mach .lb { color:#7ec8ff; } .stat.mach .v { color:#a9c6dd; }
 .up { font-size:11px; }
+/* 今節モーター（通算×今節の偏差・生データ／評価語なし） */
+.kinmotor { margin-top:7px; font-size:11.5px; color:#a9c6dd; background:#0f1a26; border:1px solid #23364a; border-radius:8px; padding:5px 9px; line-height:1.5; }
+.kinmotor b { color:#e0e6ed; }
+.kinmotor .km-tsu { color:#8a94a3; }
+.kinmotor .km-few { color:#e0a56a; font-size:10px; margin-left:4px; }
+.kinmotor .km-none { color:#8a94a3; }
 
 /* 相対バー（ST/機力） */
 .meter { margin-top:7px; }
@@ -700,6 +706,33 @@ function kimariteBar(km){
     +'<div class="kmr-bar">'+segs+'</div><div class="kmr-legend">'+legend+'</div></div>';
 }
 
+/* 今節モーター2連率（今節成績カラムの着から算出）。モーターは節を通じ艇に固定＝
+   選手の今節結果＝そのモーターの今節結果。生データのみ・評価語なし。 */
+function kinsetuMotor(row){
+  var chaku=[];
+  ["1日目成績","2日目成績","3日目成績","4日目成績","5日目成績","6日目成績"].forEach(function(k){
+    var cell=(g(row,k)||"").trim(); if(!cell) return;
+    cell.split(/\s+/).forEach(function(e){
+      var p=e.split("/");                 // レース/進入/ST/着
+      if(p.length===4 && /^\d+$/.test(p[3])) chaku.push(parseInt(p[3],10));
+    });
+  });
+  var n=chaku.length, w2=chaku.filter(function(c){return c===1||c===2;}).length;
+  return {n:n, w2:w2, rate:n?Math.round(w2/n*100):null};
+}
+function kinMotorLine(row){
+  var tsu=g(row,"モーター2連率"), moNo=g(row,"モーターNo");
+  var k=kinsetuMotor(row);
+  if(k.n===0){
+    return '<div class="kinmotor">今節モーター No.'+esc(moNo)+'：<span class="km-none">今節データなし</span>'
+      +'<span class="km-tsu">／通算2連率 '+fmtPct(tsu)+'</span></div>';
+  }
+  var few=k.n<5;   // 節序盤の少数走はN少を明示（%は参考）
+  return '<div class="kinmotor">今節モーター No.'+esc(moNo)+'：<b>'+k.n+'走</b> 2連対<b>'+k.w2+'</b>（'+k.rate+'%）'
+    +(few?'<span class="km-few">N少</span>':'')
+    +'<span class="km-tsu">／通算2連率 '+fmtPct(tsu)+'</span></div>';
+}
+
 /* E30該当場成績（この場がE30該当場のときのみ・事実の生データ・二層表示） */
 var E30_TECH=["逃げ","差し","まくり","まくり差し","抜き","恵まれ"];
 function e30Block(toban,jcd){
@@ -917,6 +950,7 @@ function boatCard(row,v,hl,minST,maxST,maxMotor){
     +'<div class="stat mach"><div class="lb">モーター'+(g(row,"モーターNo")?' No.'+esc(g(row,"モーターNo")):'')+'</div><div class="v">'+fmtPct(g(row,"モーター2連率"))+'</div><div class="v2">3連 '+fmtPct(g(row,"モーター3連率"))+'</div></div>'
     +'</div>'
     +meter
+    +kinMotorLine(row)
     +kimariteBar(km)
     +e30Block(toban,v.jcd)
     +shuTable(row)

@@ -62,6 +62,11 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .bp-yarare .it .v{font-size:15px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
 .bp-yarare .it.hi .v{color:#ff8a8a}
 .bp-yarare .nt{font-size:9px;color:#8aa0b0;margin-top:5px;text-align:center}
+.bp-kinmotor{margin-top:10px;font-size:11px;color:#a9c6dd;background:#0f1a26;border:1px solid #23364a;border-radius:8px;padding:6px 9px;line-height:1.5}
+.bp-kinmotor b{color:#e0e6ed}
+.bp-kinmotor .tsu{color:#8aa0b0}
+.bp-kinmotor .few{color:#e0a56a;font-size:9px;margin-left:4px}
+.bp-kinmotor .none{color:#8aa0b0}
 .wk{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
 .wk1{background:var(--w1);color:#000}.wk2{background:var(--w2);color:#fff}.wk3{background:var(--w3);color:#fff}.wk4{background:var(--w4);color:#fff}.wk5{background:var(--w5);color:#000}.wk6{background:var(--w6);color:#fff}
 .lv{font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;flex-shrink:0}
@@ -367,7 +372,16 @@ function bProfHTML(no, boat){
    <div class="bp-c"><div class="l">アウト戦</div><div class="v">${(p.out||0).toFixed?p.out.toFixed(1):p.out}<span style="font-size:9px">%</span></div></div>
    <div class="bp-c"><div class="l">複勝率</div><div class="v">${(p.fuku!=null?p.fuku:0).toFixed(2)}</div></div>
   </div>
+  ${kinMotorFact(no)}
   <div class="bp-c1"><div class="t">コース別 1着率（黄=イン／青=アウト）</div>${bars}</div>${yk}`;
+}
+// 今節モーター2連率（racers_today.csv由来・生データのみ・評価語なし）。
+function kinMotorFact(no){
+  const k=KINMOTOR[no]; if(!k) return '';
+  const tsu=(k.tsu!=null&&k.tsu!=='')?`<span class="tsu">／通算2連率 ${k.tsu}%</span>`:'';
+  if(!k.n) return `<div class="bp-kinmotor">今節モーター${k.moNo?` No.${k.moNo}`:''}：<span class="none">今節データなし</span>${tsu}</div>`;
+  const few=k.n<5?'<span class="few">N少</span>':'';
+  return `<div class="bp-kinmotor">今節モーター${k.moNo?` No.${k.moNo}`:''}：<b>${k.n}走</b> 2連対<b>${k.w2}</b>（${k.rate}%）${few}${tsu}</div>`;
 }
 document.addEventListener('click',function(e){
   const bt=e.target.closest('.boat');
@@ -416,6 +430,32 @@ fetch('../data/e30PlayerStats.json?_='+Date.now())
 .then(r=>r.ok?r.json():null)
 .then(doc=>{ if(doc&&doc['選手成績']){E30STATS=doc; if(typeof render==='function') render();} })
 .catch(()=>{});
+var KINMOTOR={};
+// 今節モーター2連率（出走表CSVの今節成績から算出・事実情報・判定不介入）。登録番号で結合。
+fetch('../racers/racers_today.csv?_='+Date.now())
+.then(r=>r.ok?r.text():null)
+.then(t=>{ if(t){ parseKinMotor(t); if(typeof render==='function') render(); } })
+.catch(()=>{});
+function parseKinMotor(txt){
+  const lines=txt.replace(/\r/g,'').split('\n').filter(l=>l.length);
+  if(lines.length<2) return;
+  const h=lines[0].replace(/^﻿/,'').split(','); const ix={}; h.forEach((c,i)=>ix[c]=i);
+  const days=['1日目成績','2日目成績','3日目成績','4日目成績','5日目成績','6日目成績'];
+  // 必要列(登録番号/モーターNo/モーター2連率/日目成績)は節名・企画名より前＝カンマ混入の影響なし
+  if(ix['6日目成績']==null||ix['登録番号']==null) return;
+  for(let i=1;i<lines.length;i++){
+    const a=lines[i].split(',');
+    if(a.length<=ix['6日目成績']) continue;
+    const no=a[ix['登録番号']]; if(!no) continue;
+    const chaku=[];
+    days.forEach(k=>{ const cell=(a[ix[k]]||'').trim(); if(!cell) return;
+      cell.split(/\s+/).forEach(e=>{ const p=e.split('/'); if(p.length===4 && /^\d+$/.test(p[3])) chaku.push(parseInt(p[3],10)); });
+    });
+    const n=chaku.length, w2=chaku.filter(c=>c===1||c===2).length;
+    KINMOTOR[no]={n:n, w2:w2, rate:n?Math.round(w2/n*100):null,
+                  moNo:a[ix['モーターNo']]||'', tsu:a[ix['モーター2連率']]||''};
+  }
+}
 function setDay(d){
   SRC=SRCS[d];
   document.querySelectorAll('.dsw-btn').forEach(function(b){b.classList.toggle('on', (+b.dataset.d)===d);});
