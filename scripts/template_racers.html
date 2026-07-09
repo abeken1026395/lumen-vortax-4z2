@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>本日の出走表 | データ攻め</title>
-<link rel="manifest" href="/boatrace/manifest.json">
+<link rel="manifest" href="../manifest.json">
 <meta name="theme-color" content="#0b1219">
-<link rel="apple-touch-icon" href="/boatrace/icon180.png">
-<link rel="icon" href="/boatrace/icon192.png">
+<link rel="apple-touch-icon" href="../icon180.png">
+<link rel="icon" href="../icon192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1013,7 +1013,7 @@ setInterval(function(){ if(view.page==="race") render(); }, 30000);
 /* PWA: Service Worker 登録 ＋「ホーム画面に追加」導線 */
 (function(){
   if("serviceWorker" in navigator){
-    window.addEventListener("load",function(){ navigator.serviceWorker.register("/boatrace/sw.js").catch(function(){}); });
+    window.addEventListener("load",function(){ navigator.serviceWorker.register("../sw.js").catch(function(){}); });
   }
   var el=document.getElementById("a2hs");
   if(!el) return;
@@ -1021,7 +1021,7 @@ setInterval(function(){ if(view.page==="race") render(); }, 30000);
   function dismissed(){ try{ return localStorage.getItem("br_a2hs")==="1"; }catch(e){ return false; } }
   function dismiss(){ try{ localStorage.setItem("br_a2hs","1"); }catch(e){} el.hidden=true; }
   if(standalone()||dismissed()) return;
-  var ICON='<img src="/boatrace/icon180.png" alt="">';
+  var ICON='<img src="../icon180.png" alt="">';
   var deferred=null;
   window.addEventListener("beforeinstallprompt",function(ev){
     ev.preventDefault(); deferred=ev;
