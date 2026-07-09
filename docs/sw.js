@@ -3,8 +3,8 @@
    出走表・払戻などは日々更新されるため、stale を掴ませない network-first にする。 */
 var CACHE = "boatrace-v1";
 var SHELL = [
-  "/boatrace/", "/boatrace/racers/", "/boatrace/manifest.json",
-  "/boatrace/icon180.png", "/boatrace/icon192.png", "/boatrace/icon512.png"
+  "./", "./racers/", "./manifest.json",
+  "./icon180.png", "./icon192.png", "./icon512.png"
 ];
 
 self.addEventListener("install", function (e) {
@@ -30,7 +30,7 @@ self.addEventListener("fetch", function (e) {
       caches.open(CACHE).then(function (c) { c.put(req, cp); }).catch(function () {});
       return res;
     }).catch(function () {
-      return caches.match(req).then(function (m) { return m || caches.match("/boatrace/racers/"); });
+      return caches.match(req).then(function (m) { return m || caches.match("./racers/"); });
     })
   );
 });
