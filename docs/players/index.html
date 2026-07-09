@@ -305,7 +305,11 @@ function App() {
       if (q) {
         const ql=q.trim();
         const qKata=ql.replace(/[\u3041-\u3096]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));
-        if (!(p.name.includes(ql)||p.no.includes(ql)||p.branch.includes(ql)||(p.kana&&(p.kana.includes(ql)||p.kana.includes(qKata))))) return false;
+        // \u5168\u89d2/\u534a\u89d2\u30b9\u30da\u30fc\u30b9\u306e\u8868\u8a18\u3086\u308c\u3092\u5438\u53ce\uff08\u65e5\u672c\u8a9eIME\u306f\u30b9\u30da\u30fc\u30b9\u30ad\u30fc\u3067\u5168\u89d2\u7a7a\u767d\u3092\u5165\u529b\u3057\u304c\u3061\uff09
+        const noSpace=s=>s.replace(/[\s\u3000]+/g,"");
+        const qKataNoSpace=noSpace(qKata);
+        const kanaNoSpace=p.kana?noSpace(p.kana):"";
+        if (!(p.name.includes(ql)||p.no.includes(ql)||p.branch.includes(ql)||(p.kana&&(p.kana.includes(ql)||p.kana.includes(qKata)||(qKataNoSpace&&kanaNoSpace.includes(qKataNoSpace)))))) return false;
       }
       return true;
     });
