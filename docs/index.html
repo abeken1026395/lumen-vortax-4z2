@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>データ攻め｜競艇を、読む。</title>
+<title>データ攻め｜今日も、読んでから。</title>
 <meta name="description" content="買い目も予想も出さない競艇データサイト。出走表・モーター・24場特性・払戻を毎朝更新。53,142レースで自己採点を継続中。">
 <meta property="og:title" content="データ攻め">
-<meta property="og:description" content="競艇を、読む。買い目なし、数字だけ。">
+<meta property="og:description" content="今日も、読んでから。買い目なし、数字だけ。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://abeken1026395.github.io/lumen-vortax-4z2/">
 <link rel="manifest" href="./manifest.json">
@@ -23,11 +23,20 @@ body {
   display: flex; flex-direction: column; align-items: center;
   padding: 40px 16px 60px;
 }
-.title { font-size: 72px; font-weight: 900; letter-spacing: 4px; color: #ffd166; text-align:center; line-height:1.05; white-space:nowrap; }
+.title { font-size: 72px; font-weight: 900; letter-spacing: 4px; color: #cdd6e0; text-align:center; line-height:1.05; white-space:nowrap; }
 .subtitle { font-size: 13px; color: #6b7f95; margin-top: 8px; text-align:center; letter-spacing:1px; }
 .subtitle .en { font-size: 11px; color:#54687d; letter-spacing:2px; text-transform:uppercase; }
+
+/* クイックナビ（全10ページ・タイトル直下） */
+.quicknav { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 10px; max-width:560px; width:100%; margin:16px auto 2px; }
+.quicknav a { display:flex; flex-direction:column; align-items:center; gap:3px; width:56px; text-decoration:none; color:#8faabe; padding:2px 0; }
+.quicknav a .qn-ico { font-size:21px; line-height:1; }
+.quicknav a .qn-lb { font-size:9px; letter-spacing:0; color:#7d94a8; line-height:1.1; text-align:center; }
+.quicknav a:hover .qn-lb, .quicknav a:focus-visible .qn-lb { color:#cdd6e0; }
+.quicknav a:focus-visible { outline:1px solid #3a5675; border-radius:8px; }
+
 .trustbar {
-  margin: 20px auto 36px; max-width: 560px; width:100%;
+  margin: 18px auto 30px; max-width: 560px; width:100%;
   border:1px solid #24384f; border-radius: 12px;
   background: linear-gradient(145deg, #13243700, #0f1d2c55);
   padding: 11px 16px; font-size: 12px; color:#9db4c8; line-height:1.6; text-align:center;
@@ -43,8 +52,12 @@ body {
 .tb-panel .tb-body p { margin:0; }
 .tb-panel .tb-list { margin:8px 0; }
 .tb-panel .tb-list p { margin:6px 0; }
-.tb-panel .tb-body b { color:#ffd166; font-weight:700; }
+.tb-panel .tb-body b { color:#cdd6e0; font-weight:700; }
 .tb-panel .tb-foot { margin-top:8px; color:#6b7f95; }
+
+/* 毎日更新3枚（上段・1列全幅） */
+.stack { display:flex; flex-direction:column; gap:14px; width:100%; max-width:560px; margin-bottom:14px; }
+/* 残り7枚（2列グリッド） */
 .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width:100%; max-width: 560px; }
 @media (max-width: 480px){ .grid{ grid-template-columns: 1fr; } .title{ font-size:52px; } }
 .card {
@@ -65,30 +78,43 @@ body {
 .badge-daily { background:#1b3a2a; color:#3fb950; border:1px solid #3fb95055; }
 .badge-static { background:#2a2540; color:#a371f7; border:1px solid #a371f755; }
 .c-racers { border-top:3px solid #58a6ff; }
-.c-highlights { border-top:3px solid #ffd166; }
+.c-highlights { border-top:3px solid #cdd6e0; }
 .c-motor { border-top:3px solid #3fb1c9; }
 .c-results { border-top:3px solid #e05b4b; }
-.c-players { border-top:3px solid #ffd166; }
+.c-players { border-top:3px solid #cdd6e0; }
 .c-stadium { border-top:3px solid #f0883e; }
 .c-payouts { border-top:3px solid #e0b04b; }
 .c-uranai { border-top:3px solid #a371f7; }
 .c-announcers { border-top:3px solid #3fb56b; }
 .c-fan { border-top:3px solid #e59ac9; }
 .pwa-hint {
-  margin: -22px auto 30px; max-width: 560px; width:100%;
+  margin: -18px auto 26px; max-width: 560px; width:100%;
   text-align:center; font-size: 12px; color:#8faabe; letter-spacing:.3px;
 }
 .pwa-hint .pill {
   display:inline-block; padding:5px 13px; border-radius: 999px;
   border:1px solid #24384f; background:#0f1d2c66; color:#9db4c8;
 }
-.pwa-hint b { color:#ffd166; font-weight:700; }
+.pwa-hint b { color:#cdd6e0; font-weight:700; }
 .footer { margin-top:40px; font-size:11px; color:#4a6070; text-align:center; line-height:1.7; max-width:560px; }
 </style>
 </head>
 <body>
   <div class="title">データ攻め</div>
-  <div class="subtitle"><span class="en">boatrace data</span> ─ 競艇を、読む。</div>
+  <div class="subtitle"><span class="en">boatrace data</span> ─ 今日も、読んでから。</div>
+
+  <nav class="quicknav" aria-label="全ページ">
+    <a href="./racers/"><span class="qn-ico">📋</span><span class="qn-lb">出走表</span></a>
+    <a href="./highlights/"><span class="qn-ico">🔍</span><span class="qn-lb">見どころ</span></a>
+    <a href="./motor/"><span class="qn-ico">⚙️</span><span class="qn-lb">モーター</span></a>
+    <a href="./stadium/"><span class="qn-ico">🌊</span><span class="qn-lb">24場</span></a>
+    <a href="./players/"><span class="qn-ico">🏆</span><span class="qn-lb">選手図鑑</span></a>
+    <a href="./results/"><span class="qn-ico">🏁</span><span class="qn-lb">結果</span></a>
+    <a href="./payouts/"><span class="qn-ico">💰</span><span class="qn-lb">万舟</span></a>
+    <a href="./fan/"><span class="qn-ico">🎵</span><span class="qn-lb">場の文化</span></a>
+    <a href="./uranai/"><span class="qn-ico">🔮</span><span class="qn-lb">占い</span></a>
+    <a href="./announcers/"><span class="qn-ico">🎙️</span><span class="qn-lb">実況アナ</span></a>
+  </nav>
 
   <div class="trustbar">
     波乱の的中はまだ <b class="metric" id="v-harai" role="button" tabindex="0" aria-controls="tb-panel" aria-expanded="false">36.1%</b>。それも隠さない。堅め <b class="metric" id="v-kata" role="button" tabindex="0" aria-controls="tb-panel" aria-expanded="false">74.8%</b>・主役連対 <b class="metric" id="v-shu" role="button" tabindex="0" aria-controls="tb-panel" aria-expanded="false">77.5%</b><br>
@@ -110,68 +136,71 @@ body {
     <span class="pill">📱 毎朝更新。<b>ホーム画面に置く</b>と一番早い。</span>
   </div>
 
-  <div class="grid">
-    <a class="card c-stadium" href="./stadium/">
-      <span class="badge badge-static">特性</span>
-      <span class="icon">🌊</span>
-      <div class="name">24場特性</div>
-      <div class="desc">イン天国と狭水面、同じ競艇ではない。あなたのホームはどっち型か。</div>
-    </a>
+  <div class="stack">
     <a class="card c-racers" href="./racers/">
       <span class="badge badge-daily">毎日更新</span>
       <span class="icon">📋</span>
-      <div class="name">今日の出走表</div>
-      <div class="desc">今朝の全24場。当地で跳ねる選手は誰か、↑印が教えてくれる。</div>
+      <div class="name">出走表</div>
+      <div class="desc">今日の出走情報まとめ</div>
     </a>
     <a class="card c-highlights" href="./highlights/">
       <span class="badge badge-daily">毎日更新</span>
       <span class="icon">🔍</span>
       <div class="name">見どころ</div>
-      <div class="desc">今日いちばん傾いているレースはどこか。記者の目線で12Rを読む。</div>
+      <div class="desc">今日の注目レース</div>
     </a>
     <a class="card c-motor" href="./motor/">
       <span class="badge badge-daily">毎日更新</span>
       <span class="icon">⚙️</span>
-      <div class="name">モーター成績</div>
-      <div class="desc">超抜機はどの艇に眠っているか。今節の機力を毎朝洗い直す。</div>
+      <div class="name">モーター</div>
+      <div class="desc">各場の機力ランキング</div>
     </a>
-    <a class="card c-results" href="./results/">
-      <span class="badge badge-daily">毎日更新</span>
-      <span class="icon">🏁</span>
-      <div class="name">レース結果表</div>
-      <div class="desc">昨日の全24場、何が起きたか。着順・決まり手・払戻を1画面で。</div>
-    </a>
+  </div>
+
+  <div class="grid">
     <a class="card c-players" href="./players/">
       <span class="badge badge-static">期別</span>
       <span class="icon">🏆</span>
       <div class="name">選手図鑑</div>
-      <div class="desc">まくり屋か、差し屋か。327名の手の内を実数で引く。</div>
+      <div class="desc">全1,643選手のデータ</div>
     </a>
     <div class="card c-payouts">
-      <a class="card-main" href="./payouts/" aria-label="払戻データ"></a>
+      <a class="card-main" href="./payouts/" aria-label="万舟のツボ"></a>
       <span class="badge badge-daily">毎日更新</span>
       <span class="icon">💰</span>
-      <div class="name">払戻データ</div>
-      <div class="desc">万舟はいつ、どのRで出るのか。徳山・桐生の実測。</div>
+      <div class="name">万舟のツボ</div>
+      <div class="desc">高配当が出やすい条件</div>
       <a class="sublink" href="./kiryu-payouts/">桐生の払戻を見る →</a>
     </div>
+    <a class="card c-stadium" href="./stadium/">
+      <span class="badge badge-static">特性</span>
+      <span class="icon">🌊</span>
+      <div class="name">24場のトリセツ</div>
+      <div class="desc">水面や風、場ごとの傾向</div>
+    </a>
+    <a class="card c-results" href="./results/">
+      <span class="badge badge-daily">毎日更新</span>
+      <span class="icon">🏁</span>
+      <div class="name">レース結果</div>
+      <div class="desc">昨日の結果と配当まとめ</div>
+    </a>
+    <a class="card c-fan" href="./fan/">
+      <span class="badge badge-static">文化</span>
+      <span class="icon">🎵</span>
+      <div class="name">場の文化</div>
+      <div class="desc">BGM・予想屋・場の話</div>
+    </a>
     <a class="card c-uranai" href="./uranai/">
       <span class="badge badge-static">遊び</span>
       <span class="icon">🔮</span>
-      <div class="name">占い</div>
-      <div class="desc">今日のあなたと相性のいい選手は。遊び心も実データから。</div>
+      <div class="name">選手占い</div>
+      <div class="desc">今日の相性と勝負運</div>
     </a>
     <a class="card c-announcers" href="./announcers/">
       <span class="badge badge-static">図鑑</span>
       <span class="icon">🎙️</span>
       <div class="name">実況アナ図鑑</div>
-      <div class="desc">あの声は誰か。全24場の実況を知ると中継が変わる。</div>
-    </a>
-    <a class="card c-fan" href="./fan/">
-      <span class="badge badge-static">文化</span>
-      <span class="icon">🎵</span>
-      <div class="name">場文化コレクション</div>
-      <div class="desc">締切BGMと場立ち予想屋。数字に出ない場の“らしさ”を横断で。</div>
+      <div class="desc">24場の実況アナ紹介</div>
     </a>
   </div>
 
