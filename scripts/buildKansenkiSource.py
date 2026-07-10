@@ -68,6 +68,9 @@ VENUE_KEN = {
 }
 
 # 既知の節タイプ辞書（辞書外はnull §4.4）。節名の部分一致で機械付与。
+# 注: 「周年」「記念」の素朴な部分一致は、BTS（場外発売場）の開設周年記念＝一般戦を
+# G1周年と誤付与する（例: ＢＴＳ岡山わけ開設５周年記念競走）。周年G1は series_note_for で
+# 「開設<数字>周年記念」の厳密一致かつBTS表記を含まない場合のみに限定する。
 SERIES_NOTE = [
     ("甲子園", "都道府県対抗の大会"),
     ("ヤングダービー", "若手の全国大会"),
@@ -77,8 +80,6 @@ SERIES_NOTE = [
     ("オールスター", "ファン投票によるSG"),
     ("グランプリ", "賞金上位によるSG年間王者決定戦"),
     ("ダービー", "全国ボートレース地区対抗ではないSG王座戦"),
-    ("周年", "開設周年記念のG1"),
-    ("記念", "開設周年記念のG1"),
 ]
 
 MAN_TH = 10000    # 万舟（三連単配当>10000, payoutsページと統一）
@@ -282,6 +283,10 @@ def series_note_for(series):
     for key, note in SERIES_NOTE:
         if key in s:
             return note
+    # 開設周年記念（G1）: 実在レース場の開設周年のみ。BTS等（場外発売場）の開設周年記念は
+    # 一般戦のため除外（辞書外＝null）。「開設<数字>周年記念」の厳密一致かつBTS表記を含まない場合のみ。
+    if re.search(r"開設[0-9０-９]+周年記念", s) and "ＢＴＳ" not in s and "BTS" not in s:
+        return "開設周年記念のG1"
     return None
 
 
@@ -551,14 +556,15 @@ def build_local_racers(jcd, venue_rows):
     return out
 
 
-def load_style_history(jcd):
-    """同場の直近3本の記事JSONのstyleTypeを新しい順。3本未満はある分・ゼロは空配列。"""
+def load_style_history(jcd, before_hd8):
+    """同場の直近3本の記事JSONのstyleTypeを新しい順。3本未満はある分・ゼロは空配列。
+    before_hd8（掲載日）より前の記事のみ対象＝当日の自記事や未来分は除外（自己参照防止）。"""
     if not os.path.isdir(ARTICLES_DIR):
         return []
     files = []
     for fn in os.listdir(ARTICLES_DIR):
         m = re.match(r"(\d{8})-" + re.escape(jcd) + r"\.json$", fn)
-        if m:
+        if m and m.group(1) < before_hd8:
             files.append((m.group(1), fn))
     files.sort(reverse=True)
     out = []
@@ -794,7 +800,7 @@ def build_venue(jcd, venue_rows, results_map, vstats, kimarite_map, profile,
         "scoreRank": score_rank,
         "focusRacers": focus,
         "localRacers": build_local_racers(jcd, venue_rows),
-        "styleHistory": load_style_history(jcd),
+        "styleHistory": load_style_history(jcd, hd8),
         "prevArticle": load_prev_article(jcd, prev_date8),
     }
 
