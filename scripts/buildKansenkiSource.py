@@ -793,6 +793,7 @@ def build_venue(jcd, venue_rows, results_map, vstats, kimarite_map, profile,
         "grade": None,  # 出走表に級(SG/G1/G2/G3)欄が無く確定不能のためnull（捏造防止）
         "dayNum": day_num,
         "dayLabel": day_label or None,
+        "asOfDay": as_of_day,  # = dayNum-1（N日目終了時点＝前日までの完了日数）。scoreRank=null時も常時付与。
         "seriesNote": series_note_for(series),
         "results": results_block,
         "resultsSummary": build_results_summary(results_block, vstat),

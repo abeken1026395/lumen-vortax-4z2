@@ -90,6 +90,22 @@ def load_csv(path):
 
 def main():
     rac = load_csv(RACERS)
+
+    # --- 2日混載CSV対策（案①）: 当日(JST)の開催日の行だけを処理対象にする ---
+    # 夜間に翌日分がracers_today.csvへ追記されると (場名,レース) キーが両日で衝突し、
+    # 両日に出る場のレースが12艇化して脱落 → 見どころが片日限定の少数場へ縮退する事故を防ぐ。
+    _today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y%m%d')
+    _days = sorted(set((r.get('開催日') or '').strip() for r in rac if (r.get('開催日') or '').strip()))
+    if len(_days) > 1:
+        print("NOTE: CSVに複数開催日が混在: {} → 当日{}の行のみ処理".format(_days, _today))
+    _rac_today = [r for r in rac if (r.get('開催日') or '').strip() == _today]
+    if not _rac_today:
+        # (a) 当日分が0行なら既存highlights・predictionsを上書きせずスキップ（朝の正生成を夜の空振りで壊さない）
+        print("SKIP: 当日{}の出走表行が0（CSV開催日={}）。既存highlights・predictionsを保持（上書きせず）"
+              .format(_today, _days))
+        return
+    rac = _rac_today
+
     try:
         mot = load_csv(MOTORS)
     except Exception:

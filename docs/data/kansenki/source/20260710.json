@@ -1,0 +1,2588 @@
+{
+  "date": "2026-07-10",
+  "venues": [
+    {
+      "jcd": "02",
+      "venue": "戸田",
+      "series": "第８回全国ボートレース甲子園",
+      "grade": null,
+      "dayNum": 4,
+      "dayLabel": "４日目",
+      "asOfDay": 3,
+      "seriesNote": "都道府県対抗の大会",
+      "results": [
+        {
+          "rno": 1,
+          "finish": "3-5-4",
+          "payout": 5050,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 2,
+          "finish": "2-6-3",
+          "payout": 3750,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 3,
+          "finish": "3-1-4",
+          "payout": 3250,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 4,
+          "finish": "1-4-5",
+          "payout": 6750,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 5,
+          "finish": "1-3-4",
+          "payout": 8460,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 6,
+          "finish": "4-6-5",
+          "payout": 5860,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 7,
+          "finish": "1-5-6",
+          "payout": 920,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 8,
+          "finish": "1-2-3",
+          "payout": 7360,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 9,
+          "finish": "3-1-6",
+          "payout": 2150,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 10,
+          "finish": "3-4-1",
+          "payout": 13170,
+          "kimarite": "抜き"
+        },
+        {
+          "rno": 11,
+          "finish": "1-5-3",
+          "payout": 9180,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 12,
+          "finish": "6-1-2",
+          "payout": 11680,
+          "kimarite": "まくり"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 2,
+        "manshuRaces": [
+          {
+            "rno": 10,
+            "combo": "3-4-1",
+            "payout": 13170
+          },
+          {
+            "rno": 12,
+            "combo": "6-1-2",
+            "payout": 11680
+          }
+        ],
+        "venueManRateBase": {
+          "rate": 17.5,
+          "source": "verify_log当場実績",
+          "n": 2171
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 17.5,
+          "haranRate": 37.0,
+          "katameRate": 42.8,
+          "n": 2171,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 6,
+          "setsuRaces": 24,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4573",
+          "name": "佐藤　　　翼",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "埼玉",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 12,
+              "course": 6,
+              "st": 0.05,
+              "finish": 5
+            },
+            {
+              "day": 2,
+              "rno": 3,
+              "course": 5,
+              "st": 0.08,
+              "finish": 1
+            },
+            {
+              "day": 2,
+              "rno": 12,
+              "course": 1,
+              "st": 0.27,
+              "finish": 1
+            },
+            {
+              "day": 3,
+              "rno": 6,
+              "course": 3,
+              "st": 0.15,
+              "finish": 4
+            }
+          ],
+          "motorNo": 2,
+          "motor2renSetsu": 43.75,
+          "motor2renSetsuAvg": 35.4,
+          "zenkokuWinRate": 6.8,
+          "tochiWinRate": 7.36,
+          "tochiHistory": null,
+          "fCount": 1,
+          "stSetsu": [
+            0.05,
+            0.175,
+            0.15
+          ],
+          "stCareer": 0.13,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 29,
+            "runs": 126,
+            "nige": 19,
+            "sashi": 1,
+            "makuri": 6,
+            "makurisashi": 2,
+            "makuriRate": 20.7,
+            "sashiRate": 3.4,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4573",
+          "name": "佐藤　　　翼",
+          "branch": "埼玉",
+          "summary": "A1・全国勝率6.80・当地2連率49.33%"
+        },
+        {
+          "toban": "4547",
+          "name": "中田　　竜太",
+          "branch": "埼玉",
+          "summary": "A1・全国勝率6.77・当地2連率49.57%"
+        },
+        {
+          "toban": "4700",
+          "name": "金子　　和之",
+          "branch": "埼玉",
+          "summary": "A2・全国勝率5.85・当地2連率47.06%"
+        },
+        {
+          "toban": "4201",
+          "name": "佐竹　　友樹",
+          "branch": "埼玉",
+          "summary": "B1・全国勝率4.22・当地2連率39.13%"
+        }
+      ],
+      "styleHistory": [
+        "人物型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "甲子園3日目、埼玉・佐藤翼の起伏と2号機",
+        "body": "第８回全国ボートレース甲子園は3日目。都道府県対抗の大会が、戸田で中盤に入った。埼玉のA1・佐藤翼は、初日を12R・6コースで5着と後方から入った（この一走のSTは.05）。一夜明けた2日目は、3Rを5コースから、続く12Rを1コースからと、コースを問わず2本の白星で畳み掛けた。2号機は今節2連率43.75%で、節平均34.9%を上回る。持ち味は逃げ型で、直近の1着29本のうち19本が逃げ。まくり率20.7%に対し差し率は3.4%と、前へ出て押し切る形が並ぶ。当地勝率7.36は全国勝率6.80を上回り、地元水面での数字が厚い。前日の戸田は12レースで万舟が4本。当場の年間万舟率17.5%を上回るペースで、しかもうち3本（3R・8R・10R）はまくり系の決着だった。イン先頭で決まった割合は年間で42.8%にとどまり、その水面らしい荒さが配当の欄に出た一日だった。3日目、地元埼玉はA1が佐藤と中田竜太の二枚。まくりが万舟を運んだ前夜の戸田で、佐藤の2日目の連勝と、節平均を上回る2号機の数字は、3日目を測る物差しとして先に出そろっている。",
+        "styleType": "人物型"
+      }
+    },
+    {
+      "jcd": "06",
+      "venue": "浜名湖",
+      "series": "男女Ｗ優勝戦 シーラック バリ勝男クン。カップ",
+      "grade": null,
+      "dayNum": 1,
+      "dayLabel": "初日",
+      "asOfDay": 0,
+      "seriesNote": null,
+      "results": [],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 16.4,
+          "source": "verify_log当場実績",
+          "n": 2469
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 16.4,
+          "haranRate": 30.4,
+          "katameRate": 53.1,
+          "n": 2469,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": null,
+        "e30": {
+          "applies": true,
+          "since": "2026-04-09",
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4073",
+          "name": "大橋　純一郎",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "静岡",
+          "isLocal": true,
+          "finishTrail": [],
+          "motorNo": 1,
+          "motor2renSetsu": 42.86,
+          "motor2renSetsuAvg": 37.7,
+          "zenkokuWinRate": 6.67,
+          "tochiWinRate": 5.98,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [],
+          "stCareer": 0.15,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 36,
+            "runs": 131,
+            "nige": 20,
+            "sashi": 2,
+            "makuri": 5,
+            "makurisashi": 7,
+            "makuriRate": 13.9,
+            "sashiRate": 5.6,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4073",
+          "name": "大橋　純一郎",
+          "branch": "静岡",
+          "summary": "A1・全国勝率6.67・当地2連率37.61%"
+        },
+        {
+          "toban": "4190",
+          "name": "長嶋　　万記",
+          "branch": "静岡",
+          "summary": "B2・全国勝率6.59・当地2連率42.62%"
+        },
+        {
+          "toban": "4464",
+          "name": "山下　　友貴",
+          "branch": "静岡",
+          "summary": "A1・全国勝率5.88・当地2連率32.20%"
+        },
+        {
+          "toban": "4209",
+          "name": "藤田　　竜弘",
+          "branch": "静岡",
+          "summary": "A2・全国勝率5.67・当地2連率35.62%"
+        },
+        {
+          "toban": "4689",
+          "name": "豊田　　　結",
+          "branch": "静岡",
+          "summary": "B1・全国勝率5.36・当地2連率39.39%"
+        },
+        {
+          "toban": "5174",
+          "name": "川井　　　萌",
+          "branch": "静岡",
+          "summary": "B2・全国勝率5.32・当地2連率42.97%"
+        },
+        {
+          "toban": "5248",
+          "name": "本田　　　愛",
+          "branch": "静岡",
+          "summary": "B1・全国勝率4.55・当地2連率18.07%"
+        },
+        {
+          "toban": "3156",
+          "name": "金子　　良昭",
+          "branch": "静岡",
+          "summary": "B1・全国勝率4.52・当地2連率35.58%"
+        },
+        {
+          "toban": "3518",
+          "name": "倉田　　郁美",
+          "branch": "静岡",
+          "summary": "B1・全国勝率4.47・当地2連率24.07%"
+        },
+        {
+          "toban": "4317",
+          "name": "木村　紗友希",
+          "branch": "静岡",
+          "summary": "B1・全国勝率4.40・当地2連率27.42%"
+        },
+        {
+          "toban": "3474",
+          "name": "松瀬　　弘美",
+          "branch": "静岡",
+          "summary": "B1・全国勝率4.38・当地2連率27.72%"
+        }
+      ],
+      "styleHistory": [],
+      "prevArticle": {
+        "exists": false
+      }
+    },
+    {
+      "jcd": "08",
+      "venue": "常滑",
+      "series": "名古屋グランパスカップ",
+      "grade": null,
+      "dayNum": 4,
+      "dayLabel": "４日目",
+      "asOfDay": 3,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "1-3-4",
+          "payout": 480,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 2,
+          "finish": "4-1-2",
+          "payout": 6610,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 3,
+          "finish": "3-4-2",
+          "payout": 1920,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 4,
+          "finish": "1-3-4",
+          "payout": 2010,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 5,
+          "finish": "1-6-2",
+          "payout": 2560,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 6,
+          "finish": "1-5-3",
+          "payout": 1960,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 7,
+          "finish": "2-1-4",
+          "payout": 1430,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 8,
+          "finish": "4-2-3",
+          "payout": 2940,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 9,
+          "finish": "1-2-3",
+          "payout": 1000,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 10,
+          "finish": "1-2-5",
+          "payout": 710,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 11,
+          "finish": "1-3-4",
+          "payout": 550,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 12,
+          "finish": "1-3-2",
+          "payout": 720,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 16.2,
+          "source": "verify_log当場実績",
+          "n": 2466
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 16.2,
+          "haranRate": 27.7,
+          "katameRate": 56.7,
+          "n": 2466,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 0,
+          "setsuRaces": 24,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "5089",
+          "name": "前田　　　翔",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "愛知",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 4,
+              "course": 5,
+              "st": 0.19,
+              "finish": 3
+            },
+            {
+              "day": 1,
+              "rno": 12,
+              "course": 1,
+              "st": 0.15,
+              "finish": 1
+            },
+            {
+              "day": 2,
+              "rno": 5,
+              "course": 6,
+              "st": 0.15,
+              "finish": 2
+            },
+            {
+              "day": 2,
+              "rno": 11,
+              "course": 3,
+              "st": 0.22,
+              "finish": 3
+            },
+            {
+              "day": 3,
+              "rno": 7,
+              "course": 2,
+              "st": 0.26,
+              "finish": 1
+            },
+            {
+              "day": 3,
+              "rno": 11,
+              "course": 1,
+              "st": 0.1,
+              "finish": 1
+            }
+          ],
+          "motorNo": 32,
+          "motor2renSetsu": 30.11,
+          "motor2renSetsuAvg": 33.9,
+          "zenkokuWinRate": 6.74,
+          "tochiWinRate": 6.72,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.17,
+            0.185,
+            0.18
+          ],
+          "stCareer": 0.16,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 26,
+            "runs": 109,
+            "nige": 17,
+            "sashi": 3,
+            "makuri": 3,
+            "makurisashi": 2,
+            "makuriRate": 11.5,
+            "sashiRate": 11.5,
+            "maezukeRate": 1.0,
+            "maezukeAvg": 0.03,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "5089",
+          "name": "前田　　　翔",
+          "branch": "愛知",
+          "summary": "A1・全国勝率6.74・当地2連率52.94%"
+        },
+        {
+          "toban": "4199",
+          "name": "北川　　潤二",
+          "branch": "愛知",
+          "summary": "A1・全国勝率6.30・当地2連率44.58%"
+        },
+        {
+          "toban": "5002",
+          "name": "上田　　健太",
+          "branch": "愛知",
+          "summary": "A2・全国勝率5.64・当地2連率38.24%"
+        },
+        {
+          "toban": "3922",
+          "name": "菅沼　　佳昭",
+          "branch": "愛知",
+          "summary": "B1・全国勝率3.64・当地2連率18.18%"
+        }
+      ],
+      "styleHistory": [
+        "データ型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "常滑3日目、前夜は11本が1コース逃げ",
+        "body": "名古屋グランパスカップは3日目。常滑の前夜は、12レース中11本が1コースの逃げで埋まった。唯一それを外したのは2Rの4-5-2（まくり）だけで、三連単の万舟は1本も出なかった。当場のイン先頭決着は年間56.6%（2454レース）、万舟率は16.3%。前夜はその56.6%をさらに上回るインの一色となった。今節はここまで12レースで万舟0本、荒れの気配は数字から消えている。地元・愛知の前田翔は全国勝率6.74、当地勝率6.72とほぼ並ぶA1で、当地2連率は52.94%。初日は12Rを1コースから逃げて白星を挙げた。32号機は今節2連率30.11%で、節平均33.3%をわずかに下回る。愛知はもう一枚、A1の北川潤二（当地2連率44.58%）も控える。前夜は11本の逃げが並び、万舟はゼロ。イン先頭56.6%の常滑が、その通りの一日を返した3日目。この堅さの数字がどこまで続くかを、当日の12レースが上書きしていく。",
+        "styleType": "データ型"
+      }
+    },
+    {
+      "jcd": "09",
+      "venue": "津",
+      "series": "ＢＯＡＴＲＡＣＥ振興会会長賞",
+      "grade": null,
+      "dayNum": 1,
+      "dayLabel": "初日",
+      "asOfDay": 0,
+      "seriesNote": null,
+      "results": [],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 16.3,
+          "source": "verify_log当場実績",
+          "n": 2219
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 16.3,
+          "haranRate": 30.1,
+          "katameRate": 57.5,
+          "n": 2219,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": null,
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4579",
+          "name": "中嶋　健一郎",
+          "yomi": null,
+          "grade": "A2",
+          "branch": "三重",
+          "isLocal": true,
+          "finishTrail": [],
+          "motorNo": 20,
+          "motor2renSetsu": 31.58,
+          "motor2renSetsuAvg": 32.6,
+          "zenkokuWinRate": 6.07,
+          "tochiWinRate": 6.61,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [],
+          "stCareer": 0.16,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 25,
+            "runs": 116,
+            "nige": 15,
+            "sashi": 4,
+            "makuri": 1,
+            "makurisashi": 4,
+            "makuriRate": 4.0,
+            "sashiRate": 16.0,
+            "maezukeRate": 0.9,
+            "maezukeAvg": 0.04,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4579",
+          "name": "中嶋　健一郎",
+          "branch": "三重",
+          "summary": "A2・全国勝率6.07・当地2連率45.26%"
+        },
+        {
+          "toban": "4618",
+          "name": "乃村　　康友",
+          "branch": "三重",
+          "summary": "B1・全国勝率5.07・当地2連率38.00%"
+        },
+        {
+          "toban": "5183",
+          "name": "中野　　孝二",
+          "branch": "三重",
+          "summary": "B1・全国勝率4.76・当地2連率30.61%"
+        },
+        {
+          "toban": "3605",
+          "name": "中村　　守成",
+          "branch": "三重",
+          "summary": "B1・全国勝率4.03・当地2連率31.31%"
+        }
+      ],
+      "styleHistory": [],
+      "prevArticle": {
+        "exists": false
+      }
+    },
+    {
+      "jcd": "10",
+      "venue": "三国",
+      "series": "マスターズリーグ第３戦三国レジェンドカップ",
+      "grade": null,
+      "dayNum": 4,
+      "dayLabel": "４日目",
+      "asOfDay": 3,
+      "seriesNote": "ベテランの全国大会",
+      "results": [
+        {
+          "rno": 1,
+          "finish": "1-2-4",
+          "payout": 1520,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 2,
+          "finish": "1-2-4",
+          "payout": 1690,
+          "kimarite": "抜き"
+        },
+        {
+          "rno": 3,
+          "finish": "1-4-2",
+          "payout": 740,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 4,
+          "finish": "1-2-6",
+          "payout": 1710,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 5,
+          "finish": "5-1-4",
+          "payout": 2090,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 6,
+          "finish": "1-2-6",
+          "payout": 1090,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 7,
+          "finish": "1-5-6",
+          "payout": 2240,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 8,
+          "finish": "1-6-2",
+          "payout": 5960,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 9,
+          "finish": "3-2-6",
+          "payout": 7420,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 10,
+          "finish": "3-1-4",
+          "payout": 1080,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 11,
+          "finish": "1-2-3",
+          "payout": 1040,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 12,
+          "finish": "1-3-5",
+          "payout": 890,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 18.5,
+          "source": "verify_log当場実績",
+          "n": 2147
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 18.5,
+          "haranRate": 33.7,
+          "katameRate": 50.9,
+          "n": 2147,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 1,
+          "setsuRaces": 24,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4061",
+          "name": "萩原　　秀人",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "福井",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 4,
+              "course": 5,
+              "st": 0.16,
+              "finish": 2
+            },
+            {
+              "day": 1,
+              "rno": 12,
+              "course": 1,
+              "st": 0.06,
+              "finish": 1
+            },
+            {
+              "day": 2,
+              "rno": 5,
+              "course": 3,
+              "st": 0.09,
+              "finish": 1
+            },
+            {
+              "day": 2,
+              "rno": 9,
+              "course": 5,
+              "st": 0.22,
+              "finish": 1
+            },
+            {
+              "day": 3,
+              "rno": 4,
+              "course": 1,
+              "st": 0.1,
+              "finish": 1
+            },
+            {
+              "day": 3,
+              "rno": 10,
+              "course": 3,
+              "st": 0.17,
+              "finish": 1
+            }
+          ],
+          "motorNo": 52,
+          "motor2renSetsu": 34.72,
+          "motor2renSetsuAvg": 36.9,
+          "zenkokuWinRate": 7.0,
+          "tochiWinRate": 7.35,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.11,
+            0.155,
+            0.135
+          ],
+          "stCareer": 0.14,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 37,
+            "runs": 148,
+            "nige": 20,
+            "sashi": 4,
+            "makuri": 4,
+            "makurisashi": 7,
+            "makuriRate": 10.8,
+            "sashiRate": 10.8,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.0,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4061",
+          "name": "萩原　　秀人",
+          "branch": "福井",
+          "summary": "A1・全国勝率7.00・当地2連率55.56%"
+        },
+        {
+          "toban": "3654",
+          "name": "武田　　光史",
+          "branch": "福井",
+          "summary": "A2・全国勝率6.93・当地2連率53.29%"
+        },
+        {
+          "toban": "3548",
+          "name": "室田　　泰史",
+          "branch": "福井",
+          "summary": "A2・全国勝率5.24・当地2連率39.84%"
+        },
+        {
+          "toban": "3692",
+          "name": "竹腰　　正樹",
+          "branch": "福井",
+          "summary": "B1・全国勝率4.92・当地2連率28.43%"
+        },
+        {
+          "toban": "3620",
+          "name": "信濃　　由行",
+          "branch": "福井",
+          "summary": "B1・全国勝率3.94・当地2連率22.73%"
+        }
+      ],
+      "styleHistory": [
+        "群像型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "三国3日目、ベテラン大会に福井勢五枚",
+        "body": "マスターズリーグ第３戦三国レジェンドカップは3日目。ベテランの全国大会が、三国の水面で続く。地元・福井の顔ぶれは厚い。柱はA1・萩原秀人で、全国勝率7.00・当地勝率7.35と当地で数字を上げ、当地2連率は55.56%。次いでA2の武田光史が全国勝率6.93・当地2連率53.29%、室田泰史と続き、B1の竹腰・信濃が支える五枚だ。萩原は節内で白星を重ねている。初日は12Rを1コースからST.06で逃げ、2日目は5Rと9Rを続けて頭に立った。前夜の三国は、差しが目立つ一日だった。12レースの決まり手は差しが5本を占め、万舟は11Rの2-5-6・16220円（差し）の1本。当場の年間万舟率18.6%（2135レース）に照らせば、この日は1本にとどまる堅めの数字だった。イン先頭決着は年間50.8%と、インと外がほぼ半々の水面である。52号機に乗る萩原は今節2連率34.72%で、節平均36.6%をわずかに下回る。ベテランの実績が並ぶ三国の3日目。当地2連率55.56%の萩原を先頭に、福井の五枚が、差しの通った前夜の水面をどう塗り替えるか。地元の当地成績が、3日目の見どころを先に示している。",
+        "styleType": "群像型"
+      }
+    },
+    {
+      "jcd": "11",
+      "venue": "びわこ",
+      "series": "びわこヴィーナス！第７回酒処京都新京極スタンド",
+      "grade": null,
+      "dayNum": 4,
+      "dayLabel": "４日目",
+      "asOfDay": 3,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "5-1-4",
+          "payout": 9980,
+          "kimarite": "抜き"
+        },
+        {
+          "rno": 2,
+          "finish": "3-5-2",
+          "payout": 6840,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 3,
+          "finish": "1-3-2",
+          "payout": 3700,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 4,
+          "finish": "3-5-1",
+          "payout": 4810,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 5,
+          "finish": "1-2-4",
+          "payout": 1810,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 6,
+          "finish": "1-5-3",
+          "payout": 2030,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 7,
+          "finish": "2-5-1",
+          "payout": 6890,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 8,
+          "finish": "3-1-2",
+          "payout": 3120,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 9,
+          "finish": "2-1-3",
+          "payout": 1900,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 10,
+          "finish": "1-4-6",
+          "payout": 1700,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 11,
+          "finish": "3-2-4",
+          "payout": 46910,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 12,
+          "finish": "1-4-6",
+          "payout": 1910,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 1,
+        "manshuRaces": [
+          {
+            "rno": 11,
+            "combo": "3-2-4",
+            "payout": 46910
+          }
+        ],
+        "venueManRateBase": {
+          "rate": 16.4,
+          "source": "verify_log当場実績",
+          "n": 2250
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 16.4,
+          "haranRate": 31.4,
+          "katameRate": 52.8,
+          "n": 2250,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 5,
+          "setsuRaces": 24,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": true,
+          "since": "2025-05-01",
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "3900",
+          "name": "香川　　素子",
+          "yomi": null,
+          "grade": "A2",
+          "branch": "滋賀",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 2,
+              "course": 4,
+              "st": 0.23,
+              "finish": 2
+            },
+            {
+              "day": 1,
+              "rno": 10,
+              "course": 1,
+              "st": 0.09,
+              "finish": 2
+            },
+            {
+              "day": 2,
+              "rno": 4,
+              "course": 5,
+              "st": 0.24,
+              "finish": 2
+            },
+            {
+              "day": 2,
+              "rno": 12,
+              "course": 3,
+              "st": 0.18,
+              "finish": 4
+            },
+            {
+              "day": 3,
+              "rno": 7,
+              "course": 2,
+              "st": 0.09,
+              "finish": 1
+            },
+            {
+              "day": 3,
+              "rno": 11,
+              "course": 6,
+              "st": 0.19,
+              "finish": 5
+            }
+          ],
+          "motorNo": 37,
+          "motor2renSetsu": 28.33,
+          "motor2renSetsuAvg": 32.8,
+          "zenkokuWinRate": 6.38,
+          "tochiWinRate": 6.61,
+          "tochiHistory": null,
+          "fCount": 1,
+          "stSetsu": [
+            0.16,
+            0.21,
+            0.14
+          ],
+          "stCareer": 0.18,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 27,
+            "runs": 112,
+            "nige": 15,
+            "sashi": 3,
+            "makuri": 4,
+            "makurisashi": 4,
+            "makuriRate": 14.8,
+            "sashiRate": 11.1,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.02,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "3900",
+          "name": "香川　　素子",
+          "branch": "滋賀",
+          "summary": "A2・全国勝率6.38・当地2連率52.78%"
+        },
+        {
+          "toban": "3580",
+          "name": "水口　　由紀",
+          "branch": "滋賀",
+          "summary": "B1・全国勝率4.10・当地2連率18.03%"
+        }
+      ],
+      "styleHistory": [
+        "水面型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "びわこ3日目、前夜の万舟4本は四様の手",
+        "body": "びわこヴィーナス！第７回酒処京都新京極スタンドは3日目。前夜のびわこは、四つの万舟が四つの決まり手に散った。2Rは4-3-6のまくりで22620円、3Rは1-5-6の逃げで37450円、10Rは3-6-4の差しで23650円、12Rは5-1-4のまくり差しで20310円。高配当の決まり手が一つに寄らなかった一日だ。当場の年間万舟率は16.5%（2237レース）、イン先頭決着は52.9%。前夜の万舟4本は、その16.5%を上回るペースだった。びわこはE30該当場でもある（2025年5月1日以降）。地元・滋賀の香川素子はA2で、全国勝率6.38に対し当地勝率6.61と当地で上げるタイプ。当地2連率は52.78%と地元での数字が厚い。ただF1を持ち、節内の平均STは初日.16、2日目.21と、通期の.18をまたぐ数字が並ぶ。37号機は今節2連率28.33%で、節平均32.4%を下回る。前夜は4本の万舟が四つの手に散ったびわこ。イン先頭52.9%の水面が逃げにも外にも振れた3日目、当日の12レースがその散らばりをどう束ねるか。",
+        "styleType": "水面型"
+      }
+    },
+    {
+      "jcd": "14",
+      "venue": "鳴門",
+      "series": "第１１回サッポロビールカップ競走",
+      "grade": null,
+      "dayNum": 2,
+      "dayLabel": "２日目",
+      "asOfDay": 1,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "5-1-4",
+          "payout": 13670,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 2,
+          "finish": "2-5-4",
+          "payout": 8840,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 3,
+          "finish": "4-1-2",
+          "payout": 3530,
+          "kimarite": "抜き"
+        },
+        {
+          "rno": 4,
+          "finish": "2-1-5",
+          "payout": 1170,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 5,
+          "finish": "6-2-4",
+          "payout": 7490,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 6,
+          "finish": "4-3-5",
+          "payout": 26970,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 7,
+          "finish": "4-5-2",
+          "payout": 2320,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 8,
+          "finish": "3-2-1",
+          "payout": 3850,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 9,
+          "finish": "4-1-5",
+          "payout": 10510,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 10,
+          "finish": "6-3-2",
+          "payout": 36120,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 11,
+          "finish": "1-3-2",
+          "payout": 1050,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 12,
+          "finish": "1-3-4",
+          "payout": 1330,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 4,
+        "manshuRaces": [
+          {
+            "rno": 1,
+            "combo": "5-1-4",
+            "payout": 13670
+          },
+          {
+            "rno": 6,
+            "combo": "4-3-5",
+            "payout": 26970
+          },
+          {
+            "rno": 9,
+            "combo": "4-1-5",
+            "payout": 10510
+          },
+          {
+            "rno": 10,
+            "combo": "6-3-2",
+            "payout": 36120
+          }
+        ],
+        "venueManRateBase": {
+          "rate": 19.5,
+          "source": "verify_log当場実績",
+          "n": 2119
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 19.5,
+          "haranRate": 34.9,
+          "katameRate": 47.9,
+          "n": 2119,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 4,
+          "setsuRaces": 12,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "3333",
+          "name": "丸尾　　義孝",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "徳島",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 1,
+              "course": 1,
+              "st": 0.21,
+              "finish": 2
+            },
+            {
+              "day": 1,
+              "rno": 12,
+              "course": 5,
+              "st": 0.2,
+              "finish": 5
+            }
+          ],
+          "motorNo": 65,
+          "motor2renSetsu": 42.55,
+          "motor2renSetsuAvg": 33.8,
+          "zenkokuWinRate": 6.43,
+          "tochiWinRate": 6.66,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.205
+          ],
+          "stCareer": 0.15,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 34,
+            "runs": 131,
+            "nige": 19,
+            "sashi": 6,
+            "makuri": 1,
+            "makurisashi": 7,
+            "makuriRate": 2.9,
+            "sashiRate": 17.6,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.03,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "3333",
+          "name": "丸尾　　義孝",
+          "branch": "徳島",
+          "summary": "A1・全国勝率6.43・当地2連率47.20%"
+        },
+        {
+          "toban": "4247",
+          "name": "齊藤　　　優",
+          "branch": "徳島",
+          "summary": "B1・全国勝率5.27・当地2連率33.02%"
+        },
+        {
+          "toban": "5249",
+          "name": "三木　　晴斗",
+          "branch": "徳島",
+          "summary": "B1・全国勝率4.96・当地2連率33.64%"
+        },
+        {
+          "toban": "5403",
+          "name": "藤山　　湧太",
+          "branch": "徳島",
+          "summary": "B2・全国勝率2.23・当地2連率5.88%"
+        },
+        {
+          "toban": "5056",
+          "name": "西岡　　成美",
+          "branch": "徳島",
+          "summary": "B2・全国勝率0.00・当地2連率37.14%"
+        }
+      ],
+      "styleHistory": [
+        "展望型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "鳴門初日展望、徳島はA1丸尾ら地元5人",
+        "body": "第１１回サッポロビールカップ競走が、鳴門で初日を迎える。まず見るべきは地元・徳島の顔ぶれだ。並んだのは5人。A1は丸尾義孝ただ一枚で、あとはB1の齊藤優と三木晴斗、B2が二人という構成になる。柱の丸尾は、全国勝率6.43に対し当地勝率6.66と、鳴門の水面でわずかに数字を上げる。当地2連率は47.20%。65号機は今節2連率42.55%で、節平均33.2%を上回る一台だ。決まり手は逃げ型で、直近1着34本の内訳は逃げ19・まくり差し7。差し率17.6%がまくり率2.9%を上回り、内から捌く形が持ち味になる。地元の若手は当地の持ち点をこれから積む段階で、齊藤の当地2連率は33.02%、三木は33.64%。A1一枚を、B級四枚が追う並びだ。場の実数も押さえておきたい。鳴門は過去1年でイン先頭決着が48.1%、年間万舟率は19.5%、荒れ率は34.8%。数字の上では、インで決まる日と、外が一撃を差し込む日が同居する水面である。初日は、その48.1%のインに、当地勝率6.66の丸尾がどう乗るか。徳島五枚の並びから、鳴門の一節がここから動き出す。",
+        "styleType": "展望型"
+      }
+    },
+    {
+      "jcd": "15",
+      "venue": "丸亀",
+      "series": "中讃テレビ杯",
+      "grade": null,
+      "dayNum": 2,
+      "dayLabel": "２日目",
+      "asOfDay": 1,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "4-2-5",
+          "payout": 10350,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 2,
+          "finish": "1-3-2",
+          "payout": 6460,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 3,
+          "finish": "1-2-4",
+          "payout": 1640,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 4,
+          "finish": "4-3-5",
+          "payout": 1870,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 5,
+          "finish": "1-5-3",
+          "payout": 2100,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 6,
+          "finish": "5-6-1",
+          "payout": 2640,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 7,
+          "finish": "3-1-4",
+          "payout": 2420,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 8,
+          "finish": "1-5-2",
+          "payout": 1490,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 1,
+        "manshuRaces": [
+          {
+            "rno": 1,
+            "combo": "4-2-5",
+            "payout": 10350
+          }
+        ],
+        "venueManRateBase": {
+          "rate": 17.2,
+          "source": "verify_log当場実績",
+          "n": 2322
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 17.2,
+          "haranRate": 31.9,
+          "katameRate": 55.2,
+          "n": 2322,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 1,
+          "setsuRaces": 8,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "3908",
+          "name": "重成　　一人",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "香川",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 7,
+              "course": 4,
+              "st": 0.11,
+              "finish": 3
+            },
+            {
+              "day": 1,
+              "rno": 12,
+              "course": 1,
+              "st": 0.09,
+              "finish": 2
+            }
+          ],
+          "motorNo": 36,
+          "motor2renSetsu": 35.9,
+          "motor2renSetsuAvg": 33.8,
+          "zenkokuWinRate": 5.97,
+          "tochiWinRate": 6.7,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.1
+          ],
+          "stCareer": 0.15,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 36,
+            "runs": 127,
+            "nige": 16,
+            "sashi": 7,
+            "makuri": 2,
+            "makurisashi": 6,
+            "makuriRate": 5.6,
+            "sashiRate": 19.4,
+            "maezukeRate": 0.8,
+            "maezukeAvg": -0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "3908",
+          "name": "重成　　一人",
+          "branch": "香川",
+          "summary": "A1・全国勝率5.97・当地2連率46.53%"
+        },
+        {
+          "toban": "3660",
+          "name": "長谷川　親王",
+          "branch": "香川",
+          "summary": "B1・全国勝率3.14・当地2連率15.19%"
+        },
+        {
+          "toban": "3832",
+          "name": "下田　　哲也",
+          "branch": "香川",
+          "summary": "B2・全国勝率2.71・当地2連率24.05%"
+        }
+      ],
+      "styleHistory": [
+        "展望型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "丸亀初日展望、香川はA1重成ら3人",
+        "body": "中讃テレビ杯が丸亀で開幕する。地元・香川から名を連ねたのは3人。A1は重成一人ただ一枚で、あとはB1の長谷川親王とB2の下田哲也が続く。重成は全国勝率5.97に対し当地勝率6.70と、丸亀の水面で数字を上げるタイプ。当地2連率は46.53%だ。乗る36号機は今節2連率35.9%で、節平均33.6%を上回る一台。決まり手は逃げ型で、直近1着36本の内訳は逃げ16・まくり差し6。差し率19.4%がまくり率5.6%を上回り、内から差す形が持ち味になる。場の実数も押さえておきたい。丸亀は過去1年でイン先頭決着が55.2%（2314レース）、年間万舟率は17.2%、荒れ率は31.9%。半分強がインで決まる、締まった数字が並ぶ。初日の丸亀は、A1・重成の一枚を地元の柱に据える。その当地勝率6.70と、イン先頭55.2%という場の数字を並べて、香川三枚の一節が幕を開ける。",
+        "styleType": "展望型"
+      }
+    },
+    {
+      "jcd": "16",
+      "venue": "児島",
+      "series": "ＢＴＳ岡山わけ開設５周年記念競走",
+      "grade": null,
+      "dayNum": 2,
+      "dayLabel": "２日目",
+      "asOfDay": 1,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "1-6-5",
+          "payout": 10310,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 2,
+          "finish": "1-4-2",
+          "payout": 470,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 3,
+          "finish": "5-3-1",
+          "payout": 4360,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 4,
+          "finish": "1-2-5",
+          "payout": 4650,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 5,
+          "finish": "4-3-5",
+          "payout": 2640,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 6,
+          "finish": "1-2-3",
+          "payout": 550,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 7,
+          "finish": "2-1-4",
+          "payout": 4620,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 8,
+          "finish": "5-1-6",
+          "payout": 2120,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 9,
+          "finish": "1-4-6",
+          "payout": 1060,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 10,
+          "finish": "5-3-6",
+          "payout": 5470,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 11,
+          "finish": "1-5-4",
+          "payout": 11310,
+          "kimarite": "抜き"
+        },
+        {
+          "rno": 12,
+          "finish": "1-2-4",
+          "payout": 1380,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 2,
+        "manshuRaces": [
+          {
+            "rno": 1,
+            "combo": "1-6-5",
+            "payout": 10310
+          },
+          {
+            "rno": 11,
+            "combo": "1-5-4",
+            "payout": 11310
+          }
+        ],
+        "venueManRateBase": {
+          "rate": 17.9,
+          "source": "verify_log当場実績",
+          "n": 2134
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 17.9,
+          "haranRate": 33.7,
+          "katameRate": 55.8,
+          "n": 2134,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 2,
+          "setsuRaces": 12,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4536",
+          "name": "喜井　つかさ",
+          "yomi": null,
+          "grade": "A2",
+          "branch": "岡山",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 2,
+              "course": 1,
+              "st": 0.24,
+              "finish": 1
+            },
+            {
+              "day": 1,
+              "rno": 11,
+              "course": 2,
+              "st": 0.16,
+              "finish": 5
+            }
+          ],
+          "motorNo": 35,
+          "motor2renSetsu": 48.34,
+          "motor2renSetsuAvg": 34.5,
+          "zenkokuWinRate": 5.87,
+          "tochiWinRate": 5.66,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.2
+          ],
+          "stCareer": 0.16,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 25,
+            "runs": 126,
+            "nige": 16,
+            "sashi": 0,
+            "makuri": 6,
+            "makurisashi": 0,
+            "makuriRate": 24.0,
+            "sashiRate": 0.0,
+            "maezukeRate": 0.0,
+            "maezukeAvg": 0.02,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4536",
+          "name": "喜井　つかさ",
+          "branch": "岡山",
+          "summary": "A2・全国勝率5.87・当地2連率37.70%"
+        },
+        {
+          "toban": "4635",
+          "name": "峰重　　力也",
+          "branch": "岡山",
+          "summary": "A2・全国勝率5.52・当地2連率36.99%"
+        },
+        {
+          "toban": "4580",
+          "name": "長谷川　雅和",
+          "branch": "岡山",
+          "summary": "B1・全国勝率5.43・当地2連率41.51%"
+        },
+        {
+          "toban": "3930",
+          "name": "岸本　　　隆",
+          "branch": "岡山",
+          "summary": "A2・全国勝率4.88・当地2連率47.22%"
+        },
+        {
+          "toban": "3982",
+          "name": "福田　　　理",
+          "branch": "岡山",
+          "summary": "B1・全国勝率3.66・当地2連率20.83%"
+        },
+        {
+          "toban": "5374",
+          "name": "木山　　大聖",
+          "branch": "岡山",
+          "summary": "B1・全国勝率2.76・当地2連率7.84%"
+        },
+        {
+          "toban": "5373",
+          "name": "諏訪　　玲奈",
+          "branch": "岡山",
+          "summary": "B2・全国勝率2.71・当地2連率0.00%"
+        },
+        {
+          "toban": "5447",
+          "name": "岡本　　亜子",
+          "branch": "岡山",
+          "summary": "B2・全国勝率1.05・当地2連率0.00%"
+        }
+      ],
+      "styleHistory": [
+        "展望型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "児島初日展望、岡山8人と喜井の35号機",
+        "body": "ＢＴＳ岡山わけ開設５周年記念競走が、児島で初日を迎える。地元・岡山からは8人が名を連ねた。人数は多いが、級で見るとA2が最上位で、喜井つかさ・峰重力也・岸本隆の三人。B級が五人という構成だ。注目は喜井の乗る35号機。今節2連率は48.34%で、節平均34.1%を大きく上回る一台に当たった。喜井自身は全国勝率5.87・当地勝率5.66。決まり手は逃げ型だが、直近1着25本のうち逃げが16本、残るまくりが6本で、差しは0本。まくり率24.0%・差し率0.0%と、逃げるか外から回すかの二択に振れている。地元でもう一枚、長谷川雅和は当地2連率41.51%、岸本隆は47.22%と、当地の数字ではA2・B1が上位級に迫る。場の実数は、イン先頭決着が年間55.8%（2122レース）、万舟率17.9%、荒れ率33.7%。半分強はインだが、三割強で荒れも差し込む水面だ。初日、当地2連率で最も高いのは岸本の47.22%。岡山八枚の並びと、48.34%の好機に乗る喜井が、児島の開幕を形づくる。",
+        "styleType": "展望型"
+      }
+    },
+    {
+      "jcd": "19",
+      "venue": "下関",
+      "series": "ＭＮＢＲ下関３ｒｄ マクール杯争奪戦",
+      "grade": null,
+      "dayNum": 1,
+      "dayLabel": "初日",
+      "asOfDay": 0,
+      "seriesNote": null,
+      "results": [],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 14.9,
+          "source": "verify_log当場実績",
+          "n": 2067
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 14.9,
+          "haranRate": 27.5,
+          "katameRate": 60.3,
+          "n": 2067,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": null,
+        "e30": {
+          "applies": true,
+          "since": "2026-04-29",
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4950",
+          "name": "高岡　　竜也",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "山口",
+          "isLocal": true,
+          "finishTrail": [],
+          "motorNo": 22,
+          "motor2renSetsu": 32.43,
+          "motor2renSetsuAvg": 32.2,
+          "zenkokuWinRate": 6.77,
+          "tochiWinRate": 5.73,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [],
+          "stCareer": 0.16,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 43,
+            "runs": 141,
+            "nige": 23,
+            "sashi": 3,
+            "makuri": 10,
+            "makurisashi": 2,
+            "makuriRate": 23.3,
+            "sashiRate": 7.0,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4950",
+          "name": "高岡　　竜也",
+          "branch": "山口",
+          "summary": "A1・全国勝率6.77・当地2連率40.38%"
+        },
+        {
+          "toban": "4396",
+          "name": "大田　　直弥",
+          "branch": "山口",
+          "summary": "B1・全国勝率4.85・当地2連率39.33%"
+        },
+        {
+          "toban": "4226",
+          "name": "村田　　浩司",
+          "branch": "山口",
+          "summary": "B1・全国勝率4.48・当地2連率26.83%"
+        },
+        {
+          "toban": "3976",
+          "name": "内田　　　圭",
+          "branch": "山口",
+          "summary": "B1・全国勝率3.52・当地2連率31.58%"
+        }
+      ],
+      "styleHistory": [],
+      "prevArticle": {
+        "exists": false
+      }
+    },
+    {
+      "jcd": "20",
+      "venue": "若松",
+      "series": "シャボン玉石けん杯",
+      "grade": null,
+      "dayNum": 4,
+      "dayLabel": "４日目",
+      "asOfDay": 3,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "2-1-3",
+          "payout": 4100,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 2,
+          "finish": "2-3-5",
+          "payout": 9080,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 3,
+          "finish": "2-3-1",
+          "payout": 2670,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 4,
+          "finish": "1-2-6",
+          "payout": 3550,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 5,
+          "finish": "1-2-3",
+          "payout": 700,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 6,
+          "finish": "4-1-6",
+          "payout": 3020,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 7,
+          "finish": "4-1-5",
+          "payout": 4360,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 8,
+          "finish": "1-3-2",
+          "payout": 720,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 15.8,
+          "source": "verify_log当場実績",
+          "n": 2157
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 15.8,
+          "haranRate": 30.6,
+          "katameRate": 57.7,
+          "n": 2157,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 2,
+          "setsuRaces": 20,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4350",
+          "name": "篠崎　　元志",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "福岡",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 7,
+              "course": 4,
+              "st": 0.17,
+              "finish": 2
+            },
+            {
+              "day": 1,
+              "rno": 12,
+              "course": 3,
+              "st": 0.09,
+              "finish": 2
+            },
+            {
+              "day": 2,
+              "rno": 6,
+              "course": 5,
+              "st": 0.16,
+              "finish": 2
+            },
+            {
+              "day": 2,
+              "rno": 12,
+              "course": 1,
+              "st": 0.16,
+              "finish": 2
+            },
+            {
+              "day": 3,
+              "rno": 9,
+              "course": 5,
+              "st": 0.14,
+              "finish": 1
+            }
+          ],
+          "motorNo": 6,
+          "motor2renSetsu": 33.82,
+          "motor2renSetsuAvg": 35.8,
+          "zenkokuWinRate": 7.65,
+          "tochiWinRate": 7.09,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.13,
+            0.16,
+            0.14
+          ],
+          "stCareer": 0.13,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 41,
+            "runs": 120,
+            "nige": 24,
+            "sashi": 4,
+            "makuri": 9,
+            "makurisashi": 2,
+            "makuriRate": 22.0,
+            "sashiRate": 9.8,
+            "maezukeRate": 3.3,
+            "maezukeAvg": 0.15,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4350",
+          "name": "篠崎　　元志",
+          "branch": "福岡",
+          "summary": "A1・全国勝率7.65・当地2連率46.81%"
+        },
+        {
+          "toban": "4371",
+          "name": "西山　　貴浩",
+          "branch": "福岡",
+          "summary": "A1・全国勝率7.24・当地2連率58.14%"
+        },
+        {
+          "toban": "3574",
+          "name": "大神　　康司",
+          "branch": "福岡",
+          "summary": "A1・全国勝率6.19・当地2連率54.67%"
+        },
+        {
+          "toban": "3853",
+          "name": "岩崎　　正哉",
+          "branch": "福岡",
+          "summary": "A2・全国勝率6.07・当地2連率41.10%"
+        },
+        {
+          "toban": "4079",
+          "name": "出畑　　孝典",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.68・当地2連率47.06%"
+        },
+        {
+          "toban": "4363",
+          "name": "大野　　芳顕",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.66・当地2連率40.30%"
+        },
+        {
+          "toban": "5107",
+          "name": "松本　　真広",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.42・当地2連率18.75%"
+        },
+        {
+          "toban": "4346",
+          "name": "前田　健太郎",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.28・当地2連率17.02%"
+        }
+      ],
+      "styleHistory": [
+        "群像型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "若松3日目、福岡A1が篠崎ら三枚",
+        "body": "シャボン玉石けん杯は3日目。若松に集う地元・福岡の層が厚い。A1だけで篠崎元志、西山貴浩、大神康司の三枚。筆頭の篠崎は全国勝率7.65と、この日の地元勢で最も高い数字を持つ。当地勝率は7.09、当地2連率46.81%。西山は当地2連率58.14%、大神は54.67%と、当地の数字ではむしろ二人が篠崎を上回る。A2の岩崎正哉・出畑孝典・大野芳顕まで続き、福岡は上位級がずらりと並ぶ。前夜の若松は、幕開けから荒れた。1Rがいきなり2-6-5の差しで45030円。5Rも4-3-5のまくりで36280円と、万舟2本はいずれも外からの決着だった。決まり手を見ると、前夜はまくり差しが4本を数え、外を回す形が目立った。当場の年間万舟率は15.8%（2139レース）で、前夜の万舟2本はほぼその実勢どおり。イン先頭決着は57.9%だ。篠崎の6号機は今節2連率33.82%で、節平均35.4%をわずかに下回る。全国勝率7.65の篠崎、当地2連率58.14%の西山、54.67%の大神——数字の柱が場所を変えて三本立つのが、この3日目の福岡勢だ。当地で上げる二枚と全国で押す一枚、どの数字が水面に出るかを、当日の並びが分ける。",
+        "styleType": "群像型"
+      }
+    },
+    {
+      "jcd": "22",
+      "venue": "福岡",
+      "series": "山笠特選！ＢＯＡＴ ＲＡＣＥ振興会会長賞",
+      "grade": null,
+      "dayNum": 1,
+      "dayLabel": "初日",
+      "asOfDay": 0,
+      "seriesNote": null,
+      "results": [],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 14.2,
+          "source": "verify_log当場実績",
+          "n": 2339
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 14.2,
+          "haranRate": 26.4,
+          "katameRate": 57.2,
+          "n": 2339,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": null,
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4288",
+          "name": "永田　　啓二",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "福岡",
+          "isLocal": true,
+          "finishTrail": [],
+          "motorNo": 37,
+          "motor2renSetsu": 30.99,
+          "motor2renSetsuAvg": 29.1,
+          "zenkokuWinRate": 7.58,
+          "tochiWinRate": 6.98,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [],
+          "stCareer": 0.12,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 55,
+            "runs": 141,
+            "nige": 27,
+            "sashi": 3,
+            "makuri": 17,
+            "makurisashi": 5,
+            "makuriRate": 30.9,
+            "sashiRate": 5.5,
+            "maezukeRate": 0.0,
+            "maezukeAvg": -0.01,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4288",
+          "name": "永田　　啓二",
+          "branch": "福岡",
+          "summary": "A1・全国勝率7.58・当地2連率55.42%"
+        },
+        {
+          "toban": "4256",
+          "name": "渡辺　　浩司",
+          "branch": "福岡",
+          "summary": "A1・全国勝率7.44・当地2連率56.43%"
+        },
+        {
+          "toban": "4236",
+          "name": "松村　　　敏",
+          "branch": "福岡",
+          "summary": "A1・全国勝率7.20・当地2連率60.00%"
+        },
+        {
+          "toban": "4736",
+          "name": "高倉　　和士",
+          "branch": "福岡",
+          "summary": "A1・全国勝率7.15・当地2連率42.37%"
+        },
+        {
+          "toban": "4351",
+          "name": "里岡　　右貴",
+          "branch": "福岡",
+          "summary": "A1・全国勝率6.90・当地2連率56.18%"
+        },
+        {
+          "toban": "4504",
+          "name": "前田　　将太",
+          "branch": "福岡",
+          "summary": "A1・全国勝率6.52・当地2連率55.77%"
+        },
+        {
+          "toban": "4451",
+          "name": "松崎　祐太郎",
+          "branch": "福岡",
+          "summary": "A2・全国勝率6.35・当地2連率38.10%"
+        },
+        {
+          "toban": "4958",
+          "name": "溝口　海義也",
+          "branch": "福岡",
+          "summary": "A1・全国勝率6.33・当地2連率34.78%"
+        },
+        {
+          "toban": "4506",
+          "name": "稗田　　聖也",
+          "branch": "福岡",
+          "summary": "A1・全国勝率6.24・当地2連率38.36%"
+        },
+        {
+          "toban": "4232",
+          "name": "笠　　　雅雄",
+          "branch": "福岡",
+          "summary": "B1・全国勝率6.21・当地2連率11.11%"
+        },
+        {
+          "toban": "4330",
+          "name": "奈須　　啓太",
+          "branch": "福岡",
+          "summary": "A2・全国勝率6.19・当地2連率48.48%"
+        },
+        {
+          "toban": "4403",
+          "name": "木下　　大將",
+          "branch": "福岡",
+          "summary": "A2・全国勝率6.15・当地2連率42.50%"
+        },
+        {
+          "toban": "4522",
+          "name": "古澤　　光紀",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.96・当地2連率49.11%"
+        },
+        {
+          "toban": "4551",
+          "name": "三川　　昂暁",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.87・当地2連率50.00%"
+        },
+        {
+          "toban": "4679",
+          "name": "植田　　太一",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.85・当地2連率39.73%"
+        },
+        {
+          "toban": "4789",
+          "name": "古賀　　智之",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.74・当地2連率45.45%"
+        },
+        {
+          "toban": "4474",
+          "name": "渡辺　　　崇",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.55・当地2連率31.58%"
+        },
+        {
+          "toban": "5210",
+          "name": "藤井　　公人",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.54・当地2連率36.84%"
+        },
+        {
+          "toban": "4314",
+          "name": "青木　幸太郎",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.51・当地2連率60.00%"
+        },
+        {
+          "toban": "4861",
+          "name": "田中　　宏樹",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.45・当地2連率18.75%"
+        },
+        {
+          "toban": "4395",
+          "name": "下河　　雅史",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.41・当地2連率30.00%"
+        },
+        {
+          "toban": "4684",
+          "name": "楠原　　翔太",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.38・当地2連率38.36%"
+        },
+        {
+          "toban": "5240",
+          "name": "高橋　　龍治",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.33・当地2連率20.75%"
+        },
+        {
+          "toban": "4588",
+          "name": "田中　　京介",
+          "branch": "福岡",
+          "summary": "A2・全国勝率5.33・当地2連率31.15%"
+        },
+        {
+          "toban": "5239",
+          "name": "上野　　俊樹",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.12・当地2連率15.94%"
+        },
+        {
+          "toban": "4204",
+          "name": "柴田　　大輔",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.12・当地2連率35.90%"
+        },
+        {
+          "toban": "4632",
+          "name": "長尾　京志郎",
+          "branch": "福岡",
+          "summary": "B1・全国勝率5.05・当地2連率27.08%"
+        },
+        {
+          "toban": "4329",
+          "name": "小松　　卓司",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.94・当地2連率31.25%"
+        },
+        {
+          "toban": "5351",
+          "name": "齊藤　　　廉",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.81・当地2連率11.32%"
+        },
+        {
+          "toban": "4301",
+          "name": "関　　　裕也",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.78・当地2連率25.00%"
+        },
+        {
+          "toban": "5237",
+          "name": "永松　　良教",
+          "branch": "福岡",
+          "summary": "B2・全国勝率4.68・当地2連率29.85%"
+        },
+        {
+          "toban": "4952",
+          "name": "吉武　　真也",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.60・当地2連率9.09%"
+        },
+        {
+          "toban": "4864",
+          "name": "小川　日紀太",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.54・当地2連率34.69%"
+        },
+        {
+          "toban": "5337",
+          "name": "出畑　　孝成",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.47・当地2連率16.00%"
+        },
+        {
+          "toban": "4151",
+          "name": "下河　　誉史",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.36・当地2連率35.00%"
+        },
+        {
+          "toban": "5263",
+          "name": "花田　　凱成",
+          "branch": "福岡",
+          "summary": "B1・全国勝率4.23・当地2連率26.32%"
+        },
+        {
+          "toban": "5138",
+          "name": "村本　　大成",
+          "branch": "福岡",
+          "summary": "B1・全国勝率3.86・当地2連率8.20%"
+        },
+        {
+          "toban": "5053",
+          "name": "山口　　広樹",
+          "branch": "福岡",
+          "summary": "B1・全国勝率3.72・当地2連率26.09%"
+        },
+        {
+          "toban": "5152",
+          "name": "丸山　　祐也",
+          "branch": "福岡",
+          "summary": "B1・全国勝率3.57・当地2連率20.00%"
+        },
+        {
+          "toban": "5284",
+          "name": "嘉手苅　徹哉",
+          "branch": "福岡",
+          "summary": "B2・全国勝率3.55・当地2連率11.11%"
+        },
+        {
+          "toban": "5209",
+          "name": "小野　　京平",
+          "branch": "福岡",
+          "summary": "B1・全国勝率3.53・当地2連率6.67%"
+        },
+        {
+          "toban": "5101",
+          "name": "表　　　健太",
+          "branch": "福岡",
+          "summary": "B1・全国勝率3.48・当地2連率7.14%"
+        },
+        {
+          "toban": "5382",
+          "name": "山下　　心一",
+          "branch": "福岡",
+          "summary": "B1・全国勝率2.29・当地2連率9.68%"
+        },
+        {
+          "toban": "5409",
+          "name": "宮本　　琉正",
+          "branch": "福岡",
+          "summary": "B2・全国勝率2.09・当地2連率0.00%"
+        },
+        {
+          "toban": "5392",
+          "name": "安武　　一也",
+          "branch": "福岡",
+          "summary": "B2・全国勝率1.47・当地2連率0.00%"
+        }
+      ],
+      "styleHistory": [],
+      "prevArticle": {
+        "exists": false
+      }
+    },
+    {
+      "jcd": "23",
+      "venue": "唐津",
+      "series": "スポーツ報知杯",
+      "grade": null,
+      "dayNum": 1,
+      "dayLabel": "初日",
+      "asOfDay": 0,
+      "seriesNote": null,
+      "results": [],
+      "resultsSummary": {
+        "manshuCount": 0,
+        "manshuRaces": [],
+        "venueManRateBase": {
+          "rate": 15.1,
+          "source": "verify_log当場実績",
+          "n": 2081
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 15.1,
+          "haranRate": 28.5,
+          "katameRate": 55.0,
+          "n": 2081,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": null,
+        "e30": {
+          "applies": false,
+          "since": null,
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4503",
+          "name": "上野　真之介",
+          "yomi": null,
+          "grade": "A1",
+          "branch": "佐賀",
+          "isLocal": true,
+          "finishTrail": [],
+          "motorNo": 4,
+          "motor2renSetsu": 43.32,
+          "motor2renSetsuAvg": 34.9,
+          "zenkokuWinRate": 7.87,
+          "tochiWinRate": 7.67,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [],
+          "stCareer": 0.11,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 41,
+            "runs": 131,
+            "nige": 23,
+            "sashi": 3,
+            "makuri": 5,
+            "makurisashi": 6,
+            "makuriRate": 12.2,
+            "sashiRate": 7.3,
+            "maezukeRate": 0.8,
+            "maezukeAvg": 0.02,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4503",
+          "name": "上野　真之介",
+          "branch": "佐賀",
+          "summary": "A1・全国勝率7.87・当地2連率62.33%"
+        },
+        {
+          "toban": "3892",
+          "name": "草場　　康幸",
+          "branch": "佐賀",
+          "summary": "B1・全国勝率5.06・当地2連率35.96%"
+        },
+        {
+          "toban": "3974",
+          "name": "深山　　祐二",
+          "branch": "佐賀",
+          "summary": "B1・全国勝率4.31・当地2連率19.54%"
+        },
+        {
+          "toban": "5312",
+          "name": "川辺　　郭人",
+          "branch": "佐賀",
+          "summary": "B1・全国勝率3.91・当地2連率6.42%"
+        },
+        {
+          "toban": "4724",
+          "name": "吉田　　祐貴",
+          "branch": "佐賀",
+          "summary": "B1・全国勝率3.32・当地2連率9.43%"
+        },
+        {
+          "toban": "5469",
+          "name": "今泉　　博人",
+          "branch": "佐賀",
+          "summary": "B2・全国勝率1.36・当地2連率0.00%"
+        }
+      ],
+      "styleHistory": [],
+      "prevArticle": {
+        "exists": false
+      }
+    }
+  ]
+}
