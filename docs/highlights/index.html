@@ -81,6 +81,18 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .vmeta{color:var(--sub);font-size:12px}
 .varrow{margin-left:auto;color:var(--acc);font-size:12px}
 .vbody{margin-top:8px;padding-left:2px}
+/* 観戦記カード（署名コーナー） */
+.ksk{background:linear-gradient(180deg,#12202e,#0e1822);border:1px solid #24384b;border-left:3px solid var(--acc);border-radius:12px;padding:12px 13px;margin:0 0 10px}
+.ksk-tag{font-size:11px;font-weight:800;color:var(--acc);letter-spacing:.02em}
+.ksk-title{font-size:15px;font-weight:800;color:var(--txt);margin:5px 0 4px;line-height:1.4}
+.ksk-lead{font-size:13px;color:var(--sub);line-height:1.7}
+.ksk-btn{margin-top:9px;font-size:12px;font-weight:800;color:#04121f;background:var(--acc);border:none;border-radius:8px;padding:7px 12px;cursor:pointer}
+.ksk-full{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+.ksk-body{font-size:13.5px;color:var(--txt);line-height:1.95;margin:0}
+.ksk-link{color:var(--acc2);text-decoration:none;border-bottom:1px dotted var(--acc2)}
+.ksk-terms{margin-top:10px;font-size:11px;color:var(--sub)}
+.ksk-chip{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin:0 4px 4px 0;font-size:11px;color:var(--txt)}
+.ksk-note{margin-top:9px;font-size:10.5px;color:var(--sub);opacity:.85;line-height:1.5}
 .flag{font-size:10px;font-weight:800;margin-left:3px}
 .fF{color:var(--hot)}.fST{color:#4aa8ff}
 .mtr{font-size:10.5px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);color:var(--sub);flex-shrink:0}
@@ -291,6 +303,50 @@ function dl2min(hhmm){if(!hhmm||hhmm.indexOf(':')<0)return 99999;const p=hhmm.sp
 let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
 function toggleVenue(ba){OPEN_VENUE = (OPEN_VENUE===ba)? null : ba; render();}
 
+// ---- 観戦記カード（署名コーナー）----
+let KAISAI='', KANSENKI={};
+function loadKansenki(){
+  KANSENKI={};
+  if(!/^\d{8}$/.test(KAISAI)) return Promise.resolve();
+  const codes=[...new Set(RACES.map(r=>r['場コード']))];
+  return Promise.all(codes.map(c=>
+    fetch(`../data/kansenki/articles/${KAISAI}-${c}.json?_=`+Date.now())
+      .then(r=>r.ok?r.json():null)
+      .then(a=>{ if(a) KANSENKI[c]=a; })
+      .catch(()=>{})
+  ));
+}
+function kEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function renderKansenki(a, jcd){
+  if(!a) return '';
+  const body=kEsc(a['body']||'');
+  const lead=body.split('。')[0]+'。';           // 本文リード＝最初の「。」まで
+  let full=body;
+  (a['racersMentioned']||[]).forEach(rm=>{        // 選手名を図鑑リンク化（../players/?toban=）
+    const nm=kEsc(rm['name']||''), tb=kEsc(String(rm['toban']||''));
+    if(nm&&tb) full=full.split(nm).join(`<a class="ksk-link" href="../players/?toban=${tb}">${nm}</a>`);
+  });
+  const chips=(a['glossaryTerms']||[]).map(t=>`<span class="ksk-chip">${kEsc(t)}</span>`).join('');
+  const terms=chips?`<div class="ksk-terms">用語　${chips}</div>`:'';
+  return `<div class="ksk">
+    <div class="ksk-tag">📝 観戦記${a['styleType']?`｜${kEsc(a['styleType'])}`:''}</div>
+    <div class="ksk-title">${kEsc(a['title']||'')}</div>
+    <div class="ksk-lead">${lead}</div>
+    <button class="ksk-btn" id="kskb-${jcd}" onclick="kskToggle('${jcd}')">観戦記を読む ▼</button>
+    <div class="ksk-full" id="kskf-${jcd}" style="display:none">
+      <p class="ksk-body">${full}</p>
+      ${terms}
+    </div>
+    <div class="ksk-note">観戦記｜前日までの確定データのみで書いています。予想・買い目は扱いません。</div>
+  </div>`;
+}
+function kskToggle(jcd){
+  const f=document.getElementById('kskf-'+jcd), b=document.getElementById('kskb-'+jcd);
+  if(!f) return; const show=(f.style.display==='none');
+  f.style.display=show?'block':'none';
+  if(b) b.textContent=show?'観戦記を閉じる ▲':'観戦記を読む ▼';
+}
+
 function renderVenues(){
   // その日のjsonにある場だけを、場コード順に並べてアコーディオン表示
   const byVenue={};
@@ -305,6 +361,7 @@ function renderVenues(){
     const first=v.list[0]||{};
     const setsu=first['節名']||''; const nichi=first['日目']||'';
     const setsuLine=setsu?`<div class="vsetsu">${setsu}${nichi?`（${nichi}）`:''}</div>`:'';
+    const kskCard=(KANSENKI&&KANSENKI[v.code])?renderKansenki(KANSENKI[v.code], v.code):'';  // 記事が無い場は静かに欠番
     return `<div class="venue">
       <div class="vhead${open?' open':''}" onclick="toggleVenue('${ba}')">
         <span class="vname">${ba}</span>
@@ -312,7 +369,7 @@ function renderVenues(){
         <span class="varrow">${open?'▲':'▼'}</span>
       </div>
       ${setsuLine}
-      ${open?`<div class="vbody">${races.map(renderCard).join('')}</div>`:''}
+      ${open?`<div class="vbody">${kskCard}${races.map(renderCard).join('')}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -467,11 +524,11 @@ fetch(SRC+'?_='+Date.now())
 .then(r=>{if(!r.ok)throw 0;return r.json();})
 .then(doc=>{
   RACES=doc['レース']||[];
-  const d=doc['開催日']||'';
+  const d=doc['開催日']||''; KAISAI=d;
   if(d.length===8) document.getElementById('date').textContent=`${d.slice(0,4)}年${+d.slice(4,6)}月${+d.slice(6,8)}日 ${doc['レース数']}レース`;
   const conf=(doc['確定イン率場']||[]).join('・');
   document.getElementById('note').innerHTML=`イン1着率は目安値（${conf}は公式実数、他は暫定）。機＝モーター2連率（その節の機力目安で、選手の調子とは別物）。<br>波乱＝外枠A級・当地巧者アウト・イン不安・機力ちぐはぐ等の条件数。買い目・確率・勝者予想は出していません。<br><span style="opacity:.7">生成：${(doc['生成時刻']||'').replace('T',' ').slice(0,16)}</span>`;
-  render();
+  loadKansenki().then(render);
 })
 .catch(()=>{document.getElementById('list').innerHTML='<div class="empty">'+(SRC!=='highlights.json'?'この日の見どころはまだありません（明日以降たまります）。':'見どころデータを読み込めませんでした。highlights.json を確認してください。')+'</div>';});
 }

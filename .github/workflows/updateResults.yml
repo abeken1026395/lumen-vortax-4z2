@@ -2,8 +2,13 @@ name: 見立て結果照合（夜）
 
 on:
   schedule:
-    # 毎日 JST 23:37（UTC 14:37）＝全場終了後。ナイター最終レース後を想定。
-    - cron: "37 14 * * *"
+    # 第1層: 発火多重化（冪等・安全）。GitHubのschedule遅延/不発火に備え夜間〜早朝に4本。
+    # results/verify_log/buildKansenkiSource はいずれも冪等（非null不変・重複追記排除）で、
+    # commit手順は commit-first＋rebase なので多重発火でも壊れない。
+    - cron: "37 14 * * *"   # JST 23:37（全場終了後・本命）
+    - cron: "37 16 * * *"   # JST 01:37
+    - cron: "37 18 * * *"   # JST 03:37
+    - cron: "7 20 * * *"    # JST 05:07（当日朝リカバリの前段）
   workflow_dispatch:
     inputs:
       hd:
