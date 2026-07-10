@@ -1,7 +1,7 @@
 /* データ攻め ポータル Service Worker
    方針: ネットワーク優先（オンライン時は常に最新の出走表/データ）＋オフライン時はキャッシュ。
    出走表・払戻などは日々更新されるため、stale を掴ませない network-first にする。 */
-var CACHE = "lumen-vortax-4z2-v2";
+var CACHE = "lumen-vortax-4z2-v3";
 var SHELL = [
   "./", "./racers/", "./manifest.json",
   "./icon180.png", "./icon192.png", "./icon512.png"
