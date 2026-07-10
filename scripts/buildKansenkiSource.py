@@ -808,9 +808,12 @@ def build_venue(jcd, venue_rows, results_map, vstats, kimarite_map, profile,
 def main():
     allow_daytime = os.environ.get("BKS_ALLOW_DAYTIME") == "1"
     now = jst_now()
-    if not allow_daytime and not (now.hour >= 22 or now.hour < 5):
+    # 夜間帯 = JST22:00〜翌08:59。updateResults の schedule 実発火は遅延が常態で
+    # 03〜06時台に流れ込むため、当日レース開始(〜10:30)前を許容範囲としてhour<9まで広げる。
+    # 日中(09〜21時)の再実行は従来どおり排除（§4.1/§4.3）。
+    if not allow_daytime and not (now.hour >= 22 or now.hour < 9):
         raise SystemExit(
-            "夜間帯（JST22時以降〜翌5時）専用。日中の再実行は禁止（§4.1/§4.3）。"
+            "夜間帯（JST22時以降〜翌9時）専用。日中の再実行は禁止（§4.1/§4.3）。"
             "ローカル検証時は BKS_ALLOW_DAYTIME=1 で明示的に上書き。")
 
     rows, by_jcd = load_racers()
@@ -847,7 +850,14 @@ def main():
     out_path = os.path.join(OUT_DIR, csv_hd8 + ".json")
 
     existing = load_json(out_path)
+    # サイレント欠番の可視化: 実行時にCSV開催日・導出date・既存sourceの有無を必ずログ。
+    print("CSV開催日={} 導出date(掲載日)={} results(前日)={} 既存source={}".format(
+        csv_hd8, date_dash, results_date8, "有" if existing is not None else "無"))
     if existing is not None:
+        # 導出date（=掲載日）のファイルが既に存在＝CSVが翌日カードへ未更新。
+        # 新しい日付の素材は生成されず、既存への null補完のみ（非null不変）に留まる。
+        print("CSV未更新のため新規生成なし（既存 {}.json への null補完のみ・非null不変）"
+              .format(csv_hd8))
         # 再実行=nullフィールドの補完のみ。venue単位でjcd照合しマージ。
         old_by_jcd = {v.get("jcd"): v for v in existing.get("venues", [])}
         merged = []

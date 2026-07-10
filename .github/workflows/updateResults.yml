@@ -61,6 +61,8 @@ jobs:
 
       - name: commit
         if: always()
+        env:
+          BR: ${{ github.ref_name }}
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -70,5 +72,22 @@ jobs:
           git add docs/data/verify_summary.json 2>/dev/null || true
           git add docs/data/playerMonthly.json 2>/dev/null || true
           git add docs/data/kansenki/source/ 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "auto: results + verify_log + summary"
-          git push
+          if git diff --staged --quiet; then
+            echo "no changes"; exit 0
+          fi
+          # updateResultsLive方式に統一（PR #28系）: 先にコミット→rebase(-X theirs=自分の
+          # 再生成データを優先)で衝突を機械解消→短いランダム待機でpushリトライ。
+          # 他ワークフローの同時pushによる非fast-forward拒否（run#39の失敗）を根治する。
+          git commit -m "auto: results + verify_log + summary"
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            if git rebase -X theirs "origin/$BR"; then
+              if git push origin "HEAD:$BR"; then
+                echo "pushed (try $i)"; exit 0
+              fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $(( (RANDOM % 6) + 3 ))
+          done
+          echo "push retries exhausted"; exit 1
