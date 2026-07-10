@@ -1,0 +1,74 @@
+name: 観戦記素材 当日朝リカバリ（自己修復）
+
+# 第2層: 「翌日リカバリ」ではなく「当日朝リカバリ」。単なる存在チェックでなく自己修復型。
+# 当日(JST)の観戦記source が無ければ、その場で buildKansenkiSource を実行して生成まで行う
+# （夜間ガード窓は hour<9 なので6〜7時台は実行可能）。監視と修復を分けない。
+# 通知（＝ジョブ失敗）は「修復しても当日sourceが不在」の時だけ。成功時は無通知。
+on:
+  schedule:
+    # JST 06:30 / 06:50 / 07:10（UTC 21:30 / 21:50 / 22:10）＝けんの執筆(7時以降想定)より前。
+    - cron: "30 21 * * *"
+    - cron: "50 21 * * *"
+    - cron: "10 22 * * *"
+  workflow_dispatch: {}   # 第3層: 外部cron(cron-job.org)からの workflow_dispatch 経路もここに載せる
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kansenki-recover
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install deps
+        run: pip install beautifulsoup4 requests
+
+      # 当日sourceが無ければ生成、有れば null補完のみ（非null不変）。夜間ガードは hour<9 で6〜7時台OK。
+      - name: recover kansenki source
+        if: always()
+        continue-on-error: true
+        run: python scripts/buildKansenkiSource.py
+
+      - name: commit
+        if: always()
+        env:
+          BR: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/data/kansenki/source/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "no changes（既存source保持・補完なし）"; exit 0
+          fi
+          git commit -m "auto: recover kansenki source (morning)"
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            if git rebase -X theirs "origin/$BR"; then
+              if git push origin "HEAD:$BR"; then echo "pushed (try $i)"; exit 0; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $(( (RANDOM % 6) + 3 ))
+          done
+          echo "push retries exhausted"; exit 1
+
+      # 修復後の存在チェック: 当日(JST)source が無ければジョブ失敗＝通知（修復も失敗した時のみ）。
+      - name: verify today's source exists
+        if: always()
+        run: |
+          TODAY=$(TZ=Asia/Tokyo date +%Y%m%d)
+          if [ ! -f "docs/data/kansenki/source/${TODAY}.json" ]; then
+            echo "::error::当日source(${TODAY}.json)が修復後も不在＝当日朝リカバリ失敗（要調査）"
+            exit 1
+          fi
+          echo "OK: docs/data/kansenki/source/${TODAY}.json 在り"
