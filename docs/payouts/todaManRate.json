@@ -1,0 +1,184 @@
+{
+  "stadium": "戸田",
+  "jcd": 2,
+  "threshold": 10000,
+  "period": {
+    "from": "2025/07/15",
+    "to": "2026/07/10",
+    "days": 184
+  },
+  "totalRaces": 2207,
+  "manTotal": 385,
+  "races": [
+    {
+      "rno": 1,
+      "races": 184,
+      "manCount": 28,
+      "manRate": 15.2,
+      "avgPayout": 6534,
+      "maxPayout": 52240
+    },
+    {
+      "rno": 2,
+      "races": 184,
+      "manCount": 24,
+      "manRate": 13.0,
+      "avgPayout": 5832,
+      "maxPayout": 98950
+    },
+    {
+      "rno": 3,
+      "races": 184,
+      "manCount": 30,
+      "manRate": 16.3,
+      "avgPayout": 6334,
+      "maxPayout": 45880
+    },
+    {
+      "rno": 4,
+      "races": 184,
+      "manCount": 26,
+      "manRate": 14.1,
+      "avgPayout": 6462,
+      "maxPayout": 103920
+    },
+    {
+      "rno": 5,
+      "races": 184,
+      "manCount": 35,
+      "manRate": 19.0,
+      "avgPayout": 8772,
+      "maxPayout": 157650
+    },
+    {
+      "rno": 6,
+      "races": 184,
+      "manCount": 20,
+      "manRate": 10.9,
+      "avgPayout": 5850,
+      "maxPayout": 73320
+    },
+    {
+      "rno": 7,
+      "races": 183,
+      "manCount": 28,
+      "manRate": 15.3,
+      "avgPayout": 5482,
+      "maxPayout": 67140
+    },
+    {
+      "rno": 8,
+      "races": 184,
+      "manCount": 33,
+      "manRate": 17.9,
+      "avgPayout": 8447,
+      "maxPayout": 290900
+    },
+    {
+      "rno": 9,
+      "races": 184,
+      "manCount": 35,
+      "manRate": 19.0,
+      "avgPayout": 8298,
+      "maxPayout": 151650
+    },
+    {
+      "rno": 10,
+      "races": 184,
+      "manCount": 45,
+      "manRate": 24.5,
+      "avgPayout": 9729,
+      "maxPayout": 116350
+    },
+    {
+      "rno": 11,
+      "races": 184,
+      "manCount": 36,
+      "manRate": 19.6,
+      "avgPayout": 7998,
+      "maxPayout": 100260
+    },
+    {
+      "rno": 12,
+      "races": 184,
+      "manCount": 45,
+      "manRate": 24.5,
+      "avgPayout": 8871,
+      "maxPayout": 63370
+    }
+  ],
+  "topPayouts": [
+    {
+      "date": "2025/08/28",
+      "rno": 8,
+      "combo": "6-4-3",
+      "payout": 290900
+    },
+    {
+      "date": "2025/08/10",
+      "rno": 5,
+      "combo": "5-1-3",
+      "payout": 157650
+    },
+    {
+      "date": "2025/10/27",
+      "rno": 9,
+      "combo": "5-3-6",
+      "payout": 151650
+    },
+    {
+      "date": "2025/10/15",
+      "rno": 5,
+      "combo": "5-2-6",
+      "payout": 120150
+    },
+    {
+      "date": "2026/01/03",
+      "rno": 10,
+      "combo": "6-1-2",
+      "payout": 116350
+    }
+  ],
+  "laneShare": [
+    {
+      "lane": 1,
+      "count": 52,
+      "share": 13.5
+    },
+    {
+      "lane": 2,
+      "count": 61,
+      "share": 15.8
+    },
+    {
+      "lane": 3,
+      "count": 75,
+      "share": 19.5
+    },
+    {
+      "lane": 4,
+      "count": 76,
+      "share": 19.7
+    },
+    {
+      "lane": 5,
+      "count": 77,
+      "share": 20.0
+    },
+    {
+      "lane": 6,
+      "count": 44,
+      "share": 11.4
+    }
+  ],
+  "calmRace": {
+    "rno": 6,
+    "manRate": 10.9,
+    "avgPayout": 5850
+  },
+  "wildRace": {
+    "rno": 10,
+    "manRate": 24.5,
+    "avgPayout": 9729
+  }
+}
