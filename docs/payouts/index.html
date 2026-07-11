@@ -80,7 +80,7 @@
 
 <script>
 function yen(n){return n.toLocaleString()+'円';}
-function stdLink(s){ return s.slug ? '<a href="./'+s.slug+'-payouts/">'+s.stadium+'</a>' : s.stadium; }
+function stdLink(s){ return s.slug ? '<a href="../'+s.slug+'-payouts/">'+s.stadium+'</a>' : s.stadium; }
 
 fetch('./summary.json?_=' + Date.now())
   .then(function(r){ if(!r.ok) throw new Error('no data'); return r.json(); })
@@ -126,7 +126,7 @@ fetch('./summary.json?_=' + Date.now())
     var seen={};
     var links=(d.arareRanking||[]).filter(function(s){return s.slug && !seen[s.slug] && (seen[s.slug]=1);});
     document.getElementById('linksBody').innerHTML = links.map(function(s){
-      return '<a href="./'+s.slug+'-payouts/">'+s.stadium+' →</a>';
+      return '<a href="../'+s.slug+'-payouts/">'+s.stadium+' →</a>';
     }).join('');
   })
   .catch(function(){
