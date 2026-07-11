@@ -410,7 +410,8 @@ function renderVenues(){
     let nextLine='';
     if(ISNEXT){ const m=NEXTMETA[v.code]||{};
       const up=m['generatedAt']?`更新 ${kEsc(m['generatedAt'])}`:'';
-      const pr=m['partial']?`<span class="part-badge">一部レースのみ／深夜に追加</span>`:'';
+      const nR=(m['レース数']!=null)?m['レース数']:v.list.length;  // 実取得レース数
+      const pr=m['partial']?`<span class="part-badge">取得済 ${nR}R／深夜に追加される場合があります</span>`:'';
       if(up||pr) nextLine=`<div class="vnext">${up?`<span>${up}</span>`:''}${pr}</div>`;
     }
     const kskCard=(KANSENKI&&KANSENKI[v.code])?renderKansenki(KANSENKI[v.code], v.code):'';  // 記事が無い場は静かに欠番
