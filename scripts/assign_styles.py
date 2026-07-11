@@ -58,6 +58,30 @@ def prev_day_protagonists(date8):
     return out
 
 
+def _daysback(ymd8, n):
+    import datetime
+    y, m, d = int(ymd8[:4]), int(ymd8[4:6]), int(ymd8[6:8])
+    return (datetime.date(y, m, d) - datetime.timedelta(days=n)).strftime("%Y%m%d")
+
+
+def venue_protag_history(jcd, date8, back=2):
+    """同一場の過去 back 日ぶんの主役 toban（各記事の racersMentioned[0]）を新しい順で返す。"""
+    out = []
+    for k in range(1, back + 1):
+        pd = _daysback(date8, k)
+        p = os.path.join(ARTICLES_DIR, "%s-%s.json" % (pd, jcd))
+        if not os.path.exists(p):
+            out.append(None)
+            continue
+        try:
+            a = load(p)
+            rm = a.get("racersMentioned") or []
+            out.append(str(rm[0]["toban"]) if rm and rm[0].get("toban") else None)
+        except Exception:
+            out.append(None)
+    return out
+
+
 def _max_manshu(v):
     races = (v.get("resultsSummary") or {}).get("manshuRaces") or []
     if not races:
@@ -134,13 +158,38 @@ def score_types(v):
     return sc
 
 
-def pick_protagonist(v):
-    locals_focus = [f for f in (v.get("focusRacers") or []) if f.get("isLocal")]
-    f = (locals_focus or (v.get("focusRacers") or [None]))[0]
-    if not f:
-        return None
-    return {"toban": f.get("toban"), "name": (f.get("name") or "").replace("　", ""),
-            "grade": f.get("grade"), "branch": f.get("branch")}
+def _protag_pool(v):
+    """主役候補プール（新しい軸から）: isLocalのfocus → 他のfocus → localRacersのA級。"""
+    pool = []
+    seen = set()
+    focus = v.get("focusRacers") or []
+    for f in [x for x in focus if x.get("isLocal")] + [x for x in focus if not x.get("isLocal")]:
+        tb = str(f.get("toban") or "")
+        if tb and tb not in seen:
+            seen.add(tb)
+            g = f.get("grade")
+            pool.append({"toban": tb, "name": (f.get("name") or "").replace("　", ""),
+                         "grade": g, "branch": f.get("branch")})
+    for l in v.get("localRacers") or []:
+        tb = str(l.get("toban") or "")
+        if not tb or tb in seen:
+            continue
+        s = l.get("summary") or ""
+        g = s[:2] if s[:2] in ("A1", "A2", "B1", "B2") else None
+        seen.add(tb)
+        pool.append({"toban": tb, "name": (l.get("name") or "").replace("　", ""),
+                     "grade": g, "branch": l.get("branch")})
+    # A級を前に寄せる（弱い番組でも代替を出しやすく）
+    pool.sort(key=lambda p: 0 if (p.get("grade") in ("A1", "A2")) else 1)
+    return pool
+
+
+def pick_protagonist(v, exclude=None):
+    exclude = set(exclude or ())
+    for p in _protag_pool(v):
+        if p["toban"] not in exclude:
+            return p
+    return None
 
 
 def killer_hints(v):
@@ -197,12 +246,29 @@ def assign(src):
                 best_val, best_t = val, t
         used[best_t] = used.get(best_t, 0) + 1
         v = p["v"]
-        prot = pick_protagonist(v)
-        prot_repeat = bool(prot and prot["toban"] in prev_prot)
+        jcd = v.get("jcd")
+        primary = pick_protagonist(v)
+        # 追補: 同一場の連日主役は2日連続まで可・3日連続は不可。
+        # 過去2日が同一tobanで、今回もそれが筆頭なら代替主役を確定出力（居なければ切り口変更フラグ）。
+        hist = venue_protag_history(jcd, date8, 2) if date8 else [None, None]
+        forced_alt = False
+        must_change = False
+        prot = primary
+        if primary and len([h for h in hist if h]) >= 2 and hist[0] == hist[1] == primary["toban"]:
+            alt = pick_protagonist(v, exclude={primary["toban"]})
+            if alt:
+                prot, forced_alt = alt, True
+            else:
+                must_change = True  # 代替不在（弱small番組等）＝被り継続を許すが切り口を変えさせる
+        prot_repeat = bool(prot and hist and prot["toban"] == hist[0])
         result[i] = {
-            "jcd": v.get("jcd"), "venue": v.get("venue"),
+            "jcd": jcd, "venue": v.get("venue"),
             "styleType": best_t, "dayNum": v.get("dayNum"), "dayLabel": v.get("dayLabel"),
-            "protagonist": prot, "protagonistRepeatsPrevDay": prot_repeat,
+            "protagonist": prot,
+            "protagonistRepeatsPrevDay": prot_repeat,
+            "protagonistForcedAlternate": forced_alt,   # 3日連続回避で代替に差し替えた
+            "mustChangeAngle": must_change,              # 代替不在＝被り継続だが切り口を変える
+            "protagonistHistory": hist,                  # [前日, 前々日] の主役toban
             "styleHistoryTop3": (v.get("styleHistory") or [])[:3],
             "hasTodayProgram": bool(v.get("todayProgram")),
             "killerHints": killer_hints(v),

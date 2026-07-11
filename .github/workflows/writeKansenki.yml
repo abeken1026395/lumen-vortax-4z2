@@ -1,0 +1,124 @@
+name: 観戦記 執筆起動（headless・PRで停止）
+
+# 執筆の「起動」だけを無人化する。書き手は Claude Code（headless）。
+# 出力はPRで止め、マージ＝公開は人が行う（自動マージ経路は作らない）。
+# schedule は持たず workflow_dispatch 専用（外部cronの鼓動で起動）。
+#
+# 冪等：掲載日の source があり、その日の記事がまだ無く、既存PRも無いときだけ実行。
+# 品質：assign_styles.py で型/主役を決定化 → runbook.md＋kansenkiRules.md に従い執筆 →
+#       lintKansenki.py 全場PASS まで直す。FAILの場は書かない（持ち越し）。
+# 認証：ANTHROPIC_API_KEY（リポジトリSecret。登録手順は docs/data/kansenki/SECRET_SETUP.md）。
+on:
+  workflow_dispatch:
+    inputs:
+      pubdate:
+        description: "掲載日(YYYYMMDD)。空欄なら highlights.json の開催日を使う。"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kansenki-write
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm i -g @anthropic-ai/claude-code
+
+      # 掲載日の決定（入力優先／空欄は highlights.json の開催日）
+      - name: resolve pubdate
+        id: pd
+        run: |
+          PUB="${{ github.event.inputs.pubdate }}"
+          if [ -z "$PUB" ]; then
+            PUB=$(python -c "import json;print(json.load(open('docs/highlights/highlights.json')).get('開催日',''))")
+          fi
+          echo "pubdate=$PUB" >> "$GITHUB_OUTPUT"
+          echo "掲載日=$PUB"
+
+      # 起動条件（冪等）: source有り ∧ 当日記事0 ∧ 既存PR/ブランチ無し
+      - name: gate (idempotent)
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PUB="${{ steps.pd.outputs.pubdate }}"
+          RUN=1
+          if [ -z "$PUB" ] || [ ! -f "docs/data/kansenki/source/${PUB}.json" ]; then
+            echo "no source for ${PUB} → skip"; RUN=0
+          fi
+          if ls docs/data/kansenki/articles/${PUB}-*.json >/dev/null 2>&1; then
+            echo "articles already exist for ${PUB} → skip（既存は上書きしない）"; RUN=0
+          fi
+          if git ls-remote --exit-code --heads origin "kansenki/${PUB}" >/dev/null 2>&1; then
+            echo "branch kansenki/${PUB} exists → skip"; RUN=0
+          fi
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+
+      # 執筆（headless）。書き込みは articles と /tmp のみ、ネットワーク/git/mergeは不許可。
+      - name: write articles (headless claude)
+        if: steps.gate.outputs.run == '1'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          PUB="${{ steps.pd.outputs.pubdate }}"
+          PROMPT="掲載日=${PUB}。以下のランブックに厳密に従い、${PUB} 掲載分の観戦記を全場執筆せよ。PR作成・push・mergeは行わない。\n\n$(cat docs/data/kansenki/runbook.md)"
+          claude --bare -p "$PROMPT" \
+            --append-system-prompt-file docs/data/kansenki/kansenkiRules.md \
+            --allowedTools "Read,Write,Edit,Bash(python scripts/assign_styles.py*),Bash(python scripts/lintKansenki.py*)" \
+            --permission-mode acceptEdits \
+            --max-turns 60 \
+            --model claude-sonnet-5 \
+            --output-format json > /tmp/claude_out.json || true
+          python -c "import json;d=json.load(open('/tmp/claude_out.json'));print('cost_usd=',d.get('total_cost_usd'),'session=',d.get('session_id'))" || echo "(claude出力の解析に失敗)"
+
+      # 検査（WF側の最終ゲート）: lint 全場PASS ＋ 網羅。1本でもFAILならPRを作らない。
+      - name: verify lint + coverage
+        if: steps.gate.outputs.run == '1'
+        id: verify
+        run: |
+          PUB="${{ steps.pd.outputs.pubdate }}"
+          if ! ls docs/data/kansenki/articles/${PUB}-*.json >/dev/null 2>&1; then
+            echo "記事が1本も生成されていない → PRなし（持ち越し）"; echo "ok=0" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if python scripts/lintKansenki.py docs/data/kansenki/articles/${PUB}-*.json && \
+             python scripts/lintKansenki.py --coverage "${PUB}"; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "lint/coverage FAIL → PRなし（持ち越し）"; echo "ok=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      # PR作成（WF側・決定的）。自動マージはしない。
+      - name: open PR (no auto-merge)
+        if: steps.gate.outputs.run == '1' && steps.verify.outputs.ok == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PUB="${{ steps.pd.outputs.pubdate }}"
+          BR="kansenki/${PUB}"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git checkout -b "$BR"
+          git add docs/data/kansenki/articles/${PUB}-*.json
+          if git diff --staged --quiet; then echo "差分なし → PRなし"; exit 0; fi
+          git commit -m "kansenki: ${PUB} 掲載分 観戦記（headless執筆・lint全場PASS）"
+          git push -u origin "$BR"
+          N=$(ls docs/data/kansenki/articles/${PUB}-*.json | wc -l | tr -d ' ')
+          gh pr create --base main --head "$BR" \
+            --title "kansenki: ${PUB} 掲載分 観戦記（${N}場・headless・要査読）" \
+            --body "headless執筆・lint全場PASS・網羅PASS。**自動マージしません**。人が査読してマージ＝公開してください。"

@@ -11,8 +11,11 @@
 ## 手順
 1. `python scripts/assign_styles.py docs/data/kansenki/source/{掲載日}.json --out /tmp/assign.json` を実行し、
    各場の `styleType`／`protagonist`（主役候補）／`killerHints`／`hasTodayProgram` を得る。
-2. **全場を1セッションで**執筆する（場間の書き出し・締め・型をずらす。同一人物を連日主役にしない＝
-   `protagonistRepeatsPrevDay=true` の場は、物語ラインの継続（連勝の継続/途切れ等）として回収するか主役をずらす）。
+2. **全場を1セッションで**執筆する（場間の書き出し・締め・型をずらす）。主役は assign の `protagonist` に従う。
+   - `protagonistForcedAlternate=true`：3日連続主役を避けて代替主役に差し替え済み。その代替を主役に書く。
+   - `mustChangeAngle=true`：代替候補が居らず被りが続く場（弱small番組等）。主役は同じでよいが、
+     前日と**切り口（書き出し・締め・柱にする事実）を必ず変える**。
+   - `protagonistRepeatsPrevDay=true`（上記に該当しない）：物語ラインの継続（連勝の継続/途切れ等）として回収するか切り口を変える。
 3. 各記事は既存と同じ構造の JSON を `docs/data/kansenki/articles/{掲載日}-{jcd}.json` に書く：
    `{date, jcd, venue, title, body, styleType, killerElement, glossaryTerms, racersMentioned[{name,toban}]}`
    - `styleType` は assign の指定に従う（材料がどうしても許さない場合のみ変更し、killerElement にその旨を記す）。
