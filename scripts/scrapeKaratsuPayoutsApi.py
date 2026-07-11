@@ -84,7 +84,7 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     done, rows = load_existing()
 
-    start_s = os.environ.get("START", "20250715").strip()
+    start_s = os.environ.get("START", "").strip() or "20250715"  # 空文字(schedule時)も既定へ
     start = datetime.date(int(start_s[0:4]), int(start_s[4:6]), int(start_s[6:8]))
     end_s = os.environ.get("END", "").strip()
     if end_s:
