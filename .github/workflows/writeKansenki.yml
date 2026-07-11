@@ -7,7 +7,8 @@ name: 観戦記 執筆起動（headless・PRで停止）
 # 冪等：掲載日の source があり、その日の記事がまだ無く、既存PRも無いときだけ実行。
 # 品質：assign_styles.py で型/主役を決定化 → runbook.md＋kansenkiRules.md に従い執筆 →
 #       lintKansenki.py 全場PASS まで直す。FAILの場は書かない（持ち越し）。
-# 認証：ANTHROPIC_API_KEY（リポジトリSecret。登録手順は docs/data/kansenki/SECRET_SETUP.md）。
+# 認証：CLAUDE_CODE_OAUTH_TOKEN（けんのClaude MaxサブスクのOAuth・リポジトリSecret）。
+#       APIキーは使わない。登録手順は docs/data/kansenki/SECRET_SETUP.md。
 on:
   workflow_dispatch:
     inputs:
@@ -74,18 +75,30 @@ jobs:
       - name: write articles (headless claude)
         if: steps.gate.outputs.run == '1'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # けんのClaude MaxサブスクのOAuthトークン（claude setup-token で発行）。APIキーは使わない。
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           PUB="${{ steps.pd.outputs.pubdate }}"
           PROMPT="掲載日=${PUB}。以下のランブックに厳密に従い、${PUB} 掲載分の観戦記を全場執筆せよ。PR作成・push・mergeは行わない。\n\n$(cat docs/data/kansenki/runbook.md)"
-          claude --bare -p "$PROMPT" \
+          # --bare は付けない（--bare はサブスクOAuthトークンを読まないため）。
+          # kansenkiRules は従来どおり --append-system-prompt-file で注入（--bare有無に依らず有効）。
+          set +e
+          claude -p "$PROMPT" \
             --append-system-prompt-file docs/data/kansenki/kansenkiRules.md \
             --allowedTools "Read,Write,Edit,Bash(python scripts/assign_styles.py*),Bash(python scripts/lintKansenki.py*)" \
             --permission-mode acceptEdits \
             --max-turns 60 \
             --model claude-sonnet-5 \
-            --output-format json > /tmp/claude_out.json || true
-          python -c "import json;d=json.load(open('/tmp/claude_out.json'));print('cost_usd=',d.get('total_cost_usd'),'session=',d.get('session_id'))" || echo "(claude出力の解析に失敗)"
+            --output-format json > /tmp/claude_out.json
+          RC=$?
+          set -e
+          python -c "import json;d=json.load(open('/tmp/claude_out.json'));print('cost_usd=',d.get('total_cost_usd'),'session=',d.get('session_id'))" 2>/dev/null || echo "(claude出力の解析に失敗)"
+          # トークン失効・認証失敗・実行エラー時は claude が非ゼロ終了 → ジョブを失敗させる（＝赤いrunで即検知）。
+          # なお当日記事0本は翌朝 kansenkiMissingAlarm でも Issue 起票され二重に検知される。
+          if [ $RC -ne 0 ]; then
+            echo "::error::claude 実行が非ゼロ終了（rc=$RC）。OAuthトークン失効/認証失敗の可能性（Secret CLAUDE_CODE_OAUTH_TOKEN を確認）。"
+            exit $RC
+          fi
 
       # 検査（WF側の最終ゲート）: lint 全場PASS ＋ 網羅。1本でもFAILならPRを作らない。
       - name: verify lint + coverage
