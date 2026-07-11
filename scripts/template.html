@@ -77,31 +77,62 @@ function Bar({v,c}){
   );
 }
 
-function MotorRow({row,rk,fem}){
+// 整備履歴カルテ（部品交換の時系列・事実提示のみ・出典明記）。parts が無ければ何も描かない。
+function fmtHd(hd){ const h=String(hd||""); return h.length===8?`${+h.slice(4,6)}/${+h.slice(6,8)}`:h; }
+function MotorKarte({parts}){
+  if(!parts || !parts.length) return null;
+  const stop = e=>e.stopPropagation();
+  const nChg = parts.filter(p=>String(p["部品交換"]||"")!=="").length;  // 交換ありの件数
+  return (
+    <details onClick={stop} style={{margin:"2px 0 0 46px"}}>
+      <summary onClick={stop} style={{listStyle:"none",cursor:"pointer",display:"inline-flex",alignItems:"center"}}>
+        <span style={{fontSize:10,fontWeight:700,color:"#9fb0c0",background:"#26333f",border:"1px solid #33475a",borderRadius:3,padding:"1px 6px"}}>整備履歴 {parts.length}件{nChg>0?`（交換${nChg}）`:""}</span>
+      </summary>
+      <div style={{marginTop:4,fontSize:10.5,lineHeight:1.7,color:"#a9c6dd",background:"#0f1a26",border:"1px solid #24344a",borderRadius:6,padding:"6px 9px"}}>
+        {parts.map((p,i)=>{
+          const chg = String(p["部品交換"]||"");
+          return (
+            <div key={i} style={{borderTop:i?"1px solid #16273a":"none",paddingTop:i?3:0,marginTop:i?3:0}}>
+              <b style={{color:"#e0e6ed"}}>{fmtHd(p["開催日"])}</b> {p.rno}R{p["枠"]?` ${p["枠"]}号`:""} ・ {chg
+                ? <span style={{color:"#8fd6c0",fontWeight:700}}>部品交換 {chg}</span>
+                : <span style={{color:"#6b7f95"}}>整備なし</span>}{p["プロペラ変更"]?<span style={{color:"#ffd166"}}> ・ペラ新</span>:null}{p["展示タイム"]?<span style={{color:"#7d94a8"}}> ・展示{p["展示タイム"]}</span>:null}
+            </div>
+          );
+        })}
+        <div style={{fontSize:9,color:"#6b7f95",marginTop:4}}>出典：boatrace.jp 公式 直前情報{parts[0]&&parts[0]["取得日時"]?`（${parts[0]["取得日時"]}取得）`:""}</div>
+      </div>
+    </details>
+  );
+}
+
+function MotorRow({row,rk,fem,parts}){
   const v=row[CI.rate], g=row[CI.grade];
   const my=myoumi(g,rk);
   const heart = fem ? <span style={{color:"#ff7eb6",marginLeft:3}}>♥</span> : null;
   const nameColor = fem ? "#ff9ec9" : "#8fd0ff";
   return (
-    <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,marginBottom:6,
-      background:my?"#1a2412":"#0f1923",border:my?"1px solid #3a5220":"1px solid #16222f"}}>
-      <div style={{width:4,alignSelf:"stretch",borderRadius:2,background:rk.color}}/>
-      <div style={{fontSize:13,fontWeight:800,color:"#8faabe",minWidth:36,textAlign:"center"}}>{row[CI.mno]||"-"}</div>
-      <div style={{minWidth:0,flex:"0 0 auto"}}>
-        <div style={{fontSize:13,fontWeight:700,whiteSpace:"nowrap"}}>{
-          row[CI.toban]
-          ? <a href={"../players/?toban="+row[CI.toban]} style={{color:nameColor,textDecoration:"none",borderBottom:"1px dotted #4a6a8a"}}>{row[CI.name]||"-"}{heart}</a>
-          : <span style={{color:fem?"#ff9ec9":"#e8eef5"}}>{row[CI.name]||"-"}{heart}</span>
-        }</div>
-        <div style={{display:"flex",gap:4,marginTop:2,alignItems:"center"}}>
-          <span style={{fontSize:10,fontWeight:800,color:"#fff",background:gradeColor(g),padding:"1px 5px",borderRadius:3}}>{g||"-"}</span>
-          {rk.key==="top"
-            ? <span style={{fontSize:10,fontWeight:800,color:"#0b1219",background:"#ffd166",padding:"1px 6px",borderRadius:3}}>超抜</span>
-            : <span style={{fontSize:10,fontWeight:800,color:rk.color}}>{rk.label}</span>}
-          {my&&<span style={{fontSize:10,fontWeight:800,color:"#a8e063",border:"1px solid #3a5220",borderRadius:3,padding:"1px 5px"}}>B級×高機力</span>}
+    <div style={{marginBottom:6}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,
+        background:my?"#1a2412":"#0f1923",border:my?"1px solid #3a5220":"1px solid #16222f"}}>
+        <div style={{width:4,alignSelf:"stretch",borderRadius:2,background:rk.color}}/>
+        <div style={{fontSize:13,fontWeight:800,color:"#8faabe",minWidth:36,textAlign:"center"}}>{row[CI.mno]||"-"}</div>
+        <div style={{minWidth:0,flex:"0 0 auto"}}>
+          <div style={{fontSize:13,fontWeight:700,whiteSpace:"nowrap"}}>{
+            row[CI.toban]
+            ? <a href={"../players/?toban="+row[CI.toban]} style={{color:nameColor,textDecoration:"none",borderBottom:"1px dotted #4a6a8a"}}>{row[CI.name]||"-"}{heart}</a>
+            : <span style={{color:fem?"#ff9ec9":"#e8eef5"}}>{row[CI.name]||"-"}{heart}</span>
+          }</div>
+          <div style={{display:"flex",gap:4,marginTop:2,alignItems:"center"}}>
+            <span style={{fontSize:10,fontWeight:800,color:"#fff",background:gradeColor(g),padding:"1px 5px",borderRadius:3}}>{g||"-"}</span>
+            {rk.key==="top"
+              ? <span style={{fontSize:10,fontWeight:800,color:"#0b1219",background:"#ffd166",padding:"1px 6px",borderRadius:3}}>超抜</span>
+              : <span style={{fontSize:10,fontWeight:800,color:rk.color}}>{rk.label}</span>}
+            {my&&<span style={{fontSize:10,fontWeight:800,color:"#a8e063",border:"1px solid #3a5220",borderRadius:3,padding:"1px 5px"}}>B級×高機力</span>}
+          </div>
         </div>
+        <Bar v={v} c={rk.color}/>
       </div>
-      <Bar v={v} c={rk.color}/>
+      <MotorKarte parts={parts}/>
     </div>
   );
 }
@@ -133,6 +164,7 @@ function App(){
   const [e30map,setE30map]=useState(null);  // jcd(2桁) -> {startDate:"YYYYMMDD"}（8桁）
   const [venueMeta,setVenueMeta]=useState(null);  // jcd(2桁) -> {場名,開催日,節名,企画名,日目}
   const [motorHist,setMotorHist]=useState(null);  // jcd(2桁) -> [{節名,開催日,motors:{番号:2連率}}]
+  const [partsMap,setPartsMap]=useState(null);  // "jcd_モーターNo" -> [整備履歴レコード]（時系列昇順）
   useEffect(()=>{
     fetch("../players/female.json").then(r=>r.ok?r.json():Promise.reject())
       .then(a=>{ if(Array.isArray(a)) setFemales(new Set(a.map(String))); }).catch(()=>{});
@@ -140,6 +172,10 @@ function App(){
     // 欠落・該当jcd無しはフォールバック（何も出さない）で既存表示を壊さない。
     fetch("../data/motorHistory.json").then(r=>r.ok?r.json():Promise.reject())
       .then(j=>{ const ss=j&&j.sessions; if(Array.isArray(ss)){ const m={}; for(const s of ss){ const k=String(s.jcd||"").padStart(2,"0"); (m[k]=m[k]||[]).push(s); } setMotorHist(m); } }).catch(()=>{});
+    // モーター整備履歴（部品交換）。docs/data/motorParts.json を jcd_モーターNo で引けるよう索引化。
+    // 欠落・該当無しはフォールバック（カルテを出さない）で既存表示を壊さない。
+    fetch("../data/motorParts.json").then(r=>r.ok?r.json():Promise.reject())
+      .then(j=>{ const rs=j&&j.records; if(Array.isArray(rs)){ const m={}; for(const r of rs){ const no=String(r["モーターNo"]||"").trim(); if(!no) continue; const k=String(r.jcd||"").padStart(2,"0")+"_"+no; (m[k]=m[k]||[]).push(r); } for(const k in m){ m[k].sort((a,b)=>{const d=String(a["開催日"]||"").localeCompare(String(b["開催日"]||"")); return d!==0?d:(Number(a.rno)||0)-(Number(b.rno)||0);}); } setPartsMap(m); } }).catch(()=>{});
     // 節名・日目は出走表スクレイプが生成する docs/data/venueMeta.json を参照（方式B・実行順に非依存）。
     // 欠落・該当jcd無しでもフォールバック（節名日目を出さないだけ）で既存表示は壊さない。
     fetch("../data/venueMeta.json").then(r=>r.ok?r.json():Promise.reject())
@@ -178,6 +214,12 @@ function App(){
     for(const no in motors){ const v=Number(motors[no]); if(isFinite(v) && v>topRate){ topRate=v; topNo=no; } }
     if(topNo===null) return null;
     return {no:topNo, rate:topRate, 節名:String(best["節名"]||""), 開催日:String(best["開催日"]||"")};
+  };
+
+  // jcd＋モーターNo で整備履歴（部品交換の時系列）を引く。未取得・該当無しは null。
+  const partsFor = (jcd, mno) => {
+    if(!partsMap) return null;
+    return partsMap[String(jcd||"").padStart(2,"0")+"_"+String(mno||"").trim()] || null;
   };
 
   const allVenues = useMemo(()=>[...new Set(R.data.map(r=>r[CI.venue]))].filter(Boolean),[]);
@@ -255,7 +297,7 @@ function App(){
             </div>
             <span style={{fontSize:11,color:"#6b7f95",flex:"none",whiteSpace:"nowrap",paddingTop:2}}>{rows.length}艇　<span style={{color:"#8faabe"}}>モーター2連率 →</span></span>
           </div>
-          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r} rk={rankByPos(i+1, rows.length)} fem={females&&females.has(String(r[CI.toban]))}/>)}</div>
+          <div style={{padding:"10px"}}>{rows.map((r,i)=><MotorRow key={i} row={r} rk={rankByPos(i+1, rows.length)} fem={females&&females.has(String(r[CI.toban]))} parts={partsFor(r[CI.jcd], r[CI.mno])}/>)}</div>
         </div>
       ))}
     </div>
