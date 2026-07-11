@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>桐生 R別万舟率 | データ攻め</title>
+<title>常滑 R別万舟率 | データ攻め</title>
 <style>
   :root{
     --bg:#0b1219; --panel:#121c26; --panel2:#0f1822;
@@ -89,13 +89,13 @@
 </head>
 <body>
 <header>
-  <h1>桐生 R別 万舟率</h1>
-  <div class="lead">過去1年・3連単の実績だけで読む、桐生の荒れどころ。買い目は出しません。</div>
+  <h1>常滑 R別 万舟率</h1>
+  <div class="lead">過去1年・3連単の実績だけで読む、常滑の荒れどころ。買い目は出しません。</div>
   <div class="period" id="period" style="margin-top:6px;font-size:12px;opacity:.75"></div>
 </header>
 
 <div id="feature" class="feature" style="display:none">
-  <div class="ftitle">★ 特別企画 ─ 数字で読む桐生</div>
+  <div class="ftitle">★ 特別企画 ─ 数字で読む常滑</div>
   <div class="cards">
     <div class="card" id="cardRank">
       <h3>万舟が出やすい時間帯 TOP3</h3>
@@ -138,7 +138,7 @@ var LANE_TXT={1:'#000',2:'#fff',3:'#fff',4:'#fff',5:'#000',6:'#fff'};
 
 function yen(n){return n.toLocaleString()+'円';}
 
-fetch('../payouts/kiryuManRate.json?_=' + Date.now())
+fetch('../payouts/tokonameManRate.json?_=' + Date.now())
   .then(function(r){ if(!r.ok) throw new Error('no data'); return r.json(); })
   .then(function(d){
     if(d.period){
@@ -212,7 +212,7 @@ fetch('../payouts/kiryuManRate.json?_=' + Date.now())
   .catch(function(){
     document.getElementById('meta').style.display='none';
     document.getElementById('rows').innerHTML =
-      '<div class="err">まだデータがありません。「update kiryu payouts」の集計後に、ここに表示されます。</div>';
+      '<div class="err">まだデータがありません。「update tokoname payouts」の集計後に、ここに表示されます。</div>';
   });
 </script>
 </body>

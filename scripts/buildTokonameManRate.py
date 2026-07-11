@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-唐津払戻CSV → R別万舟率JSON集計（桐生・徳山と同一スキーマ）
-入力: docs/payouts/karatsuPayouts.csv （hd, rno, combo, payout）
-出力: docs/payouts/karatsuManRate.json
+常滑払戻CSV → R別万舟率JSON集計（桐生・徳山と同一スキーマ）
+入力: docs/payouts/tokonamePayouts.csv （hd, rno, combo, payout）
+出力: docs/payouts/tokonameManRate.json
   - period: データ期間(from/to/開催日数)
   - races: R別（rno/races/manCount/manRate/avgPayout/maxPayout）
   - calmRace / wildRace: 最も堅い/荒れるR
@@ -14,8 +14,8 @@ import os
 import csv
 import json
 
-SRC = os.path.join("docs", "payouts", "karatsuPayouts.csv")
-OUT = os.path.join("docs", "payouts", "karatsuManRate.json")
+SRC = os.path.join("docs", "payouts", "tokonamePayouts.csv")
+OUT = os.path.join("docs", "payouts", "tokonameManRate.json")
 MAN = 10000  # 万舟の閾値（1万円“超”。徳山・桐生と統一）
 
 
@@ -97,8 +97,8 @@ def main():
     } if hds else None
 
     out = {
-        "stadium": "唐津",
-        "jcd": 23,
+        "stadium": "常滑",
+        "jcd": 8,
         "threshold": MAN,
         "period": period,
         "totalRaces": total_races,

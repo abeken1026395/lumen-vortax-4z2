@@ -107,7 +107,7 @@
       <div class="vs" id="vsBody"></div>
     </div>
     <div class="card" id="cardTop">
-      <h3>過去1年の高配当レース TOP5</h3>
+      <h3>過去1年の高配当レース TOP10</h3>
       <div id="topBody"></div>
     </div>
     <div class="card" id="cardLane">
@@ -174,7 +174,7 @@ fetch('../payouts/karatsuManRate.json?_=' + Date.now())
           '<div class="s">万舟率 '+d.wildRace.manRate.toFixed(1)+'%<br>平均 '+yen(d.wildRace.avgPayout)+'</div></div>';
     }
 
-    // 高配当TOP5
+    // 高配当TOP10
     document.getElementById('topBody').innerHTML = (d.topPayouts||[]).map(function(p){
       return '<div class="pay"><div class="amt">'+yen(p.payout)+'</div>'+
         '<div><span class="combo">'+p.combo+'</span> '+
