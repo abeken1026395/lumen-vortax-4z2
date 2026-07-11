@@ -328,6 +328,13 @@ function loadKansenki(){
   )]);
 }
 function kEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+// 用語解決: 見出し直ヒット優先→無ければ各見出しのalias（表記ゆれ吸収）を逆引き。
+// 定義・ふりがなは寄せ先の見出しのものを使う（チップ表記は記事の語のまま）。辞書・記事JSONには不介入。
+function kGlo(t){
+  const d=GLOSSARY[t]; if(d&&d.desc) return d;
+  for(const k in GLOSSARY){ const e=GLOSSARY[k]; if(e&&e.alias&&e.alias.indexOf(t)>=0) return e; }
+  return null;
+}
 function renderKansenki(a, jcd){
   if(!a) return '';
   const body=kEsc(a['body']||'');
@@ -338,7 +345,7 @@ function renderKansenki(a, jcd){
     if(nm&&tb) full=full.split(nm).join(`<a class="ksk-link" href="../players/?toban=${tb}">${nm}</a>`);
   });
   const chips=(a['glossaryTerms']||[]).map((t,i)=>{
-    const g=GLOSSARY[t];
+    const g=kGlo(t);
     if(!g) return `<span class="ksk-chip is-plain">${kEsc(t)}</span>`;  // 辞書に無い語=tap無効
     const cid=`kg-${jcd}-${i}`;
     const def=`<span class="ksk-def" id="${cid}" style="display:none"><b>${kEsc(t)}</b>`+
