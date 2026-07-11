@@ -96,3 +96,17 @@ jobs:
             sleep $(( (RANDOM % 6) + 3 ))
           done
           echo "push retries exhausted"; exit 1
+
+      # 網羅性チェック（警告のみ）: 当日(JST)sourceの全場に観戦記があるか。
+      # source は不完全CSV時点の暫定生成が後で完全CSVに差し替わり場が増えることがある
+      # （07-11で丸亀/下関/若松が後から加わり、12場のまま書いた記事とカードが乖離した事象）。
+      # 記事は人が書く自動追随しない生成物なので、この乖離を機械検知して警告する。
+      # continue-on-error: 未執筆＝正常な段階もあるためジョブは落とさず警告に留める。
+      - name: coverage check (kansenki articles)
+        if: always()
+        continue-on-error: true
+        run: |
+          TODAY=$(TZ=Asia/Tokyo date +%Y%m%d)
+          if ! python scripts/lintKansenki.py --coverage "$TODAY"; then
+            echo "::warning::観戦記の欠場を検知（source全場に記事が揃っていない／${TODAY}）"
+          fi

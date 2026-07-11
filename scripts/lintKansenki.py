@@ -7,9 +7,13 @@
 ハルシネーションを人力査読から機械検査に移す。あわせて他競技語彙・禁止表現・構造を検査。
 
 使い方:
-  python scripts/lintKansenki.py                     # 全 articles/*.json を検査
+  python scripts/lintKansenki.py                     # 全 articles/*.json を内容検査
   python scripts/lintKansenki.py docs/data/kansenki/articles/20260710-02.json
+  python scripts/lintKansenki.py --coverage 20260711 # 網羅性: sourceの全場に記事があるか
+  python scripts/lintKansenki.py --coverage          # 全source日付の網羅性を一括検査
 1件でもFAILなら非ゼロ終了（執筆フロー最終段で必須実行し、合格までcommitしない）。
+網羅性チェックは source(N場)と記事(M場)の乖離＝欠場を機械検知する（07-11のカード欠落の
+再発防止。sourceはcronで場が増えて再生成されうるが記事は自動追随しないため）。
 
 方針: 「数値と語彙の網」に徹する。小整数（レース番号/コース/着/日目/本数等の構造値）は
 過剰検知を避けるため広めに許容。率(X.XX/XX.XX)・円・組番など捏造ベクトルを厳格照合。
@@ -219,8 +223,51 @@ def lint_article(art_path):
     return (fn, fails)
 
 
+def check_coverage(ymd):
+    """網羅性チェック: source/YYYYMMDD.json の全venueに記事があるか。
+    源泉(source)は cron で場が増えて再生成されうる（不完全CSV時点の暫定sourceが後で
+    完全CSVに差し替わる）。記事は人が書く自動追随しない生成物なので、source(N場)と
+    記事(M場)が乖離するとカードに穴が開く。それを機械検知する（欠場=FAIL）。"""
+    src_path = os.path.join(SRC_DIR, ymd + ".json")
+    if not os.path.exists(src_path):
+        return [("素材欠", "source/%s.json なし" % ymd)]
+    src = load(src_path)
+    miss = []
+    for v in src.get("venues", []) or []:
+        jcd = v.get("jcd")
+        name = v.get("venue", "")
+        if not os.path.exists(os.path.join(ART_DIR, "%s-%s.json" % (ymd, jcd))):
+            miss.append(("記事欠", "%s-%s(%s) の記事が無い" % (ymd, jcd, name)))
+    return miss
+
+
+def run_coverage(ymds):
+    """指定日（複数可）の網羅性チェック。1日でも欠場があれば非ゼロ終了。"""
+    if not ymds:
+        ymds = sorted(re.match(r"(\d{8})\.json$", os.path.basename(p)).group(1)
+                      for p in glob.glob(os.path.join(SRC_DIR, "*.json"))
+                      if re.match(r"\d{8}\.json$", os.path.basename(p)))
+    total_fail = 0
+    for ymd in ymds:
+        miss = check_coverage(ymd)
+        if miss:
+            total_fail += 1
+            print("FAIL 網羅 %s" % ymd)
+            for cat, tok in miss:
+                print("   [%s] %s" % (cat, tok))
+        else:
+            n = len(load(os.path.join(SRC_DIR, ymd + ".json")).get("venues", []) or [])
+            print("PASS 網羅 %s（source全%d場に記事あり）" % (ymd, n))
+    print("---")
+    print("網羅結果: FAIL %d 日" % total_fail)
+    sys.exit(1 if total_fail else 0)
+
+
 def main():
     args = sys.argv[1:]
+    if args and args[0] == "--coverage":
+        run_coverage(args[1:])
+        return
     if args:
         paths = args
     else:
