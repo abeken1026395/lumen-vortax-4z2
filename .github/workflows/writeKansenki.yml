@@ -7,7 +7,8 @@ name: 観戦記 執筆起動（headless・PRで停止）
 # 冪等：掲載日の source があり、その日の記事がまだ無く、既存PRも無いときだけ実行。
 # 品質：assign_styles.py で型/主役を決定化 → runbook.md＋kansenkiRules.md に従い執筆 →
 #       lintKansenki.py 全場PASS まで直す。FAILの場は書かない（持ち越し）。
-# 認証：ANTHROPIC_API_KEY（リポジトリSecret。登録手順は docs/data/kansenki/SECRET_SETUP.md）。
+# 認証：CLAUDE_CODE_OAUTH_TOKEN（けんのClaude MaxサブスクのOAuth・リポジトリSecret）。
+#       APIキーは使わない。登録手順は docs/data/kansenki/SECRET_SETUP.md。
 on:
   workflow_dispatch:
     inputs:
