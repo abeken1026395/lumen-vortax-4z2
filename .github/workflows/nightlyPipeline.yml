@@ -13,12 +13,17 @@ name: 夜間パイプライン統合（自己判断）
 #     ※(3)→(4)の順。同一runで両方ありうる。該当なしは no-op で正常終了。
 #  5) 変更ファイルのみ commit（commit-first＋rebase -X theirs）
 on:
+  # 外部cronは使わない。GitHub schedule の夜間不発火は「多重発火×冪等」で吸収する。
+  # JST17:00〜翌1:00（UTC08:00〜16:00）を毎時3本（分03/23/43・off-peak）。no-op/補完は冪等。
+  schedule:
+    - cron: "3,23,43 8-16 * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 concurrency:
+  # 同時実行は1本に絞る（多重発火は待機・後発は現物を見て no-op/補完）。
   group: nightly-pipeline
   cancel-in-progress: false
 
@@ -39,7 +44,23 @@ jobs:
 
       # 2) 自己判断（現物比較）。DO_SWITCH / HAS_NEXT を GITHUB_ENV へ。
       - name: decide (self-judgement)
-        run: python scripts/nightly_decide.py
+        run: |
+          python scripts/nightly_decide.py | tee /tmp/decide.json
+          # 発火実績の後日検証用に判定を step summary へ（GITHUB_ENVは次step反映のため値はJSONから読む）。
+          SW=$(python -c "import json;print(json.load(open('/tmp/decide.json')).get('DO_SWITCH'))")
+          NX=$(python -c "import json;print(json.load(open('/tmp/decide.json')).get('HAS_NEXT'))")
+          TD=$(python -c "import json;print(json.load(open('/tmp/decide.json')).get('today'))")
+          DD=$(python -c "import json;print(json.load(open('/tmp/decide.json')).get('D'))")
+          {
+            echo "### 夜間パイプライン 判定（$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')）"
+            echo "- today=\`$TD\` D=\`$DD\` → **DO_SWITCH=\`$SW\` / HAS_NEXT=\`$NX\`**"
+            echo '<details><summary>判定JSON</summary>'
+            echo ''
+            echo '```json'
+            cat /tmp/decide.json
+            echo '```'
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # 3) 当日切替（安全判定を満たした時のみ）。build_highlights当日モードは無改変。
       - name: build highlights (当日モード)

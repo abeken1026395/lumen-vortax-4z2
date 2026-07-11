@@ -10,6 +10,12 @@ name: 観戦記 執筆起動（headless・PRで停止）
 # 認証：CLAUDE_CODE_OAUTH_TOKEN（けんのClaude MaxサブスクのOAuth・リポジトリSecret）。
 #       APIキーは使わない。登録手順は docs/data/kansenki/SECRET_SETUP.md。
 on:
+  # 外部cronは使わない。GitHub schedule の不発火は多重発火×冪等ゲートで吸収。
+  # JST 0:43 / 1:13 / 1:43（UTC 15:43 / 16:13 / 16:43）。source生成後・当日切替後に走る。
+  schedule:
+    - cron: "43 15 * * *"   # JST 0:43
+    - cron: "13 16 * * *"   # JST 1:13
+    - cron: "43 16 * * *"   # JST 1:43
   workflow_dispatch:
     inputs:
       pubdate:
@@ -22,6 +28,7 @@ permissions:
   pull-requests: write
 
 concurrency:
+  # 同時実行1本。多重発火は冪等ゲート（source有り∧記事0∧PR無し）で後発 no-op。
   group: kansenki-write
   cancel-in-progress: false
 
@@ -59,17 +66,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           PUB="${{ steps.pd.outputs.pubdate }}"
-          RUN=1
+          RUN=1; REASON="run（執筆対象）"
           if [ -z "$PUB" ] || [ ! -f "docs/data/kansenki/source/${PUB}.json" ]; then
-            echo "no source for ${PUB} → skip"; RUN=0
-          fi
-          if ls docs/data/kansenki/articles/${PUB}-*.json >/dev/null 2>&1; then
-            echo "articles already exist for ${PUB} → skip（既存は上書きしない）"; RUN=0
-          fi
-          if git ls-remote --exit-code --heads origin "kansenki/${PUB}" >/dev/null 2>&1; then
-            echo "branch kansenki/${PUB} exists → skip"; RUN=0
+            echo "no source for ${PUB} → skip"; RUN=0; REASON="skip: source無し"
+          elif ls docs/data/kansenki/articles/${PUB}-*.json >/dev/null 2>&1; then
+            echo "articles already exist for ${PUB} → skip（既存は上書きしない）"; RUN=0; REASON="skip: 記事既存"
+          elif git ls-remote --exit-code --heads origin "kansenki/${PUB}" >/dev/null 2>&1; then
+            echo "branch kansenki/${PUB} exists → skip"; RUN=0; REASON="skip: 既存PR/ブランチ"
           fi
           echo "run=$RUN" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          {
+            echo "### 観戦記 執筆起動 判定（$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')）"
+            echo "- 掲載日=\`$PUB\` → **$REASON**"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # 執筆（headless）。書き込みは articles と /tmp のみ、ネットワーク/git/mergeは不許可。
       - name: write articles (headless claude)
@@ -112,8 +122,10 @@ jobs:
           if python scripts/lintKansenki.py docs/data/kansenki/articles/${PUB}-*.json && \
              python scripts/lintKansenki.py --coverage "${PUB}"; then
             echo "ok=1" >> "$GITHUB_OUTPUT"
+            echo "- 検査: **lint全場PASS＋網羅PASS** → PR作成へ" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "lint/coverage FAIL → PRなし（持ち越し）"; echo "ok=0" >> "$GITHUB_OUTPUT"
+            echo "- 検査: **FAIL/未生成 → PRなし（持ち越し）**" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       # PR作成（WF側・決定的）。自動マージはしない。
@@ -135,3 +147,4 @@ jobs:
           gh pr create --base main --head "$BR" \
             --title "kansenki: ${PUB} 掲載分 観戦記（${N}場・headless・要査読）" \
             --body "headless執筆・lint全場PASS・網羅PASS。**自動マージしません**。人が査読してマージ＝公開してください。"
+          echo "- **PR作成: kansenki/${PUB}（${N}場・要査読・自動マージなし）**" >> "$GITHUB_STEP_SUMMARY"
