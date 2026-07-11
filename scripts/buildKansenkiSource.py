@@ -745,6 +745,53 @@ def null_merge(old, new):
 
 
 # ---------------------------------------------------------------------------
+# 第2部「きょうの注目」用 当日番組概要（段階2(b)）
+# ---------------------------------------------------------------------------
+def build_today_program(venue_rows, csv_hd8, motor2avg):
+    """掲載日=当日カードから当該場の番組概要を作る（追加取得なし・venue_rowsのみ）。
+    突合キー: 場=jcd(呼び出し側), 選手=登録番号(toban)。
+    - 欠損はフィールド単位null（deadline/kikaku等が欠けても該当フィールドのみnull）。
+    - todayProgram丸ごとnullは asOfCard不一致（開催日混載）の場合のみ。
+    - boatsが6艇揃わないレースは races から落とす（不完全構成は含めない）。
+    - 比較軸(§2.3): 機力は motor2SetsuAvg(今節平均)を各艇に併記。"""
+    hds = {(r.get("開催日") or "").strip() for r in venue_rows}
+    if hds != {csv_hd8}:
+        return None  # asOfCard不一致 → todayProgram丸ごとnull（取り違え防止）
+    by_rno = {}
+    for r in venue_rows:
+        rno = rno_to_int(r.get("レース"))
+        if rno is None:
+            continue
+        by_rno.setdefault(rno, []).append(r)
+    races = []
+    for rno in sorted(by_rno):
+        rows = by_rno[rno]
+        boats = []
+        for r in sorted(rows, key=lambda x: (to_int(x.get("枠")) or 99)):
+            boats.append({
+                "waku": to_int(r.get("枠")),
+                "toban": str(r.get("登録番号", "")).strip() or None,
+                "grade": (r.get("級別") or "").strip() or None,
+                "motor2": to_float(r.get("モーター2連率")),
+                "motor2SetsuAvg": motor2avg,          # §2.3 今節平均比の軸
+                "tochiWin": to_float(r.get("当地勝率")),
+                "stAvg": to_float(r.get("平均ST")),
+                "f": to_int(r.get("F数")),
+                "l": to_int(r.get("L数")),
+            })
+        if len(boats) != 6:
+            continue  # 6艇未満/超は不完全構成として落とす
+        k0 = rows[0]
+        races.append({
+            "rno": rno,
+            "kikaku": (k0.get("企画名") or "").strip() or None,      # 欠損はフィールド単位null
+            "deadline": (k0.get("締切時刻") or "").strip() or None,  # 同上
+            "boats": boats,
+        })
+    return {"asOfCard": csv_hd8, "races": races}
+
+
+# ---------------------------------------------------------------------------
 # メイン
 # ---------------------------------------------------------------------------
 def build_venue(jcd, venue_rows, results_map, vstats, kimarite_map, profile,
@@ -803,6 +850,7 @@ def build_venue(jcd, venue_rows, results_map, vstats, kimarite_map, profile,
         "localRacers": build_local_racers(jcd, venue_rows),
         "styleHistory": load_style_history(jcd, hd8),
         "prevArticle": load_prev_article(jcd, prev_date8),
+        "todayProgram": build_today_program(venue_rows, csv_hd8, motor2avg),  # 第2部素材（段階2b）
     }
 
 
