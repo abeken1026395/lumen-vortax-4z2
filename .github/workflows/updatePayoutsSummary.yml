@@ -1,0 +1,54 @@
+name: update payouts summary
+
+on:
+  workflow_dispatch:
+    inputs:
+      START:
+        description: '集計開始日 YYYYMMDD（空欄で既定 20250715）'
+        required: false
+        default: ''
+      END:
+        description: '集計終了日 YYYYMMDD（空欄で昨日=JST）'
+        required: false
+        default: ''
+  schedule:
+    - cron: '10 16 * * *'   # JST 翌1:10（各場更新の後・全24場を横断集計）
+
+permissions:
+  contents: write
+
+concurrency:
+  group: boatrace-payouts-summary
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TZ: Asia/Tokyo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 全24場を BoatraceOpenAPI(v2) から横断集計（mbrace非依存）
+      - name: build payouts summary (all 24 venues)
+        continue-on-error: true
+        env:
+          START: ${{ github.event.inputs.START }}
+          END: ${{ github.event.inputs.END }}
+        run: python scripts/buildPayoutsSummary.py
+
+      - name: commit
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/payouts/summary.json
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "update payouts summary"
+          git pull --rebase origin main
+          git push origin main
