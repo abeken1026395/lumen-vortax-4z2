@@ -55,7 +55,7 @@ def main():
             "maxPayout": smax,
         })
 
-    top = sorted(all_rows, key=lambda x: x[3], reverse=True)[:5]
+    top = sorted(all_rows, key=lambda x: x[3], reverse=True)[:10]
     top_payouts = []
     for hd, rno, combo, payout in top:
         ymd = hd[0:4] + "/" + hd[4:6] + "/" + hd[6:8]
