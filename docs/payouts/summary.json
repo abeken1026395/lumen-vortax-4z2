@@ -23,7 +23,7 @@
     {
       "stadium": "住之江",
       "jcd": 12,
-      "slug": null,
+      "slug": "suminoe",
       "date": "2026/06/28",
       "rno": 9,
       "combo": "6-3-4",
@@ -32,7 +32,7 @@
     {
       "stadium": "福岡",
       "jcd": 22,
-      "slug": null,
+      "slug": "fukuoka",
       "date": "2026/05/13",
       "rno": 3,
       "combo": "6-5-1",
@@ -50,7 +50,7 @@
     {
       "stadium": "丸亀",
       "jcd": 15,
-      "slug": null,
+      "slug": "marugame",
       "date": "2025/10/12",
       "rno": 5,
       "combo": "6-2-1",
@@ -59,7 +59,7 @@
     {
       "stadium": "蒲郡",
       "jcd": 7,
-      "slug": null,
+      "slug": "gamagori",
       "date": "2025/12/28",
       "rno": 12,
       "combo": "6-2-5",
@@ -77,7 +77,7 @@
     {
       "stadium": "三国",
       "jcd": 10,
-      "slug": null,
+      "slug": "mikuni",
       "date": "2026/04/14",
       "rno": 2,
       "combo": "6-2-3",
@@ -86,7 +86,7 @@
     {
       "stadium": "津",
       "jcd": 9,
-      "slug": null,
+      "slug": "tsu",
       "date": "2025/09/01",
       "rno": 1,
       "combo": "6-3-4",
@@ -95,7 +95,7 @@
     {
       "stadium": "芦屋",
       "jcd": 21,
-      "slug": null,
+      "slug": "ashiya",
       "date": "2026/07/06",
       "rno": 5,
       "combo": "6-4-2",
@@ -114,7 +114,7 @@
     {
       "stadium": "鳴門",
       "jcd": 14,
-      "slug": null,
+      "slug": "naruto",
       "races": 2155,
       "manCount": 419,
       "manRate": 19.4
@@ -122,7 +122,7 @@
     {
       "stadium": "江戸川",
       "jcd": 3,
-      "slug": null,
+      "slug": "edogawa",
       "races": 2040,
       "manCount": 383,
       "manRate": 18.8
@@ -130,7 +130,7 @@
     {
       "stadium": "三国",
       "jcd": 10,
-      "slug": null,
+      "slug": "mikuni",
       "races": 2183,
       "manCount": 403,
       "manRate": 18.5
@@ -146,7 +146,7 @@
     {
       "stadium": "平和島",
       "jcd": 4,
-      "slug": null,
+      "slug": "heiwajima",
       "races": 1898,
       "manCount": 335,
       "manRate": 17.7
@@ -154,7 +154,7 @@
     {
       "stadium": "宮島",
       "jcd": 17,
-      "slug": null,
+      "slug": "miyajima",
       "races": 2416,
       "manCount": 423,
       "manRate": 17.5
@@ -170,7 +170,7 @@
     {
       "stadium": "丸亀",
       "jcd": 15,
-      "slug": null,
+      "slug": "marugame",
       "races": 2358,
       "manCount": 409,
       "manRate": 17.3
@@ -178,7 +178,7 @@
     {
       "stadium": "住之江",
       "jcd": 12,
-      "slug": null,
+      "slug": "suminoe",
       "races": 2344,
       "manCount": 404,
       "manRate": 17.2
@@ -186,7 +186,7 @@
     {
       "stadium": "多摩川",
       "jcd": 5,
-      "slug": null,
+      "slug": "tamagawa",
       "races": 2263,
       "manCount": 387,
       "manRate": 17.1
@@ -194,7 +194,7 @@
     {
       "stadium": "芦屋",
       "jcd": 21,
-      "slug": null,
+      "slug": "ashiya",
       "races": 2367,
       "manCount": 392,
       "manRate": 16.6
@@ -210,7 +210,7 @@
     {
       "stadium": "津",
       "jcd": 9,
-      "slug": null,
+      "slug": "tsu",
       "races": 2243,
       "manCount": 369,
       "manRate": 16.5
@@ -258,7 +258,7 @@
     {
       "stadium": "下関",
       "jcd": 19,
-      "slug": null,
+      "slug": "shimonoseki",
       "races": 2103,
       "manCount": 313,
       "manRate": 14.9
@@ -274,7 +274,7 @@
     {
       "stadium": "蒲郡",
       "jcd": 7,
-      "slug": null,
+      "slug": "gamagori",
       "races": 2323,
       "manCount": 329,
       "manRate": 14.2
@@ -282,7 +282,7 @@
     {
       "stadium": "尼崎",
       "jcd": 13,
-      "slug": null,
+      "slug": "amagasaki",
       "races": 1945,
       "manCount": 275,
       "manRate": 14.1
@@ -290,7 +290,7 @@
     {
       "stadium": "福岡",
       "jcd": 22,
-      "slug": null,
+      "slug": "fukuoka",
       "races": 2363,
       "manCount": 334,
       "manRate": 14.1
@@ -309,7 +309,7 @@
     {
       "stadium": "住之江",
       "jcd": 12,
-      "slug": null,
+      "slug": "suminoe",
       "date": "2026/06/28",
       "rno": 9,
       "combo": "6-3-4",
@@ -318,7 +318,7 @@
     {
       "stadium": "福岡",
       "jcd": 22,
-      "slug": null,
+      "slug": "fukuoka",
       "date": "2026/05/13",
       "rno": 3,
       "combo": "6-5-1",
@@ -336,7 +336,7 @@
     {
       "stadium": "丸亀",
       "jcd": 15,
-      "slug": null,
+      "slug": "marugame",
       "date": "2025/10/12",
       "rno": 5,
       "combo": "6-2-1",
@@ -345,7 +345,7 @@
     {
       "stadium": "蒲郡",
       "jcd": 7,
-      "slug": null,
+      "slug": "gamagori",
       "date": "2025/12/28",
       "rno": 12,
       "combo": "6-2-5",
@@ -363,7 +363,7 @@
     {
       "stadium": "三国",
       "jcd": 10,
-      "slug": null,
+      "slug": "mikuni",
       "date": "2026/04/14",
       "rno": 2,
       "combo": "6-2-3",
@@ -372,7 +372,7 @@
     {
       "stadium": "津",
       "jcd": 9,
-      "slug": null,
+      "slug": "tsu",
       "date": "2025/09/01",
       "rno": 1,
       "combo": "6-3-4",
@@ -381,7 +381,7 @@
     {
       "stadium": "芦屋",
       "jcd": 21,
-      "slug": null,
+      "slug": "ashiya",
       "date": "2026/07/06",
       "rno": 5,
       "combo": "6-4-2",
@@ -390,7 +390,7 @@
     {
       "stadium": "下関",
       "jcd": 19,
-      "slug": null,
+      "slug": "shimonoseki",
       "date": "2025/07/19",
       "rno": 11,
       "combo": "6-3-1",
@@ -408,7 +408,7 @@
     {
       "stadium": "尼崎",
       "jcd": 13,
-      "slug": null,
+      "slug": "amagasaki",
       "date": "2026/01/08",
       "rno": 7,
       "combo": "5-6-1",
@@ -453,7 +453,7 @@
     {
       "stadium": "宮島",
       "jcd": 17,
-      "slug": null,
+      "slug": "miyajima",
       "date": "2025/10/30",
       "rno": 2,
       "combo": "3-6-5",
@@ -471,7 +471,7 @@
     {
       "stadium": "江戸川",
       "jcd": 3,
-      "slug": null,
+      "slug": "edogawa",
       "date": "2025/12/11",
       "rno": 2,
       "combo": "6-5-1",
@@ -480,7 +480,7 @@
     {
       "stadium": "鳴門",
       "jcd": 14,
-      "slug": null,
+      "slug": "naruto",
       "date": "2026/03/19",
       "rno": 3,
       "combo": "5-2-6",
@@ -489,7 +489,7 @@
     {
       "stadium": "多摩川",
       "jcd": 5,
-      "slug": null,
+      "slug": "tamagawa",
       "date": "2026/01/10",
       "rno": 8,
       "combo": "5-3-6",
@@ -507,7 +507,7 @@
     {
       "stadium": "平和島",
       "jcd": 4,
-      "slug": null,
+      "slug": "heiwajima",
       "date": "2025/12/29",
       "rno": 1,
       "combo": "6-2-4",
@@ -517,26 +517,26 @@
   "venues": {
     "1": "kiryu",
     "2": "toda",
-    "3": null,
-    "4": null,
-    "5": null,
+    "3": "edogawa",
+    "4": "heiwajima",
+    "5": "tamagawa",
     "6": "hamanako",
-    "7": null,
+    "7": "gamagori",
     "8": "tokoname",
-    "9": null,
-    "10": null,
+    "9": "tsu",
+    "10": "mikuni",
     "11": "biwako",
-    "12": null,
-    "13": null,
-    "14": null,
-    "15": null,
+    "12": "suminoe",
+    "13": "amagasaki",
+    "14": "naruto",
+    "15": "marugame",
     "16": "kojima",
-    "17": null,
+    "17": "miyajima",
     "18": "tokuyama",
-    "19": null,
+    "19": "shimonoseki",
     "20": "wakamatsu",
-    "21": null,
-    "22": null,
+    "21": "ashiya",
+    "22": "fukuoka",
     "23": "karatsu",
     "24": "omura"
   }
