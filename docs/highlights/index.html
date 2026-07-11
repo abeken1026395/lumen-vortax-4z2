@@ -92,6 +92,14 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .ksk-link{color:var(--acc2);text-decoration:none;border-bottom:1px dotted var(--acc2)}
 .ksk-terms{margin-top:10px;font-size:11px;color:var(--sub)}
 .ksk-chip{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin:0 4px 4px 0;font-size:11px;color:var(--txt)}
+.ksk-chip.is-tap{cursor:pointer;border-color:var(--acc2)}
+.ksk-chip.is-tap:hover{background:#1a2b3a}
+.ksk-chip.is-tap.on{background:var(--acc2);color:#04121f;border-color:var(--acc2)}
+.ksk-chip-mk{margin-left:3px;font-size:9px;font-weight:800;color:var(--acc2)}
+.ksk-chip.is-tap.on .ksk-chip-mk{color:#04121f}
+.ksk-chip.is-plain{opacity:.7}
+.ksk-def{display:block;margin:2px 0 6px;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--acc2);border-radius:8px;font-size:11.5px;line-height:1.75;color:var(--txt)}
+.ksk-def .yomi{color:var(--sub);font-weight:700}
 .ksk-note{margin-top:9px;font-size:10.5px;color:var(--sub);opacity:.85;line-height:1.5}
 .flag{font-size:10px;font-weight:800;margin-left:3px}
 .fF{color:var(--hot)}.fST{color:#4aa8ff}
@@ -304,17 +312,20 @@ let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
 function toggleVenue(ba){OPEN_VENUE = (OPEN_VENUE===ba)? null : ba; render();}
 
 // ---- 観戦記カード（署名コーナー）----
-let KAISAI='', KANSENKI={};
+let KAISAI='', KANSENKI={}, GLOSSARY={};
 function loadKansenki(){
   KANSENKI={};
-  if(!/^\d{8}$/.test(KAISAI)) return Promise.resolve();
+  // 用語辞書は記事JSONと同じく実行時fetch。無い語のチップは静かにtap無効にする（捏造しない）。
+  const gp=fetch(`../data/kansenki/glossary.json?_=`+Date.now())
+    .then(r=>r.ok?r.json():{}).then(g=>{GLOSSARY=g||{};}).catch(()=>{GLOSSARY={};});
+  if(!/^\d{8}$/.test(KAISAI)) return gp;
   const codes=[...new Set(RACES.map(r=>r['場コード']))];
-  return Promise.all(codes.map(c=>
+  return Promise.all([gp, ...codes.map(c=>
     fetch(`../data/kansenki/articles/${KAISAI}-${c}.json?_=`+Date.now())
       .then(r=>r.ok?r.json():null)
       .then(a=>{ if(a) KANSENKI[c]=a; })
       .catch(()=>{})
-  ));
+  )]);
 }
 function kEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function renderKansenki(a, jcd){
@@ -326,7 +337,16 @@ function renderKansenki(a, jcd){
     const nm=kEsc(rm['name']||''), tb=kEsc(String(rm['toban']||''));
     if(nm&&tb) full=full.split(nm).join(`<a class="ksk-link" href="../players/?toban=${tb}">${nm}</a>`);
   });
-  const chips=(a['glossaryTerms']||[]).map(t=>`<span class="ksk-chip">${kEsc(t)}</span>`).join('');
+  const chips=(a['glossaryTerms']||[]).map((t,i)=>{
+    const g=GLOSSARY[t];
+    if(!g) return `<span class="ksk-chip is-plain">${kEsc(t)}</span>`;  // 辞書に無い語=tap無効
+    const cid=`kg-${jcd}-${i}`;
+    const def=`<span class="ksk-def" id="${cid}" style="display:none"><b>${kEsc(t)}</b>`+
+      `<span class="yomi">（${kEsc(g['yomi']||'')}）</span> ${kEsc(g['desc']||'')}</span>`;
+    return `<span class="ksk-chip is-tap" id="c-${cid}" role="button" tabindex="0" `+
+      `onclick="kskTerm('${cid}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();kskTerm('${cid}')}">`+
+      `${kEsc(t)}<span class="ksk-chip-mk">？</span></span>${def}`;
+  }).join('');
   const terms=chips?`<div class="ksk-terms">用語　${chips}</div>`:'';
   return `<div class="ksk">
     <div class="ksk-tag">📝 観戦記${a['styleType']?`｜${kEsc(a['styleType'])}`:''}</div>
@@ -345,6 +365,13 @@ function kskToggle(jcd){
   if(!f) return; const show=(f.style.display==='none');
   f.style.display=show?'block':'none';
   if(b) b.textContent=show?'観戦記を閉じる ▲':'観戦記を読む ▼';
+}
+// 用語チップのタップ解説。チップごとに独立トグル（複数開いても干渉しない）。
+function kskTerm(cid){
+  const e=document.getElementById(cid), c=document.getElementById('c-'+cid);
+  if(!e) return; const show=(e.style.display==='none');
+  e.style.display=show?'block':'none';
+  if(c) c.classList.toggle('on',show);
 }
 
 function renderVenues(){
