@@ -539,6 +539,7 @@ document.addEventListener('click',function(e){
 
 let SRC='highlights.json';
 var SRCS=['highlights.json','highlights_prev.json','highlights_prev2.json','highlights_next.json'];
+var TODAY_DATE='';  // 当日highlights.jsonの開催日。明日タブの「翌日か」判定に使う
 var LIVEW={};
 // 実況天候（別系統・予報でない実測水面気象）。取れなくても本体表示は継続。
 fetch('../data/liveWeather.json?_='+Date.now())
@@ -607,7 +608,20 @@ fetch(SRC+'?_='+Date.now())
   RACES=doc['レース']||[];
   ISNEXT = !!doc['プレビュー'] || /highlights_next/.test(SRC);   // 明日タブ判定
   NEXTMETA = doc['場別'] || {};
+  if(SRC==='highlights.json') TODAY_DATE = doc['開催日']||'';     // 当日基準日を保持（比較用）
   const nn=document.getElementById('nextnote');
+  // 明日タブは「next.開催日 > 当日.開催日」の時のみカード表示。同日以下は案内のみ（同日表示バグ対策）。
+  if(ISNEXT){
+    const nextDate=doc['開催日']||'';
+    if(!(nextDate && TODAY_DATE && nextDate>TODAY_DATE)){
+      RACES=[]; NEXTMETA={};
+      if(nn) nn.style.display='none';
+      document.getElementById('date').textContent = (TODAY_DATE.length===8)?`${TODAY_DATE.slice(0,4)}年${+TODAY_DATE.slice(4,6)}月${+TODAY_DATE.slice(6,8)}日`:'';
+      document.getElementById('note').innerHTML='';
+      document.getElementById('list').innerHTML='<div class="empty">明日の情報はまだありません。夜に順次追加されます。</div>';
+      return;
+    }
+  }
   if(nn){ if(ISNEXT){ nn.textContent='翌日分は各場のレース確定後、順次追加されます。深夜にかけて表示される場が増えます。'; nn.style.display='block'; } else { nn.style.display='none'; } }
   const d=doc['開催日']||''; KAISAI=d;
   if(d.length===8) document.getElementById('date').textContent=`${d.slice(0,4)}年${+d.slice(4,6)}月${+d.slice(6,8)}日 ${doc['レース数']}レース${ISNEXT?'（明日・前夜プレビュー）':''}`;
