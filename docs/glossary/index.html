@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競艇用語辞典 | データ攻め</title>
+<style>
+  :root{
+    --bg:#0b1219; --card:#121c26; --card2:#16222e;
+    --line:#1f2e3c; --txt:#e7eef5; --sub:#8aa0b4;
+    --accent:#ffd166; --accent-dim:#caa23f; --water:#5bc8e0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;line-height:1.6;padding-bottom:60px}
+  a{color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px}
+
+  .hero{position:relative;padding:30px 0 18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .hero .row{display:flex;align-items:center;gap:12px}
+  .hero .icon{flex:none;width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#1d2c3a,#0e1822);border:1px solid var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 24px rgba(255,209,102,.15)}
+  h1{font-size:24px;font-weight:800;letter-spacing:.02em;line-height:1.2}
+  h1 .dot{color:var(--accent)}
+  .lead{color:var(--sub);font-size:13px;margin-top:8px;max-width:560px}
+  .total{color:var(--sub);font-size:12px;margin-top:10px}
+  .total b{color:var(--accent);font-size:14px}
+
+  .note{background:#1a2330;border:1px solid var(--line);border-left:3px solid var(--accent-dim);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--sub);margin-bottom:18px}
+  .note b{color:var(--accent)}
+
+  .controls{display:flex;flex-direction:column;gap:10px;margin:8px 0 14px}
+  .search{width:100%;padding:11px 13px;background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:15px}
+  .search::placeholder{color:#5e7184}
+  .rows{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:6px 11px;background:var(--card);border:1px solid var(--line);border-radius:999px;color:var(--sub);font-size:12.5px;cursor:pointer;user-select:none;transition:.12s}
+  .chip.on{background:var(--accent);color:#1a1305;border-color:var(--accent);font-weight:700}
+  .count{color:var(--sub);font-size:12px;margin-bottom:10px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:9px}
+  .term{font-size:16.5px;font-weight:800;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .yomi{font-size:11.5px;color:var(--sub);font-weight:400}
+  .desc{margin-top:7px;font-size:13px;color:#c5d2e0}
+  .alias{margin-top:6px;font-size:11px;color:var(--sub)}
+  .alias b{color:var(--water);font-weight:600}
+  .empty{color:var(--sub);text-align:center;padding:30px 0;font-size:14px}
+  footer{color:var(--sub);font-size:11px;text-align:center;margin-top:26px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="row">
+      <div class="icon">📖</div>
+      <div><h1>競艇用語辞典<span class="dot">.</span></h1></div>
+    </div>
+    <div class="lead">決まり手・進入・番組・水面環境まで、ボートレースを見るときに出会う言葉を事実だけで整理しました。買い目や予想は含みません。</div>
+    <div class="total" id="total"></div>
+  </div>
+
+  <div class="note">
+    <b>この辞典について</b>　用語の仕組み・位置・意味の客観的な説明のみを載せています。有利・不利の判断や、勝敗の予想・買い目には触れません。
+  </div>
+
+  <div class="controls">
+    <input class="search" id="q" placeholder="見出し語・ふりがな・別名で検索">
+    <div class="rows" id="rowTabs"></div>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+
+  <footer>
+    データ攻め｜競艇用語辞典<br>
+    買い目・予想は出しません。仕組みを知って楽しむための読み物を。
+  </footer>
+</div>
+
+<script>
+const ROWS=["あ","か","さ","た","な","は","ま","や","ら","わ","A-Z"];
+
+const CHAR_ROW={};
+[["あ","あぁいぃうぅゔえぇおぉ"],
+ ["か","かがきぎくぐけげこご"],
+ ["さ","さざしじすずせぜそぞ"],
+ ["た","ただちぢっつづてでとど"],
+ ["な","なにぬねの"],
+ ["は","はばぱひびぴふぶぷへべぺほぼぽ"],
+ ["ま","まみむめも"],
+ ["や","やゃゆゅよょ"],
+ ["ら","らりるれろ"],
+ ["わ","わゎをん"]
+].forEach(([row,chars])=>{ for(const c of chars) CHAR_ROW[c]=row; });
+
+function rowOf(term,entry){
+  if(/^[A-Za-z]/.test(term)) return "A-Z";
+  const y=(entry&&entry.yomi)||"";
+  for(const ch of y){ const r=CHAR_ROW[ch]; if(r) return r; }
+  return "A-Z";
+}
+
+let ITEMS=[], state={q:"",row:""};
+
+function buildRowTabs(){
+  const box=document.getElementById('rowTabs');
+  box.innerHTML='<span class="chip on" data-row="">全行</span>'+
+    ROWS.map(r=>`<span class="chip" data-row="${r}">${r}</span>`).join('');
+  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); state.row=c.dataset.row; render();
+  });
+}
+
+function matchQ(it){
+  if(!state.q) return true;
+  const q=state.q.toLowerCase();
+  const hay=[it.term,it.yomi,...(it.alias||[])].join(' ').toLowerCase();
+  return hay.includes(q);
+}
+function matchRow(it){ if(!state.row) return true; return it.row===state.row; }
+
+function render(){
+  const list=ITEMS.filter(it=>matchRow(it)&&matchQ(it))
+    .sort((a,b)=>(a.yomi||a.term).localeCompare(b.yomi||b.term,'ja'));
+  document.getElementById('count').textContent=`${list.length}語`;
+  const box=document.getElementById('list');
+  if(!list.length){ box.innerHTML='<div class="empty">該当なし</div>'; return; }
+  box.innerHTML=list.map(it=>{
+    const yomi=it.yomi?`<span class="yomi">${it.yomi}</span>`:'';
+    const alias=(it.alias&&it.alias.length)?`<div class="alias">別名：<b>${it.alias.join('・')}</b></div>`:'';
+    return `<div class="card">
+      <div class="term">${it.term}${yomi}</div>
+      <div class="desc">${it.desc||''}</div>
+      ${alias}
+    </div>`;
+  }).join('');
+}
+
+fetch('../data/kansenki/glossary.json?_='+Date.now())
+  .then(r=>r.ok?r.json():{})
+  .then(data=>{
+    ITEMS=Object.keys(data||{})
+      .filter(k=>k!=='_meta')
+      .map(k=>{ const e=data[k]||{}; return {term:k, yomi:e.yomi||'', desc:e.desc||'', alias:e.alias||[], row:rowOf(k,e)}; });
+    document.getElementById('total').innerHTML=`収録語数　<b>${ITEMS.length}</b>語`;
+    buildRowTabs();
+    render();
+  })
+  .catch(()=>{
+    document.getElementById('list').innerHTML='<div class="empty">データを読み込めませんでした</div>';
+  });
+
+document.getElementById('q').addEventListener('input',e=>{ state.q=e.target.value.trim(); render(); });
+</script>
+</body>
+</html>
