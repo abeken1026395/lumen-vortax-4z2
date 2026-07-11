@@ -5,7 +5,7 @@ name: 観戦記 執筆漏れ警報
 # あれば起票しない。網羅性チェック（部分欠け）とは別＝こちらは「全欠＝未着手」の検知。
 on:
   schedule:
-    - cron: "30 22 * * *"   # JST 07:30
+    - cron: "37 22 * * *"   # JST 07:37（off-peak分作法に統一）
   workflow_dispatch:
     inputs:
       pubdate:
