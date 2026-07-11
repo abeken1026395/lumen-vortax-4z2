@@ -232,34 +232,46 @@ def check_coverage(ymd):
     if not os.path.exists(src_path):
         return [("素材欠", "source/%s.json なし" % ymd)]
     src = load(src_path)
-    miss = []
-    for v in src.get("venues", []) or []:
+    venues = src.get("venues", []) or []
+    present, miss = [], []
+    for v in venues:
         jcd = v.get("jcd")
         name = v.get("venue", "")
-        if not os.path.exists(os.path.join(ART_DIR, "%s-%s.json" % (ymd, jcd))):
+        if os.path.exists(os.path.join(ART_DIR, "%s-%s.json" % (ymd, jcd))):
+            present.append(jcd)
+        else:
             miss.append(("記事欠", "%s-%s(%s) の記事が無い" % (ymd, jcd, name)))
+    # その日の記事が1本も無ければ「観戦記非運用日」としてスキップ（欠場検知の対象外）。
+    # 「一部書いたのに一部欠けている」乖離だけを捕える設計。0本は執筆自体の未着手で別問題。
+    if not present:
+        return None
     return miss
 
 
 def run_coverage(ymds):
-    """指定日（複数可）の網羅性チェック。1日でも欠場があれば非ゼロ終了。"""
+    """指定日（複数可）の網羅性チェック。1日でも欠場があれば非ゼロ終了。
+    記事0本の日はSKIP（非運用日）。日付省略時は全source日付を対象にする。"""
     if not ymds:
         ymds = sorted(re.match(r"(\d{8})\.json$", os.path.basename(p)).group(1)
                       for p in glob.glob(os.path.join(SRC_DIR, "*.json"))
                       if re.match(r"\d{8}\.json$", os.path.basename(p)))
-    total_fail = 0
+    total_fail = checked = 0
     for ymd in ymds:
-        miss = check_coverage(ymd)
-        if miss:
+        res = check_coverage(ymd)
+        if res is None:
+            print("SKIP 網羅 %s（当日記事0本＝観戦記非運用日）" % ymd)
+            continue
+        checked += 1
+        if res:
             total_fail += 1
             print("FAIL 網羅 %s" % ymd)
-            for cat, tok in miss:
+            for cat, tok in res:
                 print("   [%s] %s" % (cat, tok))
         else:
             n = len(load(os.path.join(SRC_DIR, ymd + ".json")).get("venues", []) or [])
             print("PASS 網羅 %s（source全%d場に記事あり）" % (ymd, n))
     print("---")
-    print("網羅結果: FAIL %d 日" % total_fail)
+    print("網羅結果: 検査%d日 / FAIL %d 日" % (checked, total_fail))
     sys.exit(1 if total_fail else 0)
 
 

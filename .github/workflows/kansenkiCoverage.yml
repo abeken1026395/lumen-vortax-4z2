@@ -1,0 +1,32 @@
+name: 観戦記 網羅性チェック（執筆完了ゲート）
+
+# 【対策A】記事(articles/)またはsource(source/)がpushされた瞬間に網羅性チェックを回す。
+# けんの執筆コミット、および cron による source 再生成（場が増える）を両方トリガにし、
+# 「source全場に記事があるか」をカード公開前に検知する。欠場があればジョブ失敗＝通知。
+# 当日記事0本の日は lint 側で SKIP（非運用日）＝誤通知しない。書いた日だけ全場そろいを要求。
+on:
+  push:
+    paths:
+      - "docs/data/kansenki/articles/**"
+      - "docs/data/kansenki/source/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kansenki-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # 全source日付を対象（0本日は自動SKIP）。一部書いたのに一部欠けている乖離を検知。
+      - name: coverage check (all days)
+        run: python scripts/lintKansenki.py --coverage
