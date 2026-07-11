@@ -4,12 +4,12 @@
   "threshold": 10000,
   "period": {
     "from": "2025/07/15",
-    "to": "2026/07/11",
-    "days": 362
+    "to": "2026/07/10",
+    "days": 361
   },
   "venueCount": 24,
-  "totalRaces": 54245,
-  "manTotal": 8995,
+  "totalRaces": 54065,
+  "manTotal": 8971,
   "topPayouts": [
     {
       "stadium": "常滑",
@@ -68,7 +68,7 @@
     {
       "stadium": "浜名湖",
       "jcd": 6,
-      "slug": null,
+      "slug": "hamanako",
       "date": "2026/04/11",
       "rno": 9,
       "combo": "6-3-5",
@@ -115,41 +115,41 @@
       "stadium": "鳴門",
       "jcd": 14,
       "slug": null,
-      "races": 2167,
-      "manCount": 422,
-      "manRate": 19.5
+      "races": 2155,
+      "manCount": 419,
+      "manRate": 19.4
     },
     {
       "stadium": "江戸川",
       "jcd": 3,
       "slug": null,
-      "races": 2052,
-      "manCount": 386,
+      "races": 2040,
+      "manCount": 383,
       "manRate": 18.8
     },
     {
       "stadium": "三国",
       "jcd": 10,
       "slug": null,
-      "races": 2195,
-      "manCount": 405,
+      "races": 2183,
+      "manCount": 403,
       "manRate": 18.5
     },
     {
       "stadium": "児島",
       "jcd": 16,
       "slug": "kojima",
-      "races": 2158,
-      "manCount": 384,
+      "races": 2146,
+      "manCount": 382,
       "manRate": 17.8
     },
     {
       "stadium": "平和島",
       "jcd": 4,
       "slug": null,
-      "races": 1910,
-      "manCount": 337,
-      "manRate": 17.6
+      "races": 1898,
+      "manCount": 335,
+      "manRate": 17.7
     },
     {
       "stadium": "宮島",
@@ -163,7 +163,7 @@
       "stadium": "戸田",
       "jcd": 2,
       "slug": "toda",
-      "races": 2219,
+      "races": 2207,
       "manCount": 385,
       "manRate": 17.4
     },
@@ -171,7 +171,7 @@
       "stadium": "丸亀",
       "jcd": 15,
       "slug": null,
-      "races": 2370,
+      "races": 2358,
       "manCount": 409,
       "manRate": 17.3
     },
@@ -200,52 +200,44 @@
       "manRate": 16.6
     },
     {
-      "stadium": "津",
-      "jcd": 9,
-      "slug": null,
-      "races": 2255,
-      "manCount": 372,
+      "stadium": "浜名湖",
+      "jcd": 6,
+      "slug": "hamanako",
+      "races": 2505,
+      "manCount": 413,
       "manRate": 16.5
     },
     {
-      "stadium": "浜名湖",
-      "jcd": 6,
+      "stadium": "津",
+      "jcd": 9,
       "slug": null,
-      "races": 2517,
-      "manCount": 414,
-      "manRate": 16.4
+      "races": 2243,
+      "manCount": 369,
+      "manRate": 16.5
     },
     {
       "stadium": "びわこ",
       "jcd": 11,
       "slug": "biwako",
-      "races": 2274,
-      "manCount": 372,
+      "races": 2262,
+      "manCount": 371,
       "manRate": 16.4
     },
     {
       "stadium": "常滑",
       "jcd": 8,
       "slug": "tokoname",
-      "races": 2490,
+      "races": 2478,
       "manCount": 399,
-      "manRate": 16.0
+      "manRate": 16.1
     },
     {
       "stadium": "若松",
       "jcd": 20,
       "slug": "wakamatsu",
-      "races": 2205,
+      "races": 2193,
       "manCount": 345,
-      "manRate": 15.6
-    },
-    {
-      "stadium": "唐津",
-      "jcd": 23,
-      "slug": "karatsu",
-      "races": 2105,
-      "manCount": 320,
-      "manRate": 15.2
+      "manRate": 15.7
     },
     {
       "stadium": "大村",
@@ -256,12 +248,20 @@
       "manRate": 15.2
     },
     {
+      "stadium": "唐津",
+      "jcd": 23,
+      "slug": "karatsu",
+      "races": 2093,
+      "manCount": 317,
+      "manRate": 15.1
+    },
+    {
       "stadium": "下関",
       "jcd": 19,
       "slug": null,
-      "races": 2115,
-      "manCount": 314,
-      "manRate": 14.8
+      "races": 2103,
+      "manCount": 313,
+      "manRate": 14.9
     },
     {
       "stadium": "徳山",
@@ -280,19 +280,19 @@
       "manRate": 14.2
     },
     {
-      "stadium": "福岡",
-      "jcd": 22,
-      "slug": null,
-      "races": 2375,
-      "manCount": 337,
-      "manRate": 14.2
-    },
-    {
       "stadium": "尼崎",
       "jcd": 13,
       "slug": null,
       "races": 1945,
       "manCount": 275,
+      "manRate": 14.1
+    },
+    {
+      "stadium": "福岡",
+      "jcd": 22,
+      "slug": null,
+      "races": 2363,
+      "manCount": 334,
       "manRate": 14.1
     }
   ],
@@ -354,7 +354,7 @@
     {
       "stadium": "浜名湖",
       "jcd": 6,
-      "slug": null,
+      "slug": "hamanako",
       "date": "2026/04/11",
       "rno": 9,
       "combo": "6-3-5",
@@ -520,7 +520,7 @@
     "3": null,
     "4": null,
     "5": null,
-    "6": null,
+    "6": "hamanako",
     "7": null,
     "8": "tokoname",
     "9": null,
