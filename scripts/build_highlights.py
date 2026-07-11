@@ -8,7 +8,7 @@ build_highlights.py
   python build_highlights.py [racers_csv] [motors_csv] [out_json]
   省略時: docs/racers/racers_today.csv  docs/motor/motors_all.csv  docs/highlights/highlights.json
 """
-import csv, json, sys, datetime
+import csv, json, sys, os, datetime
 from collections import defaultdict
 
 RACERS = sys.argv[1] if len(sys.argv) > 1 else "docs/racers/racers_today.csv"
@@ -16,6 +16,14 @@ MOTORS = sys.argv[2] if len(sys.argv) > 2 else "docs/motor/motors_all.csv"
 OUT    = sys.argv[3] if len(sys.argv) > 3 else "docs/highlights/highlights.json"
 KIM    = sys.argv[4] if len(sys.argv) > 4 else "docs/players/racerKimarite.csv"
 WEATHER = sys.argv[5] if len(sys.argv) > 5 else "docs/data/weather.json"
+
+# --- 翌日プレビュー・モード（HL_MODE=next）---
+# 前夜に「明日」タブ用の highlights_next.json を生成する専用モード。
+# 当日モード(HL_MODE未設定)の挙動・出力先・predictions書き込みには一切干渉しない。
+# 出力先は OUT と同ディレクトリの highlights_next.json 固定（当日 highlights.json は触らない）。
+NEXT = os.environ.get('HL_MODE') == 'next'
+NEXT_OUT = os.path.join(os.path.dirname(OUT) or '.', 'highlights_next.json')
+FULL_RACES = 12  # 通常番組=12R。これ未満は「一部レースのみ（深夜に追加）」の暫定表示にする。
 
 INTOP = {'大村':63,'徳山':62,'芦屋':64,'尼崎':62,'下関':60,'常滑':58,'住之江':55,'丸亀':56,
          '児島':55,'唐津':56,'若松':55,'宮島':54,'浜名湖':54,'三国':53,'蒲郡':54,'福岡':52,
@@ -96,15 +104,36 @@ def main():
     # 両日に出る場のレースが12艇化して脱落 → 見どころが片日限定の少数場へ縮退する事故を防ぐ。
     _today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y%m%d')
     _days = sorted(set((r.get('開催日') or '').strip() for r in rac if (r.get('開催日') or '').strip()))
-    if len(_days) > 1:
-        print("NOTE: CSVに複数開催日が混在: {} → 当日{}の行のみ処理".format(_days, _today))
-    _rac_today = [r for r in rac if (r.get('開催日') or '').strip() == _today]
-    if not _rac_today:
-        # (a) 当日分が0行なら既存highlights・predictionsを上書きせずスキップ（朝の正生成を夜の空振りで壊さない）
-        print("SKIP: 当日{}の出走表行が0（CSV開催日={}）。既存highlights・predictionsを保持（上書きせず）"
-              .format(_today, _days))
-        return
-    rac = _rac_today
+
+    if NEXT:
+        # --- 翌日モード: 対象日 = 当日highlights.jsonの開催日より後で最小のCSV開催日 ---
+        # 壁時計today+1でなくCSV基準にすることで0時跨ぎでも当日を確実に除外し翌開催日を指す。
+        base_day = ''
+        try:
+            with open(OUT, encoding='utf-8') as _bf:
+                base_day = (json.load(_bf).get('開催日') or '').strip()
+        except Exception:
+            base_day = ''
+        if not base_day:
+            base_day = _today  # フォールバック: 当日highlightsが読めなければ壁時計今日を基準
+        _future = [d for d in _days if d > base_day]
+        if not _future:
+            print("SKIP(翌日): 当日開催日{}より後のCSV開催日が無い（翌日未到着）。既存 highlights_next を保持（上書きせず）"
+                  .format(base_day))
+            return
+        _target = _future[0]
+        rac = [r for r in rac if (r.get('開催日') or '').strip() == _target]
+        print("翌日モード: 基準日{} → 対象開催日{}（{}行）".format(base_day, _target, len(rac)))
+    else:
+        if len(_days) > 1:
+            print("NOTE: CSVに複数開催日が混在: {} → 当日{}の行のみ処理".format(_days, _today))
+        _rac_today = [r for r in rac if (r.get('開催日') or '').strip() == _today]
+        if not _rac_today:
+            # (a) 当日分が0行なら既存highlights・predictionsを上書きせずスキップ（朝の正生成を夜の空振りで壊さない）
+            print("SKIP: 当日{}の出走表行が0（CSV開催日={}）。既存highlights・predictionsを保持（上書きせず）"
+                  .format(_today, _days))
+            return
+        rac = _rac_today
 
     try:
         mot = load_csv(MOTORS)
@@ -653,13 +682,52 @@ def main():
               "既存 highlights・predictions は保持（上書きせず）".format(len(rac), n_races))
         sys.exit(3)
 
+    # --- 翌日モード: highlights_next.json へ場単位マージ（当日 highlights.json・predictions/ は触らない）---
+    if NEXT:
+        now_iso = doc['生成時刻']
+        now_hm = now_iso[11:16]
+        by_jcd = defaultdict(list)
+        for r in out_races:
+            by_jcd[r.get('場コード')].append(r)
+        run_meta = {}
+        for jcd, rs in by_jcd.items():
+            nR = len(rs)
+            run_meta[jcd] = {'場名': rs[0].get('場名', ''), 'generatedAt': now_hm,
+                             'partial': nR < FULL_RACES, 'レース数': nR}
+        # 既存 next を読み、同一対象日ならマージ（このrunに無い＝未到着の場は据え置き）。別日なら破棄。
+        merged_races, merged_meta = [], {}
+        try:
+            with open(NEXT_OUT, encoding='utf-8') as nf:
+                oldn = json.load(nf)
+            if (oldn.get('開催日') or '') == kaisai:
+                keep = set(by_jcd.keys())
+                merged_races = [r for r in (oldn.get('レース') or []) if r.get('場コード') not in keep]
+                merged_meta = {k: v for k, v in (oldn.get('場別') or {}).items() if k not in keep}
+        except Exception:
+            pass
+        merged_races.extend(out_races)   # このrunの場は最新で上書き（載せてから更新）
+        merged_meta.update(run_meta)
+        next_doc = {
+            '生成時刻': now_iso, '開催日': kaisai, 'プレビュー': True,
+            '確定イン率場': sorted(CONFIRMED),
+            'レース数': len(merged_races), 'レース': merged_races,
+            '場別': merged_meta,
+        }
+        os.makedirs(os.path.dirname(NEXT_OUT) or '.', exist_ok=True)
+        with open(NEXT_OUT, 'w', encoding='utf-8') as nf:
+            json.dump(next_doc, nf, ensure_ascii=False, separators=(',', ':'))
+        part = sum(1 for m in merged_meta.values() if m.get('partial'))
+        print("OK(翌日): 対象{} 今回{}場/{}レース → next計{}場/{}レース(一部公開{}場) → {}".format(
+            kaisai, len(by_jcd), len(out_races), len(merged_meta), len(merged_races), part, NEXT_OUT))
+        # 鉄則: predictions/ には一切書かない。prevローテーションもしない。当日 highlights.json も不変。
+        return
+
     # 壁時計（JST）が今日になっている開催日のときだけ当日を書き換える。
     # 出走表が夜に翌日分へ更新されても、当日タブを前倒しで繰り上げない。
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y%m%d')
     if kaisai != today:
         print(f"SKIP: 開催日{kaisai} != 本日{today}（当日を保持）")
         return
-    import os
     out_dir = os.path.dirname(OUT)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)

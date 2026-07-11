@@ -155,6 +155,11 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .dsw-btn{font-size:12px;font-weight:700;color:var(--sub);background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:5px 13px;cursor:pointer}
 .dsw-btn.on{color:#04121f;background:var(--acc);border-color:var(--acc)}
 .dsw-btn:active{opacity:.7}
+.viewguide{color:var(--sub);font-size:12px;line-height:1.65;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 11px;margin:10px 0 0}
+.viewguide b{color:var(--txt)}
+.nextnote{color:var(--acc2);font-size:12px;line-height:1.6;background:rgba(90,170,255,.08);border:1px solid var(--acc2);border-radius:10px;padding:8px 11px;margin:8px 0}
+.vnext{font-size:11px;color:var(--sub);margin:3px 0 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.part-badge{display:inline-block;font-size:10px;font-weight:800;color:#04121f;background:#e0b64a;border-radius:6px;padding:2px 7px}
 </style>
 </head>
 <body>
@@ -184,7 +189,11 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
   </div>
 </header>
 
-<div class="daysw"><button class="dsw-btn on" data-d="0" onclick="setDay(0)">当日</button><button class="dsw-btn" data-d="1" onclick="setDay(1)">前日</button><button class="dsw-btn" data-d="2" onclick="setDay(2)">前々日</button></div>
+<div class="viewguide">
+  タブは左から <b>前々日・前日・当日・明日</b>（時系列）。<b>明日</b>は前夜プレビューで、各場のレース確定後に順次追加されます。
+  各カードは<b>表層のバッジ→タップで内訳</b>の二層表示。買い目・確率・勝者予想は扱いません。
+</div>
+<div class="daysw"><button class="dsw-btn" data-d="2" onclick="setDay(2)">前々日</button><button class="dsw-btn" data-d="1" onclick="setDay(1)">前日</button><button class="dsw-btn on" data-d="0" onclick="setDay(0)">当日</button><button class="dsw-btn" data-d="3" onclick="setDay(3)">明日</button></div>
 <div class="tabs">
   <div class="tab on" data-v="hot" onclick="sw('hot')">⚡ 波乱注目</div>
   <div class="tab firm" data-v="firm" onclick="sw('firm')">🛡 堅め注目</div>
@@ -196,6 +205,7 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
   <span class="sortbtn" data-s="time" onclick="ss('time')">締切順</span>
 </div>
 
+<div id="nextnote" class="nextnote" style="display:none"></div>
 <div id="list"><div class="loading">データを読み込み中…</div></div>
 <div class="note" id="note"></div>
 </div>
@@ -310,6 +320,7 @@ function dl2min(hhmm){if(!hhmm||hhmm.indexOf(':')<0)return 99999;const p=hhmm.sp
 
 let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
 function toggleVenue(ba){OPEN_VENUE = (OPEN_VENUE===ba)? null : ba; render();}
+let ISNEXT=false, NEXTMETA={};  // 明日タブ（前夜プレビュー）の状態と場別メタ（鮮度・部分公開）
 
 // ---- 観戦記カード（署名コーナー）----
 let KAISAI='', KANSENKI={}, GLOSSARY={};
@@ -395,6 +406,14 @@ function renderVenues(){
     const first=v.list[0]||{};
     const setsu=first['節名']||''; const nichi=first['日目']||'';
     const setsuLine=setsu?`<div class="vsetsu">${setsu}${nichi?`（${nichi}）`:''}</div>`:'';
+    // 明日タブ: 各場の鮮度（更新時刻）＋部分公開バッジ。欠けを誤解させないため部分は明示。
+    let nextLine='';
+    if(ISNEXT){ const m=NEXTMETA[v.code]||{};
+      const up=m['generatedAt']?`更新 ${kEsc(m['generatedAt'])}`:'';
+      const nR=(m['レース数']!=null)?m['レース数']:v.list.length;  // 実取得レース数
+      const pr=m['partial']?`<span class="part-badge">取得済 ${nR}R／深夜に追加される場合があります</span>`:'';
+      if(up||pr) nextLine=`<div class="vnext">${up?`<span>${up}</span>`:''}${pr}</div>`;
+    }
     const kskCard=(KANSENKI&&KANSENKI[v.code])?renderKansenki(KANSENKI[v.code], v.code):'';  // 記事が無い場は静かに欠番
     return `<div class="venue">
       <div class="vhead${open?' open':''}" onclick="toggleVenue('${ba}')">
@@ -402,7 +421,7 @@ function renderVenues(){
         <span class="vmeta">${v.list.length}R${hot?` ・波乱${hot}`:''}</span>
         <span class="varrow">${open?'▲':'▼'}</span>
       </div>
-      ${setsuLine}
+      ${setsuLine}${nextLine}
       ${open?`<div class="vbody">${kskCard}${races.map(renderCard).join('')}</div>`:''}
     </div>`;
   }).join('');
@@ -497,7 +516,7 @@ document.addEventListener('click',function(e){
 });
 
 let SRC='highlights.json';
-var SRCS=['highlights.json','highlights_prev.json','highlights_prev2.json'];
+var SRCS=['highlights.json','highlights_prev.json','highlights_prev2.json','highlights_next.json'];
 var LIVEW={};
 // 実況天候（別系統・予報でない実測水面気象）。取れなくても本体表示は継続。
 fetch('../data/liveWeather.json?_='+Date.now())
@@ -558,13 +577,17 @@ fetch(SRC+'?_='+Date.now())
 .then(r=>{if(!r.ok)throw 0;return r.json();})
 .then(doc=>{
   RACES=doc['レース']||[];
+  ISNEXT = !!doc['プレビュー'] || /highlights_next/.test(SRC);   // 明日タブ判定
+  NEXTMETA = doc['場別'] || {};
+  const nn=document.getElementById('nextnote');
+  if(nn){ if(ISNEXT){ nn.textContent='翌日分は各場のレース確定後、順次追加されます。深夜にかけて表示される場が増えます。'; nn.style.display='block'; } else { nn.style.display='none'; } }
   const d=doc['開催日']||''; KAISAI=d;
-  if(d.length===8) document.getElementById('date').textContent=`${d.slice(0,4)}年${+d.slice(4,6)}月${+d.slice(6,8)}日 ${doc['レース数']}レース`;
+  if(d.length===8) document.getElementById('date').textContent=`${d.slice(0,4)}年${+d.slice(4,6)}月${+d.slice(6,8)}日 ${doc['レース数']}レース${ISNEXT?'（明日・前夜プレビュー）':''}`;
   const conf=(doc['確定イン率場']||[]).join('・');
   document.getElementById('note').innerHTML=`イン1着率は目安値（${conf}は公式実数、他は暫定）。機＝モーター2連率（その節の機力目安で、選手の調子とは別物）。<br>波乱＝外枠A級・当地巧者アウト・イン不安・機力ちぐはぐ等の条件数。買い目・確率・勝者予想は出していません。<br><span style="opacity:.7">生成：${(doc['生成時刻']||'').replace('T',' ').slice(0,16)}</span>`;
   loadKansenki().then(render);
 })
-.catch(()=>{document.getElementById('list').innerHTML='<div class="empty">'+(SRC!=='highlights.json'?'この日の見どころはまだありません（明日以降たまります）。':'見どころデータを読み込めませんでした。highlights.json を確認してください。')+'</div>';});
+.catch(()=>{ISNEXT=false;NEXTMETA={};const nn=document.getElementById('nextnote');if(nn)nn.style.display='none';document.getElementById('list').innerHTML='<div class="empty">'+(SRC==='highlights_next.json'?'明日の前夜プレビューはまだありません（各場のレース確定後、夜に順次追加されます）。':SRC!=='highlights.json'?'この日の見どころはまだありません（明日以降たまります）。':'見どころデータを読み込めませんでした。highlights.json を確認してください。')+'</div>';});
 }
 loadHL();
 </script>

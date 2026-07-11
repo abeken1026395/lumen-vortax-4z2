@@ -1,0 +1,60 @@
+name: 見どころ「明日」前夜プレビュー生成
+
+# 「明日」タブ用 highlights_next.json を前夜に順次生成する巡回ジョブ。
+# GitHubのschedule単独は夜間不発火が実証済みのため採用しない（当日 highlights の既存scheduleは無改変）。
+# 外部cron(cron-job.org等)から workflow_dispatch を叩く経路で前夜に複数回巡回し、揃った場を順次追記する。
+#   推奨巡回（けんが cron-job.org に設定）: JST 21:40 / 22:40 / 23:20 / 23:50 / 翌0:20
+# HL_MODE=next は当日 highlights.json・predictions/ を一切書かない（別ファイル highlights_next.json のみ）。
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: highlights-next
+  cancel-in-progress: false
+
+jobs:
+  build-next:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4 pandas lxml
+
+      # 翌日分を出走表CSVへ取り込む（当日+翌日を巡回取得）。当日 highlights の生成はしない。
+      - run: python scripts/scrape_racers.py
+
+      # 翌日モード: highlights_next.json へ場単位マージ（当日 highlights.json・predictions/ は不変）。
+      - name: build highlights (next / 翌日プレビュー)
+        env:
+          HL_MODE: next
+        run: python scripts/build_highlights.py
+
+      - name: commit
+        env:
+          BR: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/racers/ docs/highlights/highlights_next.json docs/data/venueMeta.json 2>/dev/null || true
+          # 鉄則: 当日 highlights.json / predictions/ は add しない（翌日モードは書かないが二重の安全）。
+          git reset -q docs/highlights/highlights.json predictions/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "no change（翌日未到着 or 追記差分なし）"; exit 0
+          fi
+          git commit -m "auto: highlights_next (明日プレビュー順次追記)"
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            if git rebase -X theirs "origin/$BR"; then
+              if git push origin "HEAD:$BR"; then echo "pushed (try $i)"; exit 0; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $(( (RANDOM % 6) + 3 ))
+          done
+          echo "push retries exhausted"; exit 1
