@@ -1,0 +1,92 @@
+name: 夜間パイプライン統合（自己判断）
+
+# 判断をWF側に集約し、外部cronは「毎時の鼓動」だけにする統合パイプライン。
+# schedule は持たない（workflow_dispatch専用）。外部cron(cron-job.org)から
+# JST17:00〜翌1:00の毎時（9本/日）叩く運用を想定（時刻はけんが後入れ）。
+# 既存WF（update_racers / update_highlights / updateHighlightsNext）は削除せず保険＋非常口で残す。
+#
+# 毎回の流れ:
+#  1) scrape_racers.py で racers_today.csv 最新化＋buildMotorHistory.py
+#  2) nightly_decide.py が現物比較で DO_SWITCH / HAS_NEXT を自己判断（壁時計非依存＋0時フォールバック）
+#  3) DO_SWITCH=1 → 当日モードで highlights.json 再生成（build_highlights当日ガードは不変）
+#  4) HAS_NEXT=1 → 翌日モード(HL_MODE=next)で highlights_next.json 追記（内部SKIPガードあり）
+#     ※(3)→(4)の順。同一runで両方ありうる。該当なしは no-op で正常終了。
+#  5) 変更ファイルのみ commit（commit-first＋rebase -X theirs）
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-pipeline
+  cancel-in-progress: false
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4 pandas lxml
+
+      # 1) 出走表最新化＋モーター節成績蓄積（節完結時のみ書く＝多くの回でno-op）
+      - run: python scripts/scrape_racers.py
+      - run: python scripts/buildMotorHistory.py
+
+      # 2) 自己判断（現物比較）。DO_SWITCH / HAS_NEXT を GITHUB_ENV へ。
+      - name: decide (self-judgement)
+        run: python scripts/nightly_decide.py
+
+      # 3) 当日切替（安全判定を満たした時のみ）。build_highlights当日モードは無改変。
+      - name: build highlights (当日モード)
+        if: env.DO_SWITCH == '1'
+        run: |
+          python scripts/build_highlights.py \
+            docs/racers/racers_today.csv \
+            docs/motor/motors_all.csv \
+            docs/highlights/highlights.json \
+            docs/players/racerKimarite.csv \
+            docs/data/weather.json
+
+      # 4) 翌日追記（翌日モード）。内部で target無し時 SKIP。当日 highlights.json・predictions は不変。
+      - name: build highlights (翌日モード)
+        if: env.HAS_NEXT == '1'
+        env:
+          HL_MODE: next
+        run: |
+          python scripts/build_highlights.py \
+            docs/racers/racers_today.csv \
+            docs/motor/motors_all.csv \
+            docs/highlights/highlights.json \
+            docs/players/racerKimarite.csv \
+            docs/data/weather.json
+
+      # 5) 変更ファイルのみ commit（commit-first＋rebase）。他WF同時pushの非fast-forwardを機械解消。
+      - name: commit
+        if: always()
+        env:
+          BR: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/racers/ docs/motor/ docs/data/venueMeta.json docs/data/motorHistory.json 2>/dev/null || true
+          git add docs/highlights/highlights.json docs/highlights/highlights_next.json docs/highlights/highlights_prev.json docs/highlights/highlights_prev2.json 2>/dev/null || true
+          git add predictions/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "no changes（no-op run）"; exit 0
+          fi
+          git commit -m "auto: nightly pipeline (switch=${DO_SWITCH:-0} next=${HAS_NEXT:-0})"
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            if git rebase -X theirs "origin/$BR"; then
+              if git push origin "HEAD:$BR"; then echo "pushed (try $i)"; exit 0; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $(( (RANDOM % 6) + 3 ))
+          done
+          echo "push retries exhausted"; exit 1
