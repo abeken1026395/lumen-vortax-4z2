@@ -91,9 +91,11 @@ function MotorKarte({parts}){
       <div style={{marginTop:4,fontSize:10.5,lineHeight:1.7,color:"#a9c6dd",background:"#0f1a26",border:"1px solid #24344a",borderRadius:6,padding:"6px 9px"}}>
         {parts.map((p,i)=>{
           const chg = String(p["部品交換"]||"");
+          const nm = String(p["氏名"]||"");
+          const setsu = String(p["節名"]||"");
           return (
             <div key={i} style={{borderTop:i?"1px solid #16273a":"none",paddingTop:i?3:0,marginTop:i?3:0}}>
-              <b style={{color:"#e0e6ed"}}>{fmtHd(p["開催日"])}</b> {p.rno}R{p["枠"]?` ${p["枠"]}号`:""} ・ {chg
+              <b style={{color:"#e0e6ed"}}>{fmtHd(p["開催日"])}</b> {p.rno}R{p["枠"]?` ${p["枠"]}号`:""}{nm?<span style={{color:"#8fd0ff"}}> ・{nm}</span>:null}{setsu?<span style={{color:"#7d94a8"}} title={setsu}> ・{truncStr(setsu,15)}</span>:null} ・ {chg
                 ? <span style={{color:"#8fd6c0",fontWeight:700}}>部品交換 {chg}</span>
                 : <span style={{color:"#6b7f95"}}>整備なし</span>}{p["プロペラ変更"]?<span style={{color:"#ffd166"}}> ・ペラ新</span>:null}{p["展示タイム"]?<span style={{color:"#7d94a8"}}> ・展示{p["展示タイム"]}</span>:null}
             </div>

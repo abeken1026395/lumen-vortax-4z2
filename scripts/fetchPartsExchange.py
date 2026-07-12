@@ -188,6 +188,9 @@ def main():
     for jcd in jcds:
         hd = str(venues[jcd].get("開催日", ""))
         vname = str(venues[jcd].get("場名", ""))
+        # 収集時点の節名を venueMeta から付与（hd は venues[jcd].開催日 と同一なので開催日一致は保証）。
+        # 取れなければ空文字（創作しない）。過去分の後付けはしない＝収集時点の節名が原則。
+        setsu = str(venues[jcd].get("節名", ""))
         for rno in range(1, 13):
             url = BASE.format(rno=rno, jcd=jcd, hd=hd)
             html = fetch(url)
@@ -212,6 +215,7 @@ def main():
                     "登番": row["登番"],
                     "氏名": info.get("氏名", ""),
                     "モーターNo": info.get("モーターNo", ""),
+                    "節名": setsu,
                     "部品交換": row["部品交換"],
                     "展示タイム": row["展示タイム"],
                     "チルト": row["チルト"],
