@@ -1,0 +1,64 @@
+name: heartbeat（外部cron主発火・時刻帯で内部起動）
+
+# 発火の恒久対策。GitHub schedule 単独は不発火が多い（実績5%）ため、外部cron(cron-job.org)を
+# 主発火に戻す。ただし けんの登録負担を最小化するため、外部cronは「このheartbeatを毎時1回叩く」
+# 1ジョブだけにする。heartbeat がJST時刻帯を見て nightlyPipeline / writeKansenki を
+# GITHUB_TOKEN の workflow_dispatch で内部起動する。
+#
+# 注：workflow_dispatch / repository_dispatch は GITHUB_TOKEN の「再帰防止」の例外であり、
+#     GITHUB_TOKEN でも他WFを起動できる（PATは不要・repo secret追加ゼロ）。
+#     万一起動しなければ PAT方式（secrets.HEARTBEAT_PAT）へフォールバックする。
+# GitHub schedule は二重保険で残置（撃たれればラッキー。外部cron不達時の補完）。
+on:
+  workflow_dispatch: {}       # cron-job.org が毎時これを叩く（外部側のみPAT）
+  schedule:
+    - cron: "0 8-23 * * *"    # 毎時0分・UTC8-23 = JST17:00〜翌8:00（保険）
+
+permissions:
+  actions: write              # GITHUB_TOKEN で他WFの workflow_dispatch を叩くため
+
+concurrency:
+  group: heartbeat
+  cancel-in-progress: false
+
+jobs:
+  fan-out:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: decide & dispatch（JST時刻帯で内部起動）
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          H=$(TZ=Asia/Tokyo date +%-H)          # JST時（0-23・先頭ゼロなし）
+          NOW=$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')
+          dispatch () {
+            wf="$1"
+            code=$(curl -sS -o /tmp/d.out -w "%{http_code}" -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${REPO}/actions/workflows/${wf}/dispatches" \
+              -d '{"ref":"main"}')
+            if [ "$code" = "204" ]; then
+              echo "dispatch ${wf} → OK(204)"
+            else
+              echo "::error::dispatch ${wf} 失敗(HTTP ${code})"; cat /tmp/d.out || true; return 1
+            fi
+          }
+          # 起動マトリクス（JST）:
+          #   nightly = 17:00-01:59（H>=17 or H<=1） / write = 23:00-07:59（H>=23 or H<=7）
+          #   → 17-23=nightly / 23-2=両方 / 2-8=write / 8-17=no-op
+          RN=0; RW=0
+          if [ "$H" -ge 17 ] || [ "$H" -le 1 ]; then RN=1; fi
+          if [ "$H" -ge 23 ] || [ "$H" -le 7 ]; then RW=1; fi
+          rc=0
+          if [ "$RN" = 1 ]; then dispatch nightlyPipeline.yml || rc=1; fi
+          if [ "$RW" = 1 ]; then dispatch writeKansenki.yml   || rc=1; fi
+          if [ "$RN" = 0 ] && [ "$RW" = 0 ]; then echo "no-op帯（JST ${H}時）＝内部起動なし"; fi
+          {
+            echo "### heartbeat 判定（${NOW}）"
+            echo "- JST時=\`${H}\` → nightly=\`${RN}\` / write=\`${RW}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
