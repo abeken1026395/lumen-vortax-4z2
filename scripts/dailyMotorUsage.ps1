@@ -30,8 +30,20 @@ function Log($msg) {
     Add-Content -Path $LogFile -Value $line -Encoding utf8
 }
 
+# ネイティブコマンドの実行と出力捕捉。
+# PS5.1 では native の stderr を 2>&1 すると各行が ErrorRecord に化け、
+# ErrorActionPreference='Stop' 下では exit 0 でも終了エラーになる
+# （gitleaks等のフックがstderrに出すと commit が誤って失敗扱いになる）。
+# そのため捕捉中だけ Continue に落とし、成否は $LASTEXITCODE だけで判定する。
+function Invoke-Native([scriptblock]$block) {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { return (& $block 2>&1 | Out-String) }
+    finally { $ErrorActionPreference = $prev }
+}
+
 function Invoke-Step($what, [scriptblock]$block) {
-    $out = & $block 2>&1 | Out-String
+    $out = Invoke-Native $block
     if ($out.Trim()) { Log ("{0}:`n{1}" -f $what, $out.TrimEnd()) }
     if ($LASTEXITCODE -ne 0) { throw ("{0} が失敗 (exit {1})" -f $what, $LASTEXITCODE) }
     return $out
@@ -72,7 +84,7 @@ try {
     $env:END   = (Get-Date).AddDays(-1).ToString('yyyyMMdd')   # 前日分まで（当日分は未確定）
     Log ("Kファイル収集: {0} 〜 {1}" -f $env:START, $env:END)
     # 取得失敗日があっても集計は続ける（欠けた日は欠いたまま＝補完しない方針）
-    $fetchOut = & $Py scripts\fetchKfiles.py 2>&1 | Out-String
+    $fetchOut = Invoke-Native { & $Py scripts\fetchKfiles.py }
     Log ("fetchKfiles.py:`n{0}" -f $fetchOut.TrimEnd())
     if ($LASTEXITCODE -ne 0) { Log "※ 取得できない日があった（欠損のまま集計を継続）" }
 
@@ -113,7 +125,7 @@ print("SAME" if norm(old) == norm(new) else "CHANGED")
         Invoke-Step 'git pull --rebase' { & $Git pull --rebase origin main } | Out-Null
     } catch {
         # 衝突を放置するとリポジトリがrebase途中で固まりユーザー作業を壊す
-        & $Git rebase --abort 2>&1 | Out-Null
+        Invoke-Native { & $Git rebase --abort } | Out-Null
         throw "git pull --rebase が衝突。rebase を中止した（ローカルのコミットは残存。手動確認が必要）"
     }
     Invoke-Step 'git push' { & $Git push origin main } | Out-Null
