@@ -3,7 +3,7 @@
   "short_name": "データ攻め",
   "description": "競艇を、読む。買い目なし・数字だけ。出走表・見どころ・24場特性を毎朝更新。",
   "lang": "ja",
-  "start_url": "./racers/",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
