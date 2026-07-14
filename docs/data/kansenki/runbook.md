@@ -5,13 +5,18 @@
 
 ## 入力
 - 素材：`docs/data/kansenki/source/{掲載日}.json`（唯一の事実源。ここに無い情報は存在しない）
+- 執筆対象場：起動時に渡される `jcd` リスト（**未執筆かつ書ける場のみ**）。指定が無い場合は
+  `python scripts/kansenki_pubplan.py` の `toWrite` を対象にする（掲載日＝CSV最大開催日）。
 - 型・主役の決定：`scripts/assign_styles.py` の出力（後述。styleType と 主役は原則これに従う）
 - 規則：kansenkiRules.md（システムプロンプトに添付済み。§2事実性／§3内心／§5構成／§5.5第2部／§6型辞書／§9自己検査）
 
 ## 手順
 1. `python scripts/assign_styles.py docs/data/kansenki/source/{掲載日}.json --out /tmp/assign.json` を実行し、
    各場の `styleType`／`protagonist`（主役候補）／`killerHints`／`hasTodayProgram` を得る。
-2. **全場を1セッションで**執筆する（場間の書き出し・締め・型をずらす）。主役は assign の `protagonist` に従う。
+   - **`"locked": true` の場は既に執筆済み**（前夜便で書いた場）。**触らない・書かない**。型は分布に計上済みなので、
+     未執筆場の型はその分布を前提に割り当て済み（既執筆場の型に寄せず全体で散らす）。
+2. **対象の未執筆場のみを1セッションで**執筆する（場間の書き出し・締め・型をずらす）。主役は assign の `protagonist` に従う。
+   前夜便で一部の場が既に書かれている日は、**その既存記事は読まない・変えない**。今回の対象場だけ新規に書く。
    - `protagonistForcedAlternate=true`：3日連続主役を避けて代替主役に差し替え済み。その代替を主役に書く。
    - `mustChangeAngle=true`：代替候補が居らず被りが続く場（弱small番組等）。主役は同じでよいが、
      前日と**切り口（書き出し・締め・柱にする事実）を必ず変える**。
@@ -27,6 +32,7 @@
 4. **第2部「きょうの注目」**：`hasTodayProgram=true` の場のみ、kansenkiRules §5.5 に従って第2部を書く。
    `hasTodayProgram=false` の場は第1部（前日振り返り）のみ。無理に第2部を作らない。
 5. **既存記事は上書きしない**：`articles/{掲載日}-{jcd}.json` が既に存在する場は書かない（skip）。
+   前夜便→回収便で日をまたいで書き足すため、**公開後の記事は不変**が鉄則（既存を消さない・直さない）。
 6. §9自己検査を全問通す。→ `python scripts/lintKansenki.py docs/data/kansenki/articles/{掲載日}-*.json` を実行し、
    **全場 PASS になるまで**該当記事を直す。PASS しない場は「書かない」（そのファイルを消して持ち越す）。
 7. 仕上げに `python scripts/lintKansenki.py --coverage {掲載日}` で網羅を確認（0本の日はSKIP＝正常）。

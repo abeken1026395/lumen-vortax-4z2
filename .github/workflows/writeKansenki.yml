@@ -1,34 +1,44 @@
-name: 観戦記 執筆起動（headless・PRで停止）
+name: 観戦記 執筆起動（headless・前夜便/回収便・場単位・自動公開）
 
-# 執筆の「起動」だけを無人化する。書き手は Claude Code（headless）。
-# 出力はPRで止め、マージ＝公開は人が行う（自動マージ経路は作らない）。
-# schedule は持たず workflow_dispatch 専用（外部cronの鼓動で起動）。
+# 執筆の「起動」を無人化する。書き手は Claude Code（headless）。
+# 「素材(source)が育つ前に執筆便が尽きる」配置欠陥を解消するため、source生成の
+# 全便（updateResults 23:37/1:37/3:37/5:07・朝リカバリ6:30-7:10）の後に必ず執筆便が来る
+# 配置に再設計。かつ場単位で「書ける場から書き、未執筆場だけ追記」する（既存記事は不変）。
 #
-# 冪等：掲載日の source があり、その日の記事がまだ無く、既存PRも無いときだけ実行。
-# 品質：assign_styles.py で型/主役を決定化 → runbook.md＋kansenkiRules.md に従い執筆 →
-#       lintKansenki.py 全場PASS まで直す。FAILの場は書かない（持ち越し）。
-# 認証：CLAUDE_CODE_OAUTH_TOKEN（けんのClaude MaxサブスクのOAuth・リポジトリSecret）。
-#       APIキーは使わない。登録手順は docs/data/kansenki/SECRET_SETUP.md。
+# 掲載日＝CSV最大開催日（壁時計非依存, kansenki_pubplan.py）。
+# 書ける場＝ todayProgram あり ∧（前日結果results非空 または 初日）。未確定の場は
+# 後続の回収便に持ち越す（早すぎる第1部欠落記事を作らない）。
+#
+# 冪等：未執筆かつ書ける場が1つも無ければ no-op。多重発火は場単位ゲートで無害。
+# 品質：assign_styles.py（既執筆場はロック＝型不変・分布に計上）→ runbook＋kansenkiRules で
+#       未執筆場のみ執筆 → lintKansenki.py 全場PASS を確認してから main へ直接コミット＝公開。
+# 認証：CLAUDE_CODE_OAUTH_TOKEN（けんのClaude MaxサブスクのOAuth）。APIキーは使わない。
+#       登録手順は docs/data/kansenki/SECRET_SETUP.md。
 on:
-  # 外部cronは使わない。GitHub schedule の不発火は多重発火×冪等ゲートで吸収。
-  # JST 0:43 / 1:13 / 1:43（UTC 15:43 / 16:13 / 16:43）。source生成後・当日切替後に走る。
+  # 外部cronは使わない。GitHub schedule の不発火は多重発火×場単位冪等ゲートで吸収。
+  # 「source生成の全便の後に必ず執筆便が来る」配置（JST→UTCは −9）:
   schedule:
+    - cron: "53 14 * * *"   # JST 23:53（前夜便・updateResults 23:37 の後追い）
+    - cron: "13 15 * * *"   # JST 0:13
     - cron: "43 15 * * *"   # JST 0:43
-    - cron: "13 16 * * *"   # JST 1:13
-    - cron: "43 16 * * *"   # JST 1:43
+    - cron: "43 16 * * *"   # JST 1:43（updateResults 1:37 の後追い）
+    - cron: "3 17 * * *"    # JST 2:03
+    - cron: "53 18 * * *"   # JST 3:53（updateResults 3:37 の後追い）
+    - cron: "23 20 * * *"   # JST 5:23（updateResults 5:07 の後追い）
+    - cron: "40 21 * * *"   # JST 6:40（朝リカバリ 6:30-7:10 の後追い）
+    - cron: "20 22 * * *"   # JST 7:20（漏れ警報 7:37 の直前・最後の回収）
   workflow_dispatch:
     inputs:
       pubdate:
-        description: "掲載日(YYYYMMDD)。空欄なら highlights.json の開催日を使う。"
+        description: "掲載日(YYYYMMDD)。空欄なら CSV最大開催日を使う。"
         required: false
         default: ""
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
-  # 同時実行1本。多重発火は冪等ゲート（source有り∧記事0∧PR無し）で後発 no-op。
+  # 同時実行1本。多重発火は場単位ゲート（未執筆∧書ける場のみ）で後発 no-op。
   group: kansenki-write
   cancel-in-progress: false
 
@@ -48,54 +58,49 @@ jobs:
           node-version: "20"
       - run: npm i -g @anthropic-ai/claude-code
 
-      # 掲載日の決定（入力優先／空欄は highlights.json の開催日）
-      - name: resolve pubdate
-        id: pd
+      # 場単位 執筆計画（掲載日＝CSV最大開催日・未執筆かつ書ける場を列挙）
+      - name: plan (per-venue, idempotent)
+        id: plan
         run: |
-          PUB="${{ github.event.inputs.pubdate }}"
-          if [ -z "$PUB" ]; then
-            PUB=$(python -c "import json;print(json.load(open('docs/highlights/highlights.json')).get('開催日',''))")
+          PUB_IN="${{ github.event.inputs.pubdate }}"
+          if [ -n "$PUB_IN" ]; then
+            python scripts/kansenki_pubplan.py --pubdate "$PUB_IN" > /tmp/plan.json
+          else
+            python scripts/kansenki_pubplan.py > /tmp/plan.json
           fi
-          echo "pubdate=$PUB" >> "$GITHUB_OUTPUT"
-          echo "掲載日=$PUB"
-
-      # 起動条件（冪等）: source有り ∧ 当日記事0 ∧ 既存PR/ブランチ無し
-      - name: gate (idempotent)
-        id: gate
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          PUB="${{ steps.pd.outputs.pubdate }}"
-          RUN=1; REASON="run（執筆対象）"
-          if [ -z "$PUB" ] || [ ! -f "docs/data/kansenki/source/${PUB}.json" ]; then
-            echo "no source for ${PUB} → skip"; RUN=0; REASON="skip: source無し"
-          elif ls docs/data/kansenki/articles/${PUB}-*.json >/dev/null 2>&1; then
-            echo "articles already exist for ${PUB} → skip（既存は上書きしない）"; RUN=0; REASON="skip: 記事既存"
-          elif git ls-remote --exit-code --heads origin "kansenki/${PUB}" >/dev/null 2>&1; then
-            echo "branch kansenki/${PUB} exists → skip"; RUN=0; REASON="skip: 既存PR/ブランチ"
-          fi
-          echo "run=$RUN" >> "$GITHUB_OUTPUT"
-          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          cat /tmp/plan.json
+          PUB=$(python -c "import json;print(json.load(open('/tmp/plan.json')).get('pubdate') or '')")
+          NW=$(python -c "import json;print(len(json.load(open('/tmp/plan.json')).get('toWrite') or []))")
+          TOWRITE=$(python -c "import json;print(' '.join(json.load(open('/tmp/plan.json')).get('toWrite') or []))")
+          RUN=1; REASON="run（未執筆かつ書ける場=${NW}）"
+          if [ -z "$PUB" ]; then RUN=0; REASON="skip: 掲載日を決定できない"; fi
+          if [ "$NW" = "0" ]; then RUN=0; REASON="skip: 未執筆かつ書ける場なし（全場執筆済/未確定）"; fi
+          echo "pubdate=$PUB"     >> "$GITHUB_OUTPUT"
+          echo "run=$RUN"         >> "$GITHUB_OUTPUT"
+          echo "towrite=$TOWRITE" >> "$GITHUB_OUTPUT"
+          # 既執筆/持ち越しの明細は pubplan の JSON から1行スクリプトで整形
+          python -c "import json;p=json.load(open('/tmp/plan.json'));dn=p.get('done') or [];sk=p.get('skip') or [];print(('- 既執筆(不変): \`%s\`\n' % ' '.join(dn)) if dn else '',end='');[print('- 持ち越し %s(%s): %s' % (s.get('jcd'),s.get('venue'),s.get('reason'))) for s in sk]" > /tmp/plan_md.txt
           {
             echo "### 観戦記 執筆起動 判定（$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')）"
             echo "- 掲載日=\`$PUB\` → **$REASON**"
+            echo "- 執筆対象場: \`$TOWRITE\`"
+            cat /tmp/plan_md.txt
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # 執筆（headless）。書き込みは articles と /tmp のみ、ネットワーク/git/mergeは不許可。
+      # 執筆（headless）。未執筆場のみ。書き込みは articles と /tmp のみ、git/mergeはWF側。
       - name: write articles (headless claude)
-        if: steps.gate.outputs.run == '1'
+        if: steps.plan.outputs.run == '1'
         env:
-          # けんのClaude MaxサブスクのOAuthトークン（claude setup-token で発行）。APIキーは使わない。
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          PUB="${{ steps.pd.outputs.pubdate }}"
-          PROMPT="掲載日=${PUB}。以下のランブックに厳密に従い、${PUB} 掲載分の観戦記を全場執筆せよ。PR作成・push・mergeは行わない。\n\n$(cat docs/data/kansenki/runbook.md)"
-          # --bare は付けない（--bare はサブスクOAuthトークンを読まないため）。
-          # kansenkiRules は従来どおり --append-system-prompt-file で注入（--bare有無に依らず有効）。
+          PUB="${{ steps.plan.outputs.pubdate }}"
+          TOWRITE="${{ steps.plan.outputs.towrite }}"
+          PROMPT="掲載日=${PUB}。執筆対象の場コード(jcd)は次のみ: ${TOWRITE}。この対象場だけを執筆し、既存記事のある場は絶対に上書きしない。PR作成・push・mergeは行わない（公開はWFが行う）。以下のランブックに厳密に従うこと。\n\n$(cat docs/data/kansenki/runbook.md)"
+          # --bare は付けない（サブスクOAuthトークンを読まないため）。
           set +e
           claude -p "$PROMPT" \
             --append-system-prompt-file docs/data/kansenki/kansenkiRules.md \
-            --allowedTools "Read,Write,Edit,Bash(python scripts/assign_styles.py*),Bash(python scripts/lintKansenki.py*)" \
+            --allowedTools "Read,Write,Edit,Bash(python scripts/assign_styles.py*),Bash(python scripts/lintKansenki.py*),Bash(python scripts/kansenki_pubplan.py*)" \
             --permission-mode acceptEdits \
             --max-turns 60 \
             --model claude-sonnet-5 \
@@ -103,48 +108,61 @@ jobs:
           RC=$?
           set -e
           python -c "import json;d=json.load(open('/tmp/claude_out.json'));print('cost_usd=',d.get('total_cost_usd'),'session=',d.get('session_id'))" 2>/dev/null || echo "(claude出力の解析に失敗)"
-          # トークン失効・認証失敗・実行エラー時は claude が非ゼロ終了 → ジョブを失敗させる（＝赤いrunで即検知）。
-          # なお当日記事0本は翌朝 kansenkiMissingAlarm でも Issue 起票され二重に検知される。
           if [ $RC -ne 0 ]; then
             echo "::error::claude 実行が非ゼロ終了（rc=$RC）。OAuthトークン失効/認証失敗の可能性（Secret CLAUDE_CODE_OAUTH_TOKEN を確認）。"
             exit $RC
           fi
 
-      # 検査（WF側の最終ゲート）: lint 全場PASS ＋ 網羅。1本でもFAILならPRを作らない。
-      - name: verify lint + coverage
-        if: steps.gate.outputs.run == '1'
-        id: verify
-        run: |
-          PUB="${{ steps.pd.outputs.pubdate }}"
-          if ! ls docs/data/kansenki/articles/${PUB}-*.json >/dev/null 2>&1; then
-            echo "記事が1本も生成されていない → PRなし（持ち越し）"; echo "ok=0" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          if python scripts/lintKansenki.py docs/data/kansenki/articles/${PUB}-*.json && \
-             python scripts/lintKansenki.py --coverage "${PUB}"; then
-            echo "ok=1" >> "$GITHUB_OUTPUT"
-            echo "- 検査: **lint全場PASS＋網羅PASS** → PR作成へ" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "lint/coverage FAIL → PRなし（持ち越し）"; echo "ok=0" >> "$GITHUB_OUTPUT"
-            echo "- 検査: **FAIL/未生成 → PRなし（持ち越し）**" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      # PR作成（WF側・決定的）。自動マージはしない。
-      - name: open PR (no auto-merge)
-        if: steps.gate.outputs.run == '1' && steps.verify.outputs.ok == '1'
+      # 検査＋公開: 今回書いた対象場を lint 全場PASS 確認 → main へ直接コミット（自動公開）。
+      # FAILの場はそのファイルを消して持ち越す（＝書かない）。既存記事は触らない。
+      - name: verify + publish (per-venue direct commit)
+        if: steps.plan.outputs.run == '1'
         env:
-          GH_TOKEN: ${{ github.token }}
+          BR: ${{ github.ref_name }}
         run: |
-          PUB="${{ steps.pd.outputs.pubdate }}"
-          BR="kansenki/${PUB}"
+          PUB="${{ steps.plan.outputs.pubdate }}"
+          TOWRITE="${{ steps.plan.outputs.towrite }}"
+          # 今回の対象場のうち、実際に生成されたファイルだけを対象にする
+          FILES=""
+          for j in $TOWRITE; do
+            f="docs/data/kansenki/articles/${PUB}-${j}.json"
+            [ -f "$f" ] && FILES="$FILES $f"
+          done
+          if [ -z "$FILES" ]; then
+            echo "生成物なし → 公開なし（持ち越し）"
+            echo "- 検査: **生成物なし → 公開なし（持ち越し）**" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # lint FAIL のファイルは公開しない（削除して持ち越し）。PASSのみ残す。
+          KEEP=""
+          for f in $FILES; do
+            if python scripts/lintKansenki.py "$f"; then
+              KEEP="$KEEP $f"
+            else
+              echo "lint FAIL → 除外(持ち越し): $f"; rm -f "$f"
+            fi
+          done
+          if [ -z "$KEEP" ]; then
+            echo "全対象が lint FAIL → 公開なし（持ち越し）"
+            echo "- 検査: **全対象 lint FAIL → 公開なし（持ち越し）**" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git checkout -b "$BR"
-          git add docs/data/kansenki/articles/${PUB}-*.json
-          if git diff --staged --quiet; then echo "差分なし → PRなし"; exit 0; fi
-          git commit -m "kansenki: ${PUB} 掲載分 観戦記（headless執筆・lint全場PASS）"
-          git push -u origin "$BR"
-          N=$(ls docs/data/kansenki/articles/${PUB}-*.json | wc -l | tr -d ' ')
-          gh pr create --base main --head "$BR" \
-            --title "kansenki: ${PUB} 掲載分 観戦記（${N}場・headless・要査読）" \
-            --body "headless執筆・lint全場PASS・網羅PASS。**自動マージしません**。人が査読してマージ＝公開してください。"
-          echo "- **PR作成: kansenki/${PUB}（${N}場・要査読・自動マージなし）**" >> "$GITHUB_STEP_SUMMARY"
+          git add $KEEP
+          if git diff --staged --quiet; then echo "差分なし"; exit 0; fi
+          N=$(echo $KEEP | wc -w | tr -d ' ')
+          git commit -m "kansenki: ${PUB} 掲載分 観戦記 +${N}場（headless・場単位・lint全場PASS）"
+          # commit-first＋rebase -X theirs（他WF同時pushの非fast-forwardを機械解消）
+          PUSHED=0
+          for i in 1 2 3 4 5 6; do
+            git fetch origin "$BR" || true
+            if git rebase -X theirs "origin/$BR"; then
+              if git push origin "HEAD:$BR"; then echo "pushed (try $i)"; PUSHED=1; break; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $(( (RANDOM % 6) + 3 ))
+          done
+          if [ "$PUSHED" != "1" ]; then echo "push retries exhausted"; exit 1; fi
+          echo "- 公開: **${N}場を main へ追記（自動公開・場単位）**" >> "$GITHUB_STEP_SUMMARY"

@@ -58,6 +58,26 @@ def prev_day_protagonists(date8):
     return out
 
 
+def existing_article(jcd, date8):
+    """同日の既執筆記事（前夜便で書いた場）を読む。styleType と主役toban を返す。無ければ None。
+    ＝場単位執筆で「既に書いた場」を型分布に数え、再割当せず不変に保つための参照。"""
+    if not date8 or not jcd:
+        return None
+    p = os.path.join(ARTICLES_DIR, "%s-%s.json" % (date8, jcd))
+    if not os.path.exists(p):
+        return None
+    try:
+        a = load(p)
+    except Exception:
+        return None
+    rm = a.get("racersMentioned") or []
+    prot = None
+    if rm and rm[0].get("toban"):
+        prot = {"toban": str(rm[0]["toban"]),
+                "name": (rm[0].get("name") or "").replace("　", "")}
+    return {"styleType": a.get("styleType"), "protagonist": prot}
+
+
 def _daysback(ymd8, n):
     import datetime
     y, m, d = int(ymd8[:4]), int(ymd8[4:6]), int(ymd8[6:8])
@@ -217,9 +237,30 @@ def assign(src):
     date8 = (src.get("date") or "").replace("-", "")
     prev_prot = prev_day_protagonists(date8) if date8 else set()
     venues = src.get("venues", [])
-    # 1パス目: 各場の許可型とスコア
+    # 0パス目: 既執筆場（前夜便で書いた場）をロック。型を分布に数え、再割当しない。
+    result = [None] * len(venues)
+    used = {}
+    locked_idx = set()
+    for i, v in enumerate(venues):
+        ex = existing_article(v.get("jcd"), date8) if date8 else None
+        if not ex:
+            continue
+        locked_idx.add(i)
+        st = ex.get("styleType")
+        if st:
+            used[st] = used.get(st, 0) + 1  # 既執筆の型を分布に先行計上（回収便の偏り回避）
+        result[i] = {
+            "jcd": v.get("jcd"), "venue": v.get("venue"),
+            "styleType": st, "dayNum": v.get("dayNum"), "dayLabel": v.get("dayLabel"),
+            "protagonist": ex.get("protagonist"),
+            "locked": True,  # 既に執筆済み＝この計画では書かない・変えない
+            "hasTodayProgram": bool(v.get("todayProgram")),
+        }
+    # 1パス目: 未執筆場のみ 許可型とスコアを出す
     plan = []
-    for v in venues:
+    for i, v in enumerate(venues):
+        if i in locked_idx:
+            continue
         day1 = (v.get("dayNum") == 1)
         forbidden = set((v.get("styleHistory") or [])[:3])
         sc = score_types(v)
@@ -230,15 +271,13 @@ def assign(src):
             allowed = [t for t in CANDIDATES if t not in forbidden]
             if not allowed:  # 万一全滅なら規約の例外（killerに明記させる）
                 allowed = CANDIDATES[:]
-        plan.append({"v": v, "allowed": allowed, "score": sc, "day1": day1})
+        plan.append({"i": i, "v": v, "allowed": allowed, "score": sc, "day1": day1})
     # 2パス目: 分散を加味した貪欲割当（スコア降順に確定、使用回数ペナルティ）
-    used = {}
     # 確定順は「最高スコアと次点の差が大きい＝迷いが少ない場」から
     order = sorted(range(len(plan)),
                    key=lambda i: -(max(plan[i]["score"].get(t, 0) for t in plan[i]["allowed"])))
-    result = [None] * len(plan)
-    for i in order:
-        p = plan[i]
+    for k in order:
+        p = plan[k]
         best_t, best_val = None, -1e9
         for t in p["allowed"]:
             val = p["score"].get(t, 0) - used.get(t, 0) * 12  # 使用回数ペナルティで分散（実測で均等化）
@@ -261,7 +300,7 @@ def assign(src):
             else:
                 must_change = True  # 代替不在（弱small番組等）＝被り継続を許すが切り口を変えさせる
         prot_repeat = bool(prot and hist and prot["toban"] == hist[0])
-        result[i] = {
+        result[p["i"]] = {
             "jcd": jcd, "venue": v.get("venue"),
             "styleType": best_t, "dayNum": v.get("dayNum"), "dayLabel": v.get("dayLabel"),
             "protagonist": prot,
