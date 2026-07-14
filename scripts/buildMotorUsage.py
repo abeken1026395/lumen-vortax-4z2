@@ -19,8 +19,18 @@ import re
 import glob
 import json
 import datetime
+import tempfile
+import subprocess
 
 JST = datetime.timezone(datetime.timedelta(hours=9))
+
+# LZH解凍: lhafile が使えればそれ、無ければWindows同梱bsdtar(libarchive)。
+# lhafile は Python3.14 で C拡張のビルドが通らないため、bsdtar が実質の本命
+# （scrapeKiryuPayouts.py も同じ理由で bsdtar を使っている）。
+BSDTAR = os.environ.get(
+    "BSDTAR",
+    os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32", "tar.exe"),
+)
 
 KFILES_DIR = os.environ.get("KFILES_DIR", os.path.join("data", "kfiles"))
 OUT = os.path.join("docs", "data", "motorUsage.json")
@@ -44,15 +54,31 @@ DETAIL_RE = re.compile(r"\s*(\d{1,2})\s+(\d)\s+(\d{4})\s+(.+?)\s+(\d{1,3})\s+(\d
 DATE_RE = re.compile(r"(\d{4})/\s*(\d{1,2})/\s*(\d{1,2})")
 
 
-def decode_kfile(path):
-    """Kファイルを SHIFT_JIS テキストで返す。.lzh は lhafile で解凍、.txt はそのまま。"""
-    if path.lower().endswith(".lzh"):
+def unlzh(path):
+    """.lzh を解凍し内側テキスト(K*.TXT)のバイト列を返す。lhafile→bsdtar の順に試す。"""
+    try:
         import lhafile
+    except ImportError:
+        pass
+    else:
         arc = lhafile.Lhafile(path)
         names = arc.namelist()
-        if not names:
-            return ""
-        raw = arc.read(names[0])
+        return arc.read(names[0]) if names else b""
+
+    with tempfile.TemporaryDirectory() as td:
+        subprocess.run([BSDTAR, "-xf", path, "-C", td], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        txts = glob.glob(os.path.join(td, "*.TXT")) + glob.glob(os.path.join(td, "*.txt"))
+        if not txts:
+            return b""
+        with open(txts[0], "rb") as f:
+            return f.read()
+
+
+def decode_kfile(path):
+    """Kファイルを SHIFT_JIS テキストで返す。.lzh は解凍、.txt はそのまま。"""
+    if path.lower().endswith(".lzh"):
+        raw = unlzh(path)
     else:
         with open(path, "rb") as f:
             raw = f.read()

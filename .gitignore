@@ -1,2 +1,7 @@
 __pycache__/
 *.pyc
+
+# Kファイルは再取得可能な中間物（生成物 motorUsage.json のみコミットする）
+data/kfiles/*.lzh
+data/kfiles/*.txt
+data/kfiles/*.part
