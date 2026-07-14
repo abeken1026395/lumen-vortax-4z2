@@ -5,3 +5,6 @@ __pycache__/
 data/kfiles/*.lzh
 data/kfiles/*.txt
 data/kfiles/*.part
+
+# 自動実行(dailyMotorUsage.ps1)のログ・ロック
+scripts/logs/
