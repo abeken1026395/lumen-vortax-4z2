@@ -1,4 +1,4 @@
-# registerDailyMotorUsage.ps1
+﻿# registerDailyMotorUsage.ps1
 # dailyMotorUsage.ps1 を「毎日 JST 6:00」に走らせるタスクを登録する。再実行すれば設定を上書き更新する。
 #
 # ログオン種別について（重要）:

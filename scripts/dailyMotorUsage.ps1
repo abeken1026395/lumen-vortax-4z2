@@ -1,4 +1,4 @@
-# dailyMotorUsage.ps1
+﻿# dailyMotorUsage.ps1
 # Kファイル差分収集 → motorUsage.json 再生成 → 変更があればコミット＆push。
 # Windowsタスクスケジューラから毎日1回実行される想定（登録: scripts/registerDailyMotorUsage.ps1）。
 #
