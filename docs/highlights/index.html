@@ -185,6 +185,12 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .rchip.past{color:var(--sub);background:var(--panel2);opacity:.55}
 .rchip.hot{border-color:rgba(255,209,102,.55)}
 .rchip-mk{font-size:9px;color:var(--acc);line-height:1}
+/* 締切ライブ演出（当日のみ・1分毎更新） */
+.soon-badge{display:none;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(255,209,102,.16);color:var(--acc);border:1px solid rgba(255,209,102,.4)}
+.race.soon .soon-badge{display:inline-flex;align-items:center}
+.race.past:not(.open) .rhead{opacity:.55}
+.rchip.soon{border-color:rgba(255,209,102,.6)}
+.rchip.soon::after{content:"";position:absolute;top:-2px;right:-2px;width:7px;height:7px;border-radius:50%;background:var(--acc)}
 </style>
 </head>
 <body>
@@ -210,6 +216,7 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
       <span class="mtr-leg-item"><span class="flag fST">ST</span>平均STが鋭い（目安0.15以下）</span>
       <span class="mtr-leg-item"><span class="up">▲</span>当地勝率が全国勝率より高い（その場を得意）</span>
       <span class="mtr-leg-item"><span class="badge b-mid">波乱</span>荷れ条件の件数（4以上赤／2-3金／0-1灰）</span>
+      <span class="mtr-leg-item"><span class="rchip-mk" style="font-size:12px">⚡</span>その場で波乱指数が最も高いレース</span>
     </div>
   </div>
 </header>
@@ -349,9 +356,9 @@ function renderCard(r, ctx){
   const uid = r['場コード']+'_'+r['レース'];              // 当日内で一意
   const open = OPEN_RACES.has(uid);
   const title = (ctx==='venue') ? r['レース'] : `${r['場名']} ${r['レース']}`;  // 場別=R番号のみ／波乱堅め=場名+R
-  return `<div class="race${open?' open':''}" data-uid="${uid}">
+  return `<div class="race${open?' open':''}" data-uid="${uid}" data-dl="${dl2min(r['締切時刻'])}">
     <div class="rhead" role="button" tabindex="0" aria-expanded="${open?'true':'false'}" aria-controls="rb-${uid}" data-uid="${uid}">
-      <div class="rtop"><span class="rname">${title}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}<span class="rchev" aria-hidden="true">▼</span></div>
+      <div class="rtop"><span class="rname">${title}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}<span class="soon-badge" aria-hidden="true">まもなく</span>${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}<span class="rchev" aria-hidden="true">▼</span></div>
       <div class="rmitate"><span class="lbl">見立て</span><span class="mt-txt">${r['見立て']}</span></div>
     </div>
     <div class="rbody" id="rb-${uid}"${open?'':' hidden'}>
@@ -369,6 +376,20 @@ function sw(v){VIEW=v;document.querySelectorAll('.tab').forEach(t=>t.classList.t
 function ss(s){SORT=s;document.querySelectorAll('.sortbtn').forEach(t=>t.classList.toggle('on',t.dataset.s===s));render();}
 function dl2min(hhmm){if(!hhmm||hhmm.indexOf(':')<0)return 99999;const p=hhmm.split(':');return (+p[0])*60+(+p[1]);}
 function nowMinJST(){const d=new Date();return (d.getUTCHours()*60+d.getUTCMinutes()+540)%1440;}  // JSTの現在分（TZ非依存）
+// 締切に応じた表示状態を付け替える（再描画せずクラスのみ／時刻演出は当日タブのみ）
+function refreshDeadlineState(){
+  const isToday=(SRC==='highlights.json' && !ISNEXT);
+  const nm=nowMinJST();
+  const apply=(el)=>{
+    const dl=+el.dataset.dl;
+    const past=isToday && dl<99999 && dl<nm;                 // 締切過ぎ
+    const soon=isToday && !past && dl<99999 && (dl-nm)>=0 && (dl-nm)<=30;  // 残り30分以内
+    el.classList.toggle('past', past);
+    el.classList.toggle('soon', soon);
+  };
+  document.querySelectorAll('.race[data-dl]').forEach(apply);
+  document.querySelectorAll('.rchip[data-dl]').forEach(apply);
+}
 
 let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
 function toggleVenue(ba){OPEN_VENUE = (OPEN_VENUE===ba)? null : ba; render();}
@@ -505,17 +526,14 @@ function renderVenues(){
     const kskCard=(KANSENKI&&KANSENKI[v.code])?renderKansenki(KANSENKI[v.code], v.code):'';  // 記事が無い場は静かに欠番
     let chipBar='';
     if(open){
-      const isToday=(SRC==='highlights.json' && !ISNEXT);   // 締切過ぎグレーは当日のみ
-      const nm=nowMinJST();
       const maxH=Math.max.apply(null, races.map(r=>r['波乱']||0));
       let hotDone=false;
       chipBar=`<div class="rchips" role="group" aria-label="${ba} レース頭出し">`+races.map(r=>{
         const n=parseInt(r['レース']);
         const uid=r['場コード']+'_'+r['レース'];
-        const past=isToday && dl2min(r['締切時刻'])<nm;
         const isHot=(!hotDone && maxH>=2 && (r['波乱']||0)===maxH);  // その場で最高波乱の1Rだけ⚡
         if(isHot) hotDone=true;
-        return `<button class="rchip${past?' past':''}${isHot?' hot':''}" data-target="${uid}" aria-label="${n}Rへ移動">${n}${isHot?'<span class="rchip-mk" aria-hidden="true">⚡</span>':''}</button>`;
+        return `<button class="rchip${isHot?' hot':''}" data-target="${uid}" data-dl="${dl2min(r['締切時刻'])}" aria-label="${n}Rへ移動">${n}${isHot?'<span class="rchip-mk" aria-hidden="true">⚡</span>':''}</button>`;
       }).join('')+`</div>`;
     }
     return `<div class="venue">
@@ -548,7 +566,9 @@ function render(){
   }else{
     el.innerHTML=renderVenues();
   }
+  refreshDeadlineState();
 }
+if(!window.__dlTimer){ window.__dlTimer=setInterval(refreshDeadlineState, 60000); }  // 1分毎に締切表示を更新（タイマー1本）
 
 function bProfHTML(no, boat){
   const p=PROF[no];
