@@ -1,0 +1,91 @@
+<!-- 自動生成: scripts/buildBeforeinfoProbe.py。手編集しない。 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>beforeinfo収集 現在地プローブ</title>
+<style>
+body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:12px;background:#f7f7f8;color:#1a1a1a;line-height:1.6;font-size:15px}
+h1{font-size:19px;margin:8px 0}h2{font-size:16px;margin:22px 0 8px;border-left:5px solid #2b6cb0;padding-left:8px}
+h3{font-size:14px;margin:16px 0 6px;color:#2b6cb0}
+.card{background:#fff;border:1px solid #e2e2e5;border-radius:8px;padding:12px;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;overflow-x:auto;display:block}
+th,td{border:1px solid #ddd;padding:4px 6px;text-align:left;white-space:nowrap}
+th{background:#eef2f7}
+.ok{color:#1a7f37;font-weight:bold}.ng{color:#c1121f;font-weight:bold}
+.muted{color:#666;font-size:12px}code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;word-break:break-all}
+.empty{color:#c1121f}.bignum{font-size:22px;font-weight:bold}
+</style>
+<h1>beforeinfo収集 現在地プローブ</h1>
+<p class="muted">生成: 2026-07-16 02:40 JST ／ このページはけん専用（noindex）。どのページからもリンクしない。</p>
+<h2>1. 何を集めているか</h2>
+<div class="card">
+<p><b>データ源:</b> boatrace.jp公式 直前情報</p>
+<p><b>ベースURL:</b> <code>https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno={rno}&amp;jcd={jcd}&amp;hd={hd}</code></p>
+<p><b>収集項目（motorParts.json 実レコードのキー）:</b></p>
+<p><code>jcd</code> / <code>場名</code> / <code>開催日</code> / <code>rno</code> / <code>枠</code> / <code>登番</code> / <code>氏名</code> / <code>モーターNo</code> / <code>節名</code> / <code>部品交換</code> / <code>展示タイム</code> / <code>チルト</code> / <code>プロペラ変更</code> / <code>出典URL</code> / <code>取得日時</code></p>
+<p><b>出典URLの実例:</b><br><code>https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=1&amp;jcd=03&amp;hd=20260713</code></p>
+</div>
+<h2>2. 何をしているか</h2>
+<div class="card">
+<p><b>実行元ワークフロー:</b> 出走表データ自動更新 <span class='muted'>(update_racers.yml)</span></p>
+<p><b>fetchPartsExchange 起動条件(if):</b> <code>github.event.schedule == &#x27;37 14 * * *&#x27; || github.event_name == &#x27;workflow_dispatch&#x27;</code></p>
+<p><b>schedule の cron 全行 → JST換算:</b></p><table><tr><th>cron(UTC)</th><th>JST</th></tr>
+<tr><td><code>22 23 * * *</code></td><td>JST 08:22（翌日）</td></tr>
+<tr><td><code>52 23 * * *</code></td><td>JST 08:52（翌日）</td></tr>
+<tr><td><code>22 0 * * *</code></td><td>JST 09:22</td></tr>
+<tr><td><code>7 11 * * *</code></td><td>JST 20:07</td></tr>
+<tr><td><code>7 13 * * *</code></td><td>JST 22:07</td></tr>
+<tr><td><code>37 13 * * *</code></td><td>JST 22:37</td></tr>
+<tr><td><code>7 14 * * *</code></td><td>JST 23:07</td></tr>
+<tr><td><code>37 14 * * *</code></td><td>JST 23:37</td></tr>
+<tr><td><code>7 15 * * *</code></td><td>JST 00:07（翌日）</td></tr>
+<tr><td><code>37 15 * * *</code></td><td>JST 00:37（翌日）</td></tr>
+</table>
+<p class='muted'>※上記は実行元WFの全schedule。実際に fetchPartsExchange を叩くのは if 条件に一致する回のみ。</p>
+<h3>処理の流れ</h3>
+<p class='muted'>① beforeinfo(公式直前情報)を各場×12R取得 → ② parse_beforeinfo で枠/登番/展示/チルト/プロペラ/部品交換を抽出<br>③ racers_today.csv の登番→モーターNo/氏名を紐付け → ④ motorParts.json へ重複除いてappend蓄積</p>
+</div>
+<h2>3. 何が完了しているか</h2>
+<div class="card">
+<p><b>総レコード数:</b> <span class='bignum'>1800</span></p>
+<p><b>最終更新(updated):</b> 2026-07-16 00:58</p>
+<h3>各項目の充填率（非空件数／総数）</h3>
+<table><tr><th>項目</th><th>非空</th><th>総数</th><th>充填率</th></tr>
+<tr><td>展示タイム</td><td class='ng'>0</td><td>1800</td><td class='ng'>0.0%</td></tr>
+<tr><td>チルト</td><td class='ng'>0</td><td>1800</td><td class='ng'>0.0%</td></tr>
+<tr><td>部品交換</td><td class='ng'>0</td><td>1800</td><td class='ng'>0.0%</td></tr>
+<tr><td>プロペラ変更（Trueの件数）</td><td class='ng'>0</td><td>1800</td><td class='ng'>0.0%</td></tr>
+<tr><td>モーターNo</td><td class='ok'>1800</td><td>1800</td><td class='ok'>100.0%</td></tr>
+<tr><td>節名</td><td class='ok'>1800</td><td>1800</td><td class='ok'>100.0%</td></tr>
+</table>
+<h3>収集済み開催日と各日の件数</h3>
+<table><tr><th>開催日</th><th>件数</th><th>取得時刻レンジ</th></tr>
+<tr><td>20260713</td><td>936</td><td>02:49〜03:15</td></tr>
+<tr><td>20260716</td><td>864</td><td>00:34〜00:58</td></tr>
+</table>
+</div>
+<h2>4. 何が未完了・未確定か</h2>
+<div class="card">
+<h3>充填率0%の項目</h3>
+<p class='ng'>展示タイム / チルト / 部品交換 / プロペラ変更</p>
+<h3>欠測日（収集済み最小〜最大の範囲で0件の日）</h3>
+<p class='ng'>20260714 / 20260715</p>
+<h3>蓄積データの時刻検証（原因A: 取得が全発走前か）</h3>
+<p>開催日 20260716 の最終取得時刻 00:58 が最早締切 08:32 より前＝全レース発走前（直前情報未公開の時刻に取得）。</p>
+<h3>原因判定</h3>
+<p class='bignum'>原因A（時刻）が蓄積データから成立：全レコードの取得時刻が当該開催日の最早締切より前＝発走前で直前情報未公開。※Bの併存有無は正しい時刻での現物取得（上記現物検証）で要確認。</p>
+</div>
+<h2>現物検証（beforeinfo 1枚を parse_beforeinfo に通す）</h2>
+<div class="card">
+<table>
+<tr><th>jcd</th><td>21</td><th>場名</th><td>芦屋</td></tr>
+<tr><th>rno</th><td>1R</td><th>hd</th><td>20260716</td></tr>
+<tr><th>取得時刻(JST)</th><td>02:40</td><th>締切/発走時刻</th><td>08:32</td></tr>
+</table>
+<p><b>対象URL:</b><br><code>https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno=1&amp;jcd=21&amp;hd=20260716</code></p>
+<p class='ng'>この実行環境から boatrace.jp に到達できず、現物取得は未実施。</p>
+<p class='muted'>理由: <code>URLError(OSError(&#x27;Tunnel connection failed: 403 Forbidden&#x27;))</code></p>
+<p>けんが iPhone/PC で上記URLを開いて保存し、ローカル（boatrace.jp到達可）で <code>python scripts/buildBeforeinfoProbe.py</code> を再実行すると、下記の6艇分の実値・td全列挙・A/B判定が自動で埋まる。</p>
+<h3>7/14・7/15 の状況（GitHub Actions 実行履歴）</h3>
+<p class='muted'>本スクリプトは Actions実行履歴API に到達しないため、ここでは不明。けんが GitHub Actions の「出走表データ自動更新」実行履歴で 7/14・7/15 の発火有無/成否を確認のこと。</p>
+</div>

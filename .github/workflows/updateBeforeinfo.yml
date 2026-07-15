@@ -1,0 +1,49 @@
+name: beforeinfo部品交換収集
+
+on:
+  schedule:
+    # 前日分は当日いっぱい有効なので、多少遅延しても間に合うよう枠を厚くする
+    - cron: '7 21 * * *'   # JST 翌 6:07
+    - cron: '7 1 * * *'    # JST 10:07
+    - cron: '7 5 * * *'    # JST 14:07
+  workflow_dispatch:
+    inputs:
+      hd:
+        description: '検証用の対象開催日（YYYYMMDD）。空なら既定（JST前日）を使用'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: boatrace-beforeinfo
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 pandas lxml
+      - name: fetch beforeinfo (部品交換・チルト・プロペラ変更・体重・展示タイム)
+        env:
+          HD_OVERRIDE: ${{ github.event.inputs.hd }}
+        run: python scripts/fetchPartsExchange.py
+      - name: commit and push
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/motorParts.json
+          git diff --staged --quiet && echo "no change" && exit 0
+          git commit -m "beforeinfo部品交換収集 $(date +'%Y-%m-%d %H:%M')"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin main && break
+            echo "push retry $i ..."
+            sleep 5
+          done

@@ -38,12 +38,6 @@ jobs:
       # 節完結（venueMetaの日目=最終日）の場のモーター節成績を motorHistory.json に蓄積。
       # venueMeta.json は直前の scrape_racers で再生成済み、motors_all.csv はcheckout済みの既存を読む（読み取りのみ）。
       - run: python scripts/buildMotorHistory.py
-      # 夜1回だけ boatrace.jp直前情報から部品交換を収集し motorParts.json に蓄積。
-      # JST23:37の回のみ（この時刻はまだ当日扱い＝venueMeta/racersCSVが当日で整合。翌0:37以降は翌日に切替るため不可）。
-      # スクリプト先頭で1場1Rの疎通確認をし、到達不可なら既存を変更せず終了する（append方式・安全）。
-      - name: parts exchange (夜1回・boatrace.jp直前情報)
-        if: github.event.schedule == '37 14 * * *' || github.event_name == 'workflow_dispatch'
-        run: python scripts/fetchPartsExchange.py
       - name: commit and push
         run: |
           git config user.name "github-actions[bot]"
