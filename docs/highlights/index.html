@@ -191,6 +191,13 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .race.past:not(.open) .rhead{opacity:.55}
 .rchip.soon{border-color:rgba(255,209,102,.6)}
 .rchip.soon::after{content:"";position:absolute;top:-2px;right:-2px;width:7px;height:7px;border-radius:50%;background:var(--acc)}
+/* 前日/前々日タブの確定結果併記（実数のみ・判定しない） */
+.rresult{font-size:11.5px;font-weight:800;color:#8fd6c0;background:rgba(143,214,192,.10);border:1px solid rgba(143,214,192,.30);border-radius:8px;padding:2px 8px;white-space:nowrap}
+.rresult b{color:#8fd6c0;font-variant-numeric:tabular-nums}
+.rresult b.man,.rresult-row b.man{color:var(--hot)}
+.rresult-row{font-size:12.5px;font-weight:700;color:#a9d9c8;background:rgba(143,214,192,.09);border:1px solid rgba(143,214,192,.28);border-radius:9px;padding:6px 10px;margin:0 0 9px;line-height:1.55;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.rresult-row b{color:#8fd6c0;font-variant-numeric:tabular-nums}
+.rresult-row .src{font-size:10px;color:var(--sub);opacity:.75;font-weight:600}
 </style>
 </head>
 <body>
@@ -356,12 +363,17 @@ function renderCard(r, ctx){
   const uid = r['場コード']+'_'+r['レース'];              // 当日内で一意
   const open = OPEN_RACES.has(uid);
   const title = (ctx==='venue') ? r['レース'] : `${r['場名']} ${r['レース']}`;  // 場別=R番号のみ／波乱堅め=場名+R
+  const isPrev=(SRC==='highlights_prev.json'||SRC==='highlights_prev2.json');  // 前日/前々日のみ結果併記
+  const res=isPrev?RESULTS[uid]:null;
+  const resHead=res?`<span class="rresult">結果 ${res.finish}${res.payout!=null?` <b class="${res.payout>=10000?'man':''}">${(res.payout).toLocaleString()}円</b>`:''}</span>`:'';
+  const resRow=res?`<div class="rresult-row">🏁 <span>結果 <b>${res.finish}</b></span>${res.payout!=null?`<span>3連単 <b class="${res.payout>=10000?'man':''}">${(res.payout).toLocaleString()}円</b></span>`:''}<span class="src">出典：results（確定成績）</span></div>`:'';
   return `<div class="race${open?' open':''}" data-uid="${uid}" data-dl="${dl2min(r['締切時刻'])}">
     <div class="rhead" role="button" tabindex="0" aria-expanded="${open?'true':'false'}" aria-controls="rb-${uid}" data-uid="${uid}">
-      <div class="rtop"><span class="rname">${title}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}<span class="soon-badge" aria-hidden="true">まもなく</span>${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}<span class="rchev" aria-hidden="true">▼</span></div>
+      <div class="rtop"><span class="rname">${title}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}<span class="soon-badge" aria-hidden="true">まもなく</span>${resHead}${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}<span class="rchev" aria-hidden="true">▼</span></div>
       <div class="rmitate"><span class="lbl">見立て</span><span class="mt-txt">${r['見立て']}</span></div>
     </div>
     <div class="rbody" id="rb-${uid}"${open?'':' hidden'}>
+      ${resRow}
       ${wx}
       ${e30Info(r)}
       <div class="boats">${r['艇'].map(b=>boatRow(b, r['場名'])).join('')}</div>
@@ -647,6 +659,7 @@ document.addEventListener('click',function(e){
 });
 
 let SRC='highlights.json';
+let RESULTS={}, RESULTS_DATE='';  // 前日/前々日タブの確定結果（場コード+レース→着順/配当）
 var SRCS=['highlights.json','highlights_prev.json','highlights_prev2.json','highlights_next.json'];
 var TODAY_DATE='';  // 当日highlights.jsonの開催日。明日タブの「翌日か」判定に使う
 var LIVEW={};
@@ -733,6 +746,13 @@ fetch(SRC+'?_='+Date.now())
   }
   if(nn){ if(ISNEXT){ nn.textContent='翌日分は各場のレース確定後、順次追加されます。深夜にかけて表示される場が増えます。'; nn.style.display='block'; } else { nn.style.display='none'; } }
   const d=doc['開催日']||''; KAISAI=d;
+  RESULTS={}; RESULTS_DATE='';  // タブ切替でリセット
+  if((SRC==='highlights_prev.json'||SRC==='highlights_prev2.json') && /^\d{8}$/.test(d)){
+    fetch('../results/data/'+d+'.json?_='+Date.now())
+    .then(r=>r.ok?r.json():null)
+    .then(rd=>{ if(rd&&rd['場']){ const m={}; rd['場'].forEach(v=>{ (v['レース']||[]).forEach(x=>{ m[v['場コード']+'_'+x['レース']]={finish:x['着順'],payout:x['三連単配当']}; }); }); RESULTS=m; RESULTS_DATE=d; if(typeof render==='function') render(); } })
+    .catch(()=>{});  // 無ければ何も出さない
+  }
   if(d.length===8) document.getElementById('date').textContent=`${d.slice(0,4)}年${+d.slice(4,6)}月${+d.slice(6,8)}日 ${doc['レース数']}レース${ISNEXT?'（明日・前夜プレビュー）':''}`;
   const conf=(doc['確定イン率場']||[]).join('・');
   document.getElementById('note').innerHTML=`イン1着率は目安値（${conf}は公式実数、他は暫定）。機＝モーター2連率（その節の機力目安で、選手の調子とは別物）。<br>波乱＝外枠A級・当地巧者アウト・イン不安・機力ちぐはぐ等の条件数。買い目・確率・勝者予想は出していません。<br><span style="opacity:.7">生成：${(doc['生成時刻']||'').replace('T',' ').slice(0,16)}</span>`;
