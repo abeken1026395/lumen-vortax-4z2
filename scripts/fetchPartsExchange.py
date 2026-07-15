@@ -34,6 +34,7 @@ import json
 import time
 import datetime
 import urllib.request
+from urllib.parse import urlparse, parse_qs
 
 from bs4 import BeautifulSoup
 
@@ -63,8 +64,6 @@ JCD_NAME = {
 PARTS_LEGEND = ["ピストン", "リング", "電気", "キャブ", "シリンダ", "シャフト", "ギヤ", "キャリボ", "ペラ"]
 
 TOBAN_RE = re.compile(r"toban=(\d{4})")
-# ページ内のレースナビ(自レース含む)から実際に配信されたjcd/hdを逆算する
-NAV_RE = re.compile(r"beforeinfo\?rno=\d+&jcd=(\d+)&hd=(\d+)")
 
 
 def _cell_text(td):
@@ -124,22 +123,54 @@ def parse_beforeinfo(html):
     return out
 
 
+def _extract_jcd_hd(href):
+    """1つのhrefからクエリを構造的にパースしjcd/hdを取り出す。無ければ(None, None)。"""
+    qs = parse_qs(urlparse(href).query)
+    jcd = qs.get("jcd", [None])[0]
+    hd = qs.get("hd", [None])[0]
+    if jcd is not None:
+        jcd = jcd.zfill(2)
+    return jcd, hd
+
+
 def verify_hd_jcd(html, want_jcd, want_hd):
-    """HTML内のレースナビからjcd/hdを逆算し、要求値と一致するか検証する。
-    取れない/複数種混在/不一致なら安全側に倒して False。"""
-    matches = NAV_RE.findall(html)
-    if not matches:
-        return False, "ナビからjcd/hdを抽出できず"
-    jcds = set(j.zfill(2) for j, h in matches)
-    hds = set(h for j, h in matches)
-    if len(jcds) != 1 or len(hds) != 1:
-        return False, "ナビ内でjcd/hdが混在（複数種）"
-    got_jcd = next(iter(jcds))
-    got_hd = next(iter(hds))
-    if got_jcd != want_jcd or got_hd != want_hd:
-        return False, "jcd/hd不一致（要求jcd={} hd={} / 実際jcd={} hd={}）".format(
-            want_jcd, want_hd, got_jcd, got_hd)
-    return True, ""
+    """HTML内のリンクをBeautifulSoupで構造的に解析し、jcd/hdを逆算して要求値と照合する。
+    生HTML文字列への正規表現マッチはしない（href属性の&が&amp;にエスケープされ得るため）。
+    まずbeforeinfoリンクを対象にし、無ければ jcd=/hd= を含む全aタグにフォールバックする。
+    1件でも要求値と不一致なら、または1件も抽出できなければ安全側に倒して破棄。
+    戻り値: (ok: bool, reason: str, debug: dict)"""
+    soup = BeautifulSoup(html, "html.parser")
+    anchors = soup.find_all("a", href=True)
+
+    before_hrefs = [a["href"] for a in anchors if "beforeinfo" in a["href"]]
+    fallback_hrefs = [a["href"] for a in anchors if "jcd=" in a["href"] and "hd=" in a["href"]]
+
+    def collect(hrefs):
+        found = []
+        for href in hrefs:
+            jcd, hd = _extract_jcd_hd(href)
+            if jcd and hd:
+                found.append((href, jcd, hd))
+        return found
+
+    found = collect(before_hrefs)
+    if not found:
+        found = collect(fallback_hrefs)
+
+    debug = {
+        "sample_hrefs": (before_hrefs or fallback_hrefs)[:3],
+        "extracted": [(j, h) for _, j, h in found[:3]],
+    }
+
+    if not found:
+        return False, "beforeinfoリンクを1件も抽出できず（jcd=/hd=含むaタグも無し）", debug
+
+    bad = [(href, j, h) for href, j, h in found if j != want_jcd or h != want_hd]
+    if bad:
+        _, got_jcd, got_hd = bad[0]
+        return False, "jcd/hd不一致（要求jcd={} hd={} / 抽出jcd={} hd={}）".format(
+            want_jcd, want_hd, got_jcd, got_hd), debug
+    return True, "", debug
 
 
 def fetch(url):
@@ -273,7 +304,12 @@ def main():
             continue
         url = BASE.format(rno=rno, jcd=jcd, hd=hd)
 
-        ok, why = verify_hd_jcd(html, jcd, hd)
+        ok, why, dbg = verify_hd_jcd(html, jcd, hd)
+        if idx == 0:
+            print("診断(先頭レース jcd={} rno={}): beforeinfoリンク実値(先頭3件)={}".format(
+                jcd, rno, dbg["sample_hrefs"]))
+            print("診断(先頭レース jcd={} rno={}): 抽出jcd/hd(先頭3件)={}".format(
+                jcd, rno, dbg["extracted"]))
         if not ok:
             mismatch_races.append((jcd, rno, why))
             continue
