@@ -163,6 +163,20 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .nextnote{color:var(--acc2);font-size:12px;line-height:1.6;background:rgba(90,170,255,.08);border:1px solid var(--acc2);border-radius:10px;padding:8px 11px;margin:8px 0}
 .vnext{font-size:11px;color:var(--sub);margin:3px 0 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .part-badge{display:inline-block;font-size:10px;font-weight:800;color:#04121f;background:#e0b64a;border-radius:6px;padding:2px 7px}
+/* レース・アコーディオン（場別／波乱・堅め 共用） */
+.race{background:var(--panel);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.race.open{border-color:var(--acc)}
+.rhead{padding:11px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rhead:focus-visible{outline:2px solid var(--acc2);outline-offset:-2px}
+.rtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.race .rname{font-weight:800;font-size:15px}
+.rchev{color:var(--acc);font-size:11px;flex-shrink:0;transition:transform .18s}
+.race.open .rchev{transform:rotate(180deg)}
+.rmitate{margin-top:7px;font-size:13px;font-weight:800;color:var(--acc);line-height:1.45;display:flex;gap:6px;align-items:baseline}
+.rmitate .lbl{font-size:9.5px;font-weight:800;color:var(--bg);background:var(--acc);padding:2px 5px;border-radius:4px;flex-shrink:0;letter-spacing:.04em;position:relative;top:-1px}
+.rmitate .mt-txt{flex:1}
+.rbody{padding:2px 13px 13px}
+.rbody[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -321,19 +335,25 @@ function fcstWx(r){
   if(!it.length) return '';
   return `<div class="fcstwx">🔮 予報（締切${kEsc(dl)}に最も近い時刻）｜ ${it.join(' ／ ')}<span class="cav">。Open-Meteoの予報値。実況ではありません。予想・買い目には用いません。</span></div>`;
 }
-function renderCard(r){
+function renderCard(r, ctx){
   // 明日タブ＝当日実況(LIVEW)・当日潮汐(TIDE)は出さず、締切近傍の予報に差し替える。
   const wx = ISNEXT ? fcstWx(r) : `${liveWx(r['場コード'])}${windSignal(r['場コード'])}${tideInfo(r['場コード'])}`;
-  return `<div class="card">
-    <div class="chead"><span class="rname">${r['場名']} ${r['レース']}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}
-      ${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}</div>
-    ${wx}
-    ${e30Info(r)}
-    <div class="boats">${r['艇'].map(b=>boatRow(b, r['場名'])).join('')}</div>
-    <div class="headline"><span class="lbl">見立て</span><span>${r['見立て']}</span></div>
-    <div class="tenkai"><div class="t">展開の筋</div>${r['展開'].map(p=>`<p>${p}</p>`).join('')}</div>
-    <div class="suji"><b>波及の連鎖</b>：${r['波及']}</div>
-    ${!r['モーター使用']?`<div class="warn">※当節モーター成績は集計前のため、機力は判定から除外しています。</div>`:''}
+  const uid = r['場コード']+'_'+r['レース'];              // 当日内で一意
+  const open = OPEN_RACES.has(uid);
+  const title = (ctx==='venue') ? r['レース'] : `${r['場名']} ${r['レース']}`;  // 場別=R番号のみ／波乱堅め=場名+R
+  return `<div class="race${open?' open':''}" data-uid="${uid}">
+    <div class="rhead" role="button" tabindex="0" aria-expanded="${open?'true':'false'}" aria-controls="rb-${uid}" data-uid="${uid}">
+      <div class="rtop"><span class="rname">${title}</span>${r['日目']?`<span class="nichi">${r['日目']}</span>`:''}${r['企画名']?`<span class="kikaku">${r['企画名']}</span>`:''}${badge(r)}${r['締切時刻']?`<span class="deadline">締切 ${r['締切時刻']}</span>`:''}<span class="rchev" aria-hidden="true">▼</span></div>
+      <div class="rmitate"><span class="lbl">見立て</span><span class="mt-txt">${r['見立て']}</span></div>
+    </div>
+    <div class="rbody" id="rb-${uid}"${open?'':' hidden'}>
+      ${wx}
+      ${e30Info(r)}
+      <div class="boats">${r['艇'].map(b=>boatRow(b, r['場名'])).join('')}</div>
+      <div class="tenkai"><div class="t">展開の筋</div>${r['展開'].map(p=>`<p>${p}</p>`).join('')}</div>
+      <div class="suji"><b>波及の連鎖</b>：${r['波及']}</div>
+      ${!r['モーター使用']?`<div class="warn">※当節モーター成績は集計前のため、機力は判定から除外しています。</div>`:''}
+    </div>
   </div>`;
 }
 
@@ -343,6 +363,33 @@ function dl2min(hhmm){if(!hhmm||hhmm.indexOf(':')<0)return 99999;const p=hhmm.sp
 
 let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
 function toggleVenue(ba){OPEN_VENUE = (OPEN_VENUE===ba)? null : ba; render();}
+
+// レース・アコーディオンの開閉（同時に複数開いてよい・状態は再描画をまたいで保持）
+let OPEN_RACES=new Set();
+function setRaceOpen(el, open){
+  const head=el.querySelector(':scope > .rhead');
+  const body=el.querySelector(':scope > .rbody');
+  el.classList.toggle('open', open);
+  if(head) head.setAttribute('aria-expanded', open?'true':'false');
+  if(body){ if(open) body.removeAttribute('hidden'); else body.setAttribute('hidden',''); }
+}
+function toggleRace(uid, el){
+  const open=!OPEN_RACES.has(uid);
+  if(open) OPEN_RACES.add(uid); else OPEN_RACES.delete(uid);
+  if(el) setRaceOpen(el, open);
+}
+document.addEventListener('click',function(e){
+  const rh=e.target.closest('.rhead');
+  if(!rh) return;
+  toggleRace(rh.dataset.uid, rh.closest('.race'));
+});
+document.addEventListener('keydown',function(e){
+  const t=e.target;
+  if((e.key==='Enter'||e.key===' ') && t.classList && t.classList.contains('rhead')){
+    e.preventDefault();
+    toggleRace(t.dataset.uid, t.closest('.race'));
+  }
+});
 let ISNEXT=false, NEXTMETA={};  // 明日タブ（前夜プレビュー）の状態と場別メタ（鮮度・部分公開）
 
 // ---- 観戦記カード（署名コーナー）----
@@ -445,7 +492,7 @@ function renderVenues(){
         <span class="varrow">${open?'▲':'▼'}</span>
       </div>
       ${setsuLine}${nextLine}
-      ${open?`<div class="vbody">${kskCard}${races.map(renderCard).join('')}</div>`:''}
+      ${open?`<div class="vbody">${kskCard}${races.map(r=>renderCard(r,'venue')).join('')}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -458,13 +505,13 @@ function render(){
     if(SORT==='time') arr.sort((x,y)=>dl2min(x['締切時刻'])-dl2min(y['締切時刻']));
     else arr.sort((x,y)=>y['波乱']-x['波乱']||x['場名'].localeCompare(y['場名'],'ja'));
     if(!arr.length){el.innerHTML='<div class="empty">本日は波乱条件が2つ以上揃うレースがありません。</div>';return;}
-    el.innerHTML=arr.map(renderCard).join('');
+    el.innerHTML=arr.map(r=>renderCard(r,'flat')).join('');
   }else if(VIEW==='firm'){
     arr=arr.filter(r=>r['イン堅']);
     if(SORT==='time') arr.sort((x,y)=>dl2min(x['締切時刻'])-dl2min(y['締切時刻']));
     else arr.sort((x,y)=>x['波乱']-y['波乱']||y['イン1着率']-x['イン1着率']);
     if(!arr.length){el.innerHTML='<div class="empty">本日はイン堅め条件のレースがありません。</div>';return;}
-    el.innerHTML=arr.map(renderCard).join('');
+    el.innerHTML=arr.map(r=>renderCard(r,'flat')).join('');
   }else{
     el.innerHTML=renderVenues();
   }
@@ -523,8 +570,16 @@ document.addEventListener('click',function(e){
   const rid=bt.dataset.rid, no=bt.dataset.no;
   const prof=document.getElementById('bp-'+rid);
   if(!prof) return;
-  const open=bt.classList.toggle('open');
-  if(open){
+  const willOpen=!bt.classList.contains('open');
+  if(willOpen){
+    // 同一レース内で既に開いている別の艇を閉じる（1艇のみ展開）
+    const scope=bt.closest('.rbody')||bt.closest('.race')||document;
+    scope.querySelectorAll('.boat.open').forEach(o=>{
+      if(o!==bt){ o.classList.remove('open'); const op=document.getElementById('bp-'+o.dataset.rid); if(op) op.classList.remove('show'); }
+    });
+  }
+  bt.classList.toggle('open', willOpen);   // 再タップで閉じるトグル
+  if(willOpen){
     if(!prof.dataset.filled){
       // 同カード内の艇データを探す
       let boat=null;
