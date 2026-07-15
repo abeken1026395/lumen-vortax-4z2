@@ -12111,6 +12111,1115 @@
           }
         ]
       }
+    },
+    {
+      "jcd": "24",
+      "venue": "大村",
+      "series": "ミッドナイトボートレースｉｎ大村 ５",
+      "grade": null,
+      "dayNum": 3,
+      "dayLabel": "３日目",
+      "asOfDay": 2,
+      "seriesNote": null,
+      "results": [
+        {
+          "rno": 1,
+          "finish": "3-1-2",
+          "payout": 4600,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 2,
+          "finish": "1-5-2",
+          "payout": 1070,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 3,
+          "finish": "5-3-6",
+          "payout": 14440,
+          "kimarite": "差し"
+        },
+        {
+          "rno": 4,
+          "finish": "5-1-3",
+          "payout": 22190,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 5,
+          "finish": "1-5-4",
+          "payout": 560,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 6,
+          "finish": "4-6-2",
+          "payout": 2930,
+          "kimarite": "まくり"
+        },
+        {
+          "rno": 7,
+          "finish": "5-1-3",
+          "payout": 26510,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 8,
+          "finish": "1-2-6",
+          "payout": 860,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 9,
+          "finish": "1-4-3",
+          "payout": 810,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 10,
+          "finish": "5-1-2",
+          "payout": 6860,
+          "kimarite": "まくり差し"
+        },
+        {
+          "rno": 11,
+          "finish": "1-5-6",
+          "payout": 8500,
+          "kimarite": "逃げ"
+        },
+        {
+          "rno": 12,
+          "finish": "1-5-4",
+          "payout": 5960,
+          "kimarite": "逃げ"
+        }
+      ],
+      "resultsSummary": {
+        "manshuCount": 3,
+        "manshuRaces": [
+          {
+            "rno": 3,
+            "combo": "5-3-6",
+            "payout": 14440
+          },
+          {
+            "rno": 4,
+            "combo": "5-1-3",
+            "payout": 22190
+          },
+          {
+            "rno": 7,
+            "combo": "5-1-3",
+            "payout": 26510
+          }
+        ],
+        "venueManRateBase": {
+          "rate": 15.4,
+          "source": "verify_log当場実績",
+          "n": 2403
+        }
+      },
+      "reference": {
+        "venueYearStats": {
+          "manRate": 15.4,
+          "haranRate": 28.0,
+          "katameRate": 61.3,
+          "n": 2403,
+          "source": "verify_log.csv 当場過去1年（万舟>10000/荒れ>=5000/イン先頭決着）"
+        },
+        "setsuVsYear": {
+          "setsuManshu": 8,
+          "setsuRaces": 24,
+          "note": "今節万舟ペースと年間実績の比較軸（数値のみ・評価語なし）"
+        },
+        "e30": {
+          "applies": true,
+          "since": "2025-06-22",
+          "source": "e30Schedule.json"
+        }
+      },
+      "scoreRank": null,
+      "focusRacers": [
+        {
+          "toban": "4259",
+          "name": "真庭　　明志",
+          "yomi": null,
+          "grade": "A2",
+          "branch": "長崎",
+          "isLocal": true,
+          "finishTrail": [
+            {
+              "day": 1,
+              "rno": 1,
+              "course": 2,
+              "st": 0.18,
+              "finish": 1
+            },
+            {
+              "day": 1,
+              "rno": 11,
+              "course": 6,
+              "st": 0.09,
+              "finish": 4
+            },
+            {
+              "day": 2,
+              "rno": 3,
+              "course": 5,
+              "st": 0.13,
+              "finish": 1
+            },
+            {
+              "day": 2,
+              "rno": 9,
+              "course": 1,
+              "st": 0.09,
+              "finish": 1
+            }
+          ],
+          "motorNo": 61,
+          "motor2renSetsu": 42.86,
+          "motor2renSetsuAvg": 31.0,
+          "zenkokuWinRate": 5.47,
+          "tochiWinRate": 5.96,
+          "tochiHistory": null,
+          "fCount": 0,
+          "stSetsu": [
+            0.135,
+            0.11
+          ],
+          "stCareer": 0.15,
+          "kimariteType": {
+            "type": "逃げ型",
+            "winCount": 27,
+            "runs": 153,
+            "nige": 18,
+            "sashi": 5,
+            "makuri": 1,
+            "makurisashi": 1,
+            "makuriRate": 3.7,
+            "sashiRate": 18.5,
+            "maezukeRate": 1.4,
+            "maezukeAvg": 0.07,
+            "window": "2025-12-31〜2026-07-01",
+            "source": "racerKimarite.csv"
+          }
+        }
+      ],
+      "localRacers": [
+        {
+          "toban": "4259",
+          "name": "真庭　　明志",
+          "branch": "長崎",
+          "summary": "A2・全国勝率5.47・当地2連率42.31%"
+        },
+        {
+          "toban": "4004",
+          "name": "山本　　浩輔",
+          "branch": "長崎",
+          "summary": "B1・全国勝率4.88・当地2連率25.00%"
+        },
+        {
+          "toban": "5048",
+          "name": "眞鳥　　康太",
+          "branch": "長崎",
+          "summary": "B1・全国勝率4.01・当地2連率25.33%"
+        }
+      ],
+      "styleHistory": [
+        "番狂わせ型",
+        "展望型",
+        "水面型"
+      ],
+      "prevArticle": {
+        "exists": true,
+        "title": "大村２日目、堅水面に初日5万舟",
+        "body": "ミッドナイトボートレースｉｎ大村 ５は２日目。大村はイン先頭決着が年間61.4%（2391レース）と全国屈指の堅水面だが、初日は12レース中5レースで万舟が飛んだ。逃げは5本にとどまり、年間61.4%を大きく下回った。2Rは1-6-3・逃げで55200円、頭が残っても2・3着の波乱で高配当になった。5Rは4-5-6・差しで22180円、10Rは2-5-1・差しで21780円と外の差しも決まり、年間万舟率15.3%・荒れ率27.9%を大きく超える一日だった。地元・長崎の真庭明志は初日1Rを2コースから差して白星。だが後半11Rは6コースから4着に沈んだ。今節の平均STは0.135と通期0.15を上回る速さだ。きょうの注目——真庭は3Rに5コース、9R予選特賞では1コースに入る。61号機は今節2連率42.86%で節平均30.8%を上回り、全国勝率5.47に対し当地勝率5.96と大村を得意にする一枚だ。荒れの目立った初日を受け、締切21時25分の予選特賞で内の一枠がどう出るか、展示の伸びが確認点になる。",
+        "styleType": "番狂わせ型"
+      },
+      "todayProgram": {
+        "asOfCard": "20260716",
+        "races": [
+          {
+            "rno": 1,
+            "kikaku": "一般",
+            "deadline": "17:41",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "5311",
+                "grade": "B1",
+                "motor2": 25.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.19,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "4004",
+                "grade": "B1",
+                "motor2": 19.35,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.79,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4196",
+                "grade": "B1",
+                "motor2": 9.38,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.77,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4440",
+                "grade": "B1",
+                "motor2": 24.24,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.88,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "4161",
+                "grade": "B1",
+                "motor2": 45.45,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.8,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4674",
+                "grade": "B1",
+                "motor2": 36.36,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.97,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 2,
+            "kikaku": "一般",
+            "deadline": "18:08",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4626",
+                "grade": "B1",
+                "motor2": 42.86,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.04,
+                "stAvg": 0.22,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "5063",
+                "grade": "B1",
+                "motor2": 54.29,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.9,
+                "stAvg": 0.21,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4067",
+                "grade": "A2",
+                "motor2": 32.26,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 7.88,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "5207",
+                "grade": "B1",
+                "motor2": 32.35,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.13,
+                "stAvg": 0.16,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "5385",
+                "grade": "B1",
+                "motor2": 51.52,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 0.0,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4259",
+                "grade": "A2",
+                "motor2": 42.86,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.96,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 3,
+            "kikaku": "一般",
+            "deadline": "18:34",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4575",
+                "grade": "A2",
+                "motor2": 26.67,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.39,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "3939",
+                "grade": "B2",
+                "motor2": 35.29,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.83,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "3467",
+                "grade": "B1",
+                "motor2": 47.06,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.64,
+                "stAvg": 0.2,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "5381",
+                "grade": "B1",
+                "motor2": 29.03,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 0.0,
+                "stAvg": 0.17,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "4180",
+                "grade": "A2",
+                "motor2": 25.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.0,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4495",
+                "grade": "B2",
+                "motor2": 50.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.43,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 4,
+            "kikaku": "一般",
+            "deadline": "19:03",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4786",
+                "grade": "A1",
+                "motor2": 22.58,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.41,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "4179",
+                "grade": "A2",
+                "motor2": 18.75,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.0,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "3441",
+                "grade": "B1",
+                "motor2": 29.41,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 0.0,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "5343",
+                "grade": "B1",
+                "motor2": 0.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 2.67,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "5048",
+                "grade": "B1",
+                "motor2": 41.67,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.47,
+                "stAvg": 0.21,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "3623",
+                "grade": "A1",
+                "motor2": 20.69,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 8.02,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 5,
+            "kikaku": "一般",
+            "deadline": "19:30",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "3918",
+                "grade": "A1",
+                "motor2": 28.57,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.57,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "5271",
+                "grade": "B1",
+                "motor2": 51.43,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.42,
+                "stAvg": 0.19,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "3544",
+                "grade": "B1",
+                "motor2": 27.27,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 0.0,
+                "stAvg": 0.2,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4866",
+                "grade": "B1",
+                "motor2": 40.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.17,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "4797",
+                "grade": "A1",
+                "motor2": 27.27,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.93,
+                "stAvg": 0.13,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4945",
+                "grade": "B1",
+                "motor2": 22.22,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.67,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 6,
+            "kikaku": "一般",
+            "deadline": "19:56",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4545",
+                "grade": "A1",
+                "motor2": 16.67,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 8.04,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "5033",
+                "grade": "B1",
+                "motor2": 12.12,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 1.83,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "3967",
+                "grade": "B1",
+                "motor2": 40.63,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.57,
+                "stAvg": 0.19,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4466",
+                "grade": "A2",
+                "motor2": 40.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.5,
+                "stAvg": 0.19,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "4644",
+                "grade": "A1",
+                "motor2": 44.83,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 7.05,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "5426",
+                "grade": "B2",
+                "motor2": 42.86,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 1.38,
+                "stAvg": 0.2,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 7,
+            "kikaku": "一般",
+            "deadline": "20:25",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4962",
+                "grade": "A2",
+                "motor2": 31.25,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.0,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "5325",
+                "grade": "B1",
+                "motor2": 21.21,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.0,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "3740",
+                "grade": "A1",
+                "motor2": 27.27,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.36,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "3211",
+                "grade": "B1",
+                "motor2": 47.22,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.75,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "4215",
+                "grade": "A2",
+                "motor2": 36.36,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.44,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "5385",
+                "grade": "B1",
+                "motor2": 51.52,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 0.0,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 8,
+            "kikaku": "一般",
+            "deadline": "20:59",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4560",
+                "grade": "A2",
+                "motor2": 24.14,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.92,
+                "stAvg": 0.15,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "5207",
+                "grade": "B1",
+                "motor2": 32.35,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.13,
+                "stAvg": 0.16,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4254",
+                "grade": "A2",
+                "motor2": 25.71,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.8,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4872",
+                "grade": "B1",
+                "motor2": 29.03,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.82,
+                "stAvg": 0.18,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "3956",
+                "grade": "A2",
+                "motor2": 18.75,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.38,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4440",
+                "grade": "B1",
+                "motor2": 24.24,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.88,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 9,
+            "kikaku": "準優勝戦",
+            "deadline": "21:25",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "3623",
+                "grade": "A1",
+                "motor2": 20.69,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 8.02,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "3918",
+                "grade": "A1",
+                "motor2": 28.57,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.57,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4180",
+                "grade": "A2",
+                "motor2": 25.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.0,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4067",
+                "grade": "A2",
+                "motor2": 32.26,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 7.88,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "3939",
+                "grade": "B2",
+                "motor2": 35.29,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.83,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4179",
+                "grade": "A2",
+                "motor2": 18.75,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.0,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 10,
+            "kikaku": "準優勝戦",
+            "deadline": "21:51",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4259",
+                "grade": "A2",
+                "motor2": 42.86,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.96,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "4545",
+                "grade": "A1",
+                "motor2": 16.67,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 8.04,
+                "stAvg": 0.15,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4575",
+                "grade": "A2",
+                "motor2": 26.67,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.39,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4797",
+                "grade": "A1",
+                "motor2": 27.27,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.93,
+                "stAvg": 0.13,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "5311",
+                "grade": "B1",
+                "motor2": 25.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.19,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "5343",
+                "grade": "B1",
+                "motor2": 0.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 2.67,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 11,
+            "kikaku": "準優勝戦",
+            "deadline": "22:16",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4495",
+                "grade": "B2",
+                "motor2": 50.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.43,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "4786",
+                "grade": "A1",
+                "motor2": 22.58,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.41,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4644",
+                "grade": "A1",
+                "motor2": 44.83,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 7.05,
+                "stAvg": 0.14,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "4626",
+                "grade": "B1",
+                "motor2": 42.86,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.04,
+                "stAvg": 0.22,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "4962",
+                "grade": "A2",
+                "motor2": 31.25,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 3.0,
+                "stAvg": 0.17,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4004",
+                "grade": "B1",
+                "motor2": 19.35,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.79,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              }
+            ]
+          },
+          {
+            "rno": 12,
+            "kikaku": "一般",
+            "deadline": "22:41",
+            "boats": [
+              {
+                "waku": 1,
+                "toban": "4466",
+                "grade": "A2",
+                "motor2": 40.0,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.5,
+                "stAvg": 0.19,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 2,
+                "toban": "5381",
+                "grade": "B1",
+                "motor2": 29.03,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 0.0,
+                "stAvg": 0.17,
+                "f": 1,
+                "l": 0
+              },
+              {
+                "waku": 3,
+                "toban": "4215",
+                "grade": "A2",
+                "motor2": 36.36,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 5.44,
+                "stAvg": 0.16,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 4,
+                "toban": "5048",
+                "grade": "B1",
+                "motor2": 41.67,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.47,
+                "stAvg": 0.21,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 5,
+                "toban": "3740",
+                "grade": "A1",
+                "motor2": 27.27,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 6.36,
+                "stAvg": 0.18,
+                "f": 0,
+                "l": 0
+              },
+              {
+                "waku": 6,
+                "toban": "4560",
+                "grade": "A2",
+                "motor2": 24.14,
+                "motor2SetsuAvg": 31.0,
+                "tochiWin": 4.92,
+                "stAvg": 0.15,
+                "f": 1,
+                "l": 0
+              }
+            ]
+          }
+        ]
+      }
     }
-  ]
+  ],
+  "supplementedAt": "2026-07-16T03:41:12.919332+09:00"
 }
