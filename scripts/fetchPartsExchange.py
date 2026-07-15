@@ -33,7 +33,7 @@ import re
 import json
 import time
 import datetime
-import urllib.request
+import requests
 from urllib.parse import urlparse, parse_qs
 
 from bs4 import BeautifulSoup
@@ -123,64 +123,51 @@ def parse_beforeinfo(html):
     return out
 
 
-def _extract_jcd_hd(href):
-    """1つのhrefからクエリを構造的にパースしjcd/hdを取り出す。無ければ(None, None)。"""
-    qs = parse_qs(urlparse(href).query)
+def _query_dict(url):
+    """URLのクエリをパースし、値だけの辞書にする（jcdは2桁ゼロ埋め）。"""
+    qs = parse_qs(urlparse(url).query)
     jcd = qs.get("jcd", [None])[0]
     hd = qs.get("hd", [None])[0]
+    rno = qs.get("rno", [None])[0]
     if jcd is not None:
         jcd = jcd.zfill(2)
-    return jcd, hd
+    return jcd, hd, rno
 
 
-def verify_hd_jcd(html, want_jcd, want_hd):
-    """HTML内のリンクをBeautifulSoupで構造的に解析し、jcd/hdを逆算して要求値と照合する。
-    生HTML文字列への正規表現マッチはしない（href属性の&が&amp;にエスケープされ得るため）。
-    まずbeforeinfoリンクを対象にし、無ければ jcd=/hd= を含む全aタグにフォールバックする。
-    1件でも要求値と不一致なら、または1件も抽出できなければ安全側に倒して破棄。
-    戻り値: (ok: bool, reason: str, debug: dict)"""
+def verify_hd_jcd(final_url, html, want_jcd, want_hd, want_rno):
+    """HTTPレスポンスの最終URL(final_url。requestsのr.url。サイレントリダイレクトはHTTPの
+    3xxで発生し、redirect後のURLにjcd/hdが反映される)を要求値と照合する。
+    final_urlからjcd/hdが抽出できない場合のみ、ページ内リンクにフォールバックする。
+    その際は rno・jcd・hd の3つ全てが要求値と一致するリンクが1つでもあれば一致とみなす
+    （前日/翌日/他レースへの切替リンクは要求値と一致しないのが普通なので、それらの存在を
+    破棄理由にはしない＝不一致リンクは無視する）。
+    戻り値: (ok: bool, reason: str)"""
+    jcd, hd, _ = _query_dict(final_url)
+    if jcd and hd:
+        if jcd == want_jcd and hd == want_hd:
+            return True, ""
+        return False, "最終URLのjcd/hdが要求値と不一致（要求jcd={} hd={} / 最終URL jcd={} hd={} url={}）".format(
+            want_jcd, want_hd, jcd, hd, final_url)
+
+    # フォールバック：最終URLからjcd/hdを抽出できない場合のみ、ページ内リンクの厳格一致を見る
     soup = BeautifulSoup(html, "html.parser")
-    anchors = soup.find_all("a", href=True)
-
-    before_hrefs = [a["href"] for a in anchors if "beforeinfo" in a["href"]]
-    fallback_hrefs = [a["href"] for a in anchors if "jcd=" in a["href"] and "hd=" in a["href"]]
-
-    def collect(hrefs):
-        found = []
-        for href in hrefs:
-            jcd, hd = _extract_jcd_hd(href)
-            if jcd and hd:
-                found.append((href, jcd, hd))
-        return found
-
-    found = collect(before_hrefs)
-    if not found:
-        found = collect(fallback_hrefs)
-
-    debug = {
-        "sample_hrefs": (before_hrefs or fallback_hrefs)[:3],
-        "extracted": [(j, h) for _, j, h in found[:3]],
-    }
-
-    if not found:
-        return False, "beforeinfoリンクを1件も抽出できず（jcd=/hd=含むaタグも無し）", debug
-
-    bad = [(href, j, h) for href, j, h in found if j != want_jcd or h != want_hd]
-    if bad:
-        _, got_jcd, got_hd = bad[0]
-        return False, "jcd/hd不一致（要求jcd={} hd={} / 抽出jcd={} hd={}）".format(
-            want_jcd, want_hd, got_jcd, got_hd), debug
-    return True, "", debug
+    want_rno_str = str(want_rno)
+    for a in soup.find_all("a", href=True):
+        ajcd, ahd, arno = _query_dict(a["href"])
+        if ajcd == want_jcd and ahd == want_hd and arno == want_rno_str:
+            return True, ""
+    return False, "最終URLからjcd/hdを抽出できず、rno/jcd/hdが全て一致するページ内リンクも無し（final_url={}）".format(
+        final_url)
 
 
 def fetch(url):
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    """requestsでGETし、リダイレクト後の最終URLとHTML本文を返す。失敗時は(None, None)。"""
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            return r.read().decode("utf-8", errors="replace")
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=TIMEOUT, allow_redirects=True)
+        return r.url, r.text
     except Exception as e:
         print("  [warn] fetch失敗:", url, e)
-        return None
+        return None, None
 
 
 def load_json(path):
@@ -268,7 +255,7 @@ def main():
     # --- 疎通確認：先頭レースの取得可否のみ見る（ネットワーク到達不可なら全体中止・既存維持） ---
     first_jcd, first_rno = races[0]
     first_url = BASE.format(rno=first_rno, jcd=first_jcd, hd=hd)
-    first_html = fetch(first_url)
+    first_final_url, first_html = fetch(first_url)
     if not first_html:
         print("疎通失敗。boatrace.jp本体に到達できず。全体を中止（既存を変更しない）。")
         return
@@ -294,22 +281,20 @@ def main():
     pending = list(races)
 
     for idx, (jcd, rno) in enumerate(pending):
+        url = BASE.format(rno=rno, jcd=jcd, hd=hd)
         if idx == 0:
-            html = first_html  # 疎通確認で取得済みの1件目を再利用（二重取得しない）
+            final_url, html = first_final_url, first_html  # 疎通確認で取得済みの1件目を再利用（二重取得しない）
         else:
-            url = BASE.format(rno=rno, jcd=jcd, hd=hd)
-            html = fetch(url)
+            final_url, html = fetch(url)
             time.sleep(SLEEP)
         if not html:
             continue
-        url = BASE.format(rno=rno, jcd=jcd, hd=hd)
 
-        ok, why, dbg = verify_hd_jcd(html, jcd, hd)
         if idx == 0:
-            print("診断(先頭レース jcd={} rno={}): beforeinfoリンク実値(先頭3件)={}".format(
-                jcd, rno, dbg["sample_hrefs"]))
-            print("診断(先頭レース jcd={} rno={}): 抽出jcd/hd(先頭3件)={}".format(
-                jcd, rno, dbg["extracted"]))
+            print("診断(先頭レース jcd={} rno={}): 要求URL={}".format(jcd, rno, url))
+            print("診断(先頭レース jcd={} rno={}): r.url={}".format(jcd, rno, final_url))
+
+        ok, why = verify_hd_jcd(final_url, html, jcd, hd, rno)
         if not ok:
             mismatch_races.append((jcd, rno, why))
             continue
