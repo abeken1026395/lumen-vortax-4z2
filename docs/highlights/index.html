@@ -82,7 +82,7 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .vhead.open{border-color:var(--acc);background:#16222e}
 .vname{font-weight:800;font-size:15px}
 .vmeta{color:var(--sub);font-size:12px}
-.varrow{margin-left:auto;color:var(--sub);font-size:12px}
+.varrow{margin-left:10px;color:var(--sub);font-size:12px}
 .vbody{margin-top:8px;padding-left:2px}
 /* 観戦記カード（署名コーナー） */
 .ksk{background:linear-gradient(180deg,#12202e,#0e1822);border:1px solid #24384b;border-left:3px solid var(--acc);border-radius:12px;padding:12px 13px;margin:0 0 10px}
@@ -198,6 +198,15 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .rresult-row{font-size:12.5px;font-weight:700;color:#a9d9c8;background:rgba(143,214,192,.09);border:1px solid rgba(143,214,192,.28);border-radius:9px;padding:6px 10px;margin:0 0 9px;line-height:1.55;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
 .rresult-row b{color:#8fd6c0;font-variant-numeric:tabular-nums}
 .rresult-row .src{font-size:10px;color:var(--sub);opacity:.75;font-weight:600}
+/* 締切二段階演出（当日のみ・既存1分タイマーで更新）＋場カードの次レース締切 */
+.vnext{margin-left:auto;font-size:11px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums}
+.vnext .vnext-t{font-weight:700}
+.vnext.soon{color:var(--acc)}
+.vnext.urgent,.vnext.urgent .vnext-t{color:var(--hot)}
+.race.urgent .deadline{color:var(--hot);font-weight:800}
+.race.urgent .soon-badge{color:var(--hot);background:rgba(255,107,91,.16);border-color:rgba(255,107,91,.45)}
+.rchip.urgent{border-color:rgba(255,107,91,.7)}
+.rchip.urgent::after{background:var(--hot)}
 </style>
 </head>
 <body>
@@ -393,14 +402,27 @@ function refreshDeadlineState(){
   const isToday=(SRC==='highlights.json' && !ISNEXT);
   const nm=nowMinJST();
   const apply=(el)=>{
-    const dl=+el.dataset.dl;
-    const past=isToday && dl<99999 && dl<nm;                 // 締切過ぎ
-    const soon=isToday && !past && dl<99999 && (dl-nm)>=0 && (dl-nm)<=30;  // 残り30分以内
+    const dl=+el.dataset.dl; const rem=dl-nm;
+    const past=isToday && dl<99999 && dl<nm;                       // 締切過ぎ
+    const soon=isToday && !past && dl<99999 && rem>=0 && rem<=30;  // 残り30分以内＝まもなく
+    const urgent=isToday && !past && dl<99999 && rem>=0 && rem<=10;// 残り10分以内＝赤
     el.classList.toggle('past', past);
     el.classList.toggle('soon', soon);
+    el.classList.toggle('urgent', urgent);
   };
   document.querySelectorAll('.race[data-dl]').forEach(apply);
   document.querySelectorAll('.rchip[data-dl]').forEach(apply);
+  // 場カードの「次◯R 締切」（当日のみ・次に締切が来る未消化レース）
+  document.querySelectorAll('.vnext[data-nx]').forEach(el=>{
+    el.classList.remove('soon','urgent');
+    if(!isToday){ el.textContent=''; return; }
+    const pairs=(el.dataset.nx||'').split(',').filter(Boolean).map(x=>{const i=x.lastIndexOf(':');return {r:x.slice(0,i), d:+x.slice(i+1)};});
+    const nx=pairs.filter(x=>x.d<99999 && x.d>=nm).sort((a,b)=>a.d-b.d)[0];
+    if(!nx){ el.textContent=''; return; }
+    const hh=String(Math.floor(nx.d/60)).padStart(2,'0'), mm=String(nx.d%60).padStart(2,'0'), rem=nx.d-nm;
+    el.innerHTML=`次 ${nx.r} <span class="vnext-t">締切 ${hh}:${mm}</span>`;
+    if(rem<=10) el.classList.add('urgent'); else if(rem<=30) el.classList.add('soon');
+  });
 }
 
 let OPEN_VENUE=null;  // 場別アコーディオンで開いている場
@@ -524,6 +546,7 @@ function renderVenues(){
     const hot=v.list.filter(r=>r['波乱']>=4).length;  // 波乱の多いレース数
     const open=OPEN_VENUE===ba;
     const races=v.list.slice().sort((x,y)=>parseInt(x['レース'])-parseInt(y['レース']));
+    const nx=races.map(r=>r['レース']+':'+dl2min(r['締切時刻'])).join(',');  // 場カードの次レース締切用
     const first=v.list[0]||{};
     const setsu=first['節名']||''; const nichi=first['日目']||'';
     const setsuLine=setsu?`<div class="vsetsu">${setsu}${nichi?`（${nichi}）`:''}</div>`:'';
@@ -552,6 +575,7 @@ function renderVenues(){
       <div class="vhead${open?' open':''}" onclick="toggleVenue('${ba}')">
         <span class="vname">${ba}</span>
         <span class="vmeta">${v.list.length}R${hot?` ・波乱${hot}`:''}</span>
+        <span class="vnext" data-nx="${nx}"></span>
         <span class="varrow">${open?'▲':'▼'}</span>
       </div>
       ${setsuLine}${nextLine}
