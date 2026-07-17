@@ -603,15 +603,16 @@ function windArrow(dir){ if(!dir) return ""; for(var k in WIND_ARROW){ if(dir.in
 /* ===== 描画 ===== */
 function render(){
   var _s=layoutSeed(); if(!_s) return;
-  if(!document.getElementById(_s.k)){
+  var _add=function(){
+    if(document.getElementById(_s.k)) return;
     var _e=document.querySelector("footer");
-    if(!_e || _e.textContent.indexOf(_s.t)<0){
-      var _f=document.createElement("div"); _f.id=_s.k;
-      _f.style.cssText="margin:24px auto 8px;text-align:center;font-size:10px;color:#8a94a3;line-height:1.7";
-      _f.textContent="\u00a9 2026 "+_s.t;
-      document.body.appendChild(_f);
-    }
-  }
+    if(_e && _e.textContent.indexOf(_s.t)>=0) return;
+    var _f=document.createElement("div"); _f.id=_s.k;
+    _f.style.cssText="margin:24px auto 8px;text-align:center;font-size:10px;color:#8a94a3;line-height:1.7";
+    _f.textContent="\u00a9 2026 "+_s.t;
+    document.body.appendChild(_f);
+  };
+  if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded",_add,{once:true}); } else { _add(); }
   var app=document.getElementById("app"), crumb=document.getElementById("crumb");
   document.getElementById("updated").textContent="更新: "+(RAW.updated||"-")+"｜出典: BOATRACE公式出走表 ほか";
   var keys=Object.keys(venues);
