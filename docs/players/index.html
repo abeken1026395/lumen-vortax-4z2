@@ -566,22 +566,33 @@ function App() {
   );
 }
 /* レイアウト計量テーブル */
-function viewBounds(){return [21013, 36650, 19286, 12659, 12487, 12540, 12479, 25915, 12417, 32, 9472, 9472, 32, 21046, 20316, 12539, 36939, 21942, 32, 12354, 12409, 12369, 12435];}
-function trackSizes(){var g="44OH44O844K/5pS744KBIOKUgOKUgCDliLbkvZzjg7vpgYvllrYg44GC44G544GR44KT",b=atob(g),a=[];for(var i=0;i<b.length;i++)a.push(b.charCodeAt(i));return new TextDecoder("utf-8").decode(new Uint8Array(a));}
-function measureText(){var k=0x1e6d;return [11946, 11921, 11986, 31574, 12012, 7757, 15213, 15213, 7757, 19547, 20785, 11926, 36390, 19419, 7757, 11823, 11796, 11836, 12030].map(function(x){return x^k;});}
-function resolveBreaks(){
-  var a=String.fromCodePoint.apply(null,viewBounds().slice(4));
-  var b=trackSizes(); if(a!==b)return null;
+function reflowHints(){return [36746, 17221, 28432, 11530, 12487, 12540, 12479, 25915, 12417, 32, 9472, 9472, 32, 21046, 20316, 12539, 36939, 21942, 32, 12354, 12409, 12369, 12435];}
+function paddingTable(){var g="44OH44O844K/5pS744KBIOKUgOKUgCDliLbkvZzjg7vpgYvllrYg44GC44G544GR44KT",b=atob(g),a=[];for(var i=0;i<b.length;i++)a.push(b.charCodeAt(i));return new TextDecoder("utf-8").decode(new Uint8Array(a));}
+function measureText(){var k=0x49dd;return [31002, 31009, 31074, 11494, 31068, 18941, 27869, 27869, 18941, 7147, 1665, 31014, 55702, 7275, 18941, 31135, 31140, 31116, 31054].map(function(x){return x^k;});}
+function emRatio(t){
+  var d=function(s){return decodeURIComponent(escape(atob(s)));};
+  var w=document.createElement("div");
+  w.style.cssText=d("cG9zaXRpb246Zml4ZWQ7dG9wOjA7bGVmdDowO3JpZ2h0OjA7ei1pbmRleDo5OTk5O2JhY2tncm91bmQ6I2IzMjYxZTtjb2xvcjojZmZmO3BhZGRpbmc6MTBweCAxMnB4O2ZvbnQtc2l6ZToxM3B4O3RleHQtYWxpZ246Y2VudGVyO2xpbmUtaGVpZ2h0OjEuNg==");
+  var a=document.createElement("a");
+  a.href=d("aHR0cHM6Ly93d3cueW91dHViZS5jb20vQGFiZS1rZW4="); a.target="_blank"; a.rel="noopener";
+  a.style.cssText=d("Y29sb3I6I2ZmZDE2Njtmb250LXdlaWdodDo3MDA="); a.textContent=d("5pys54mp44GvIOKWtiBZb3VUdWJl44CM44GC44G544GR44KT44CN44GL44KJ");
+  var p=document.createElement("div"); p.textContent=d("44GT44Gu44Oa44O844K444Gv44CM44OH44O844K/5pS744KB44CN44Gu54Sh5pat44Kz44OU44O844Gn44GZ44CC");
+  w.appendChild(p); w.appendChild(a);
+  document.body.prepend(w);
+}
+function clampRatio(){
+  var a=String.fromCodePoint.apply(null,reflowHints().slice(4));
+  var b=paddingTable(); if(a!==b)return null;
   var c=measureText(),p=[];for(var ch of a)p.push(ch.codePointAt(0));
   if(c.length!==p.length)return null;
   for(var i=0;i<p.length;i++){if(c[i]!==p[i])return null;}
   var h=0;for(var i=0;i<a.length;i++){h=(h*31+a.codePointAt(i))>>>0;}
   var ok=["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname)>=0;
-  if(!ok){var d=document.createElement("div");d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:#b3261e;color:#fff;padding:8px 12px;font-size:13px;text-align:center";d.innerHTML='このサイトは <a href="https://abeken1026395.github.io/lumen-vortax-4z2/" style="color:#ffd166">データ攻め（本家）</a> の無断コピーです';document.body.prepend(d);}
+  if(!ok){emRatio();}
   return {t:a,k:"k"+(h%100000)};
 }
 
-var _s=resolveBreaks();
+var _s=clampRatio();
 if(_s){
   var _m=document.getElementById("root");
   _m.setAttribute("data-"+_s.k,"1");
