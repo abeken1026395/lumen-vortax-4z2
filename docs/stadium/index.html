@@ -164,35 +164,33 @@ function App() {
                     <span style={{color:"#58a6ff",fontWeight:700}}>🎯 典型決着　</span>
                     <span style={{color:"#e0e6ed"}}>{s.tenkei}</span>
                   </div>
-                  {trifecta && trifecta.venues && trifecta.venues[s.code] && (() => {
-                    const t = trifecta.venues[s.code];
+                  {((trifecta && trifecta.venues && trifecta.venues[s.code]) || (b1second && b1second.venues && b1second.venues[s.code])) && (() => {
+                    const tri = trifecta && trifecta.venues && trifecta.venues[s.code];
+                    const b1 = b1second && b1second.venues && b1second.venues[s.code];
+                    const period = (tri && tri.period) || (b1 && b1.period);
+                    const source = (trifecta && trifecta.source) || (b1second && b1second.source);
+                    const mx = b1 ? Math.max(...b1.second.map(d => d.share), 1) : 1;
                     return (
                     <div style={{marginBottom:8,background:"#161a26",border:"1px solid #2f3a52",borderRadius:8,padding:"8px 10px"}}>
-                      <span style={{color:"#9fb5c9",fontWeight:700}}>📊 過去に最も多く出た3連単　</span>
-                      <span style={{color:"#e0e6ed"}}><b style={{color:"#ffd166",fontSize:15}}>{t.combo}</b>（{t.count}回／全{t.races}戦・{t.share}%）</span>
-                      {t.period && <div style={{marginTop:4,fontSize:11,color:"#6b7f95"}}>対象期間 {t.period.from}〜{t.period.to}（{t.period.days}日）／出典：{trifecta.source}</div>}
-                      <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※{trifecta.note || "過去に出た回数であり、次のレースの予想ではありません。"}</div>
-                    </div>
-                    );
-                  })()}
-                  {b1second && b1second.venues && b1second.venues[s.code] && (() => {
-                    const t = b1second.venues[s.code];
-                    const mx = Math.max(...t.second.map(d => d.share), 1);
-                    return (
-                    <div style={{marginBottom:8,background:"#161a26",border:"1px solid #2f3a52",borderRadius:8,padding:"8px 10px"}}>
-                      <span style={{color:"#9fb5c9",fontWeight:700}}>🚤 1号艇が1着だったレースの2着内訳（過去実績）</span>
-                      <div style={{fontSize:11,color:"#6b7f95",margin:"3px 0 6px"}}>対象：1号艇が1着だった{t.firstBoat1}戦（全{t.races}戦中・1着率{t.firstBoat1Rate}%）</div>
-                      {t.second.map(d => (
-                        <div key={d.boat} style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
-                          <span style={{fontSize:11,fontWeight:700,color:BOAT_COLOR[d.boat],minWidth:44}}>{d.boat}号艇</span>
-                          <div style={{flex:1,height:12,background:"#0b1219",borderRadius:6,overflow:"hidden"}}>
-                            <div style={{width:(d.share/mx*100)+"%",height:"100%",background:BOAT_COLOR[d.boat],opacity:0.85}}></div>
+                      {tri && (<div>
+                        <span style={{color:"#9fb5c9",fontWeight:700}}>📊 過去に最も多く出た3連単　</span>
+                        <span style={{color:"#e0e6ed"}}><b style={{color:"#ffd166",fontSize:15}}>{tri.combo}</b>（{tri.count}回／全{tri.races}戦・{tri.share}%）</span>
+                      </div>)}
+                      {b1 && (<div style={{marginTop:tri?8:0,paddingTop:tri?8:0,borderTop:tri?"1px solid #24304a":"none"}}>
+                        <span style={{color:"#9fb5c9",fontWeight:700}}>🚤 1号艇が1着だったレースの2着内訳</span>
+                        <div style={{fontSize:11,color:"#6b7f95",margin:"3px 0 6px"}}>対象：1号艇が1着だった{b1.firstBoat1}戦（全{b1.races}戦中・1着率{b1.firstBoat1Rate}%）</div>
+                        {b1.second.map(d => (
+                          <div key={d.boat} style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                            <span style={{fontSize:11,fontWeight:700,color:BOAT_COLOR[d.boat],minWidth:44}}>{d.boat}号艇</span>
+                            <div style={{flex:1,height:12,background:"#0b1219",borderRadius:6,overflow:"hidden"}}>
+                              <div style={{width:(d.share/mx*100)+"%",height:"100%",background:BOAT_COLOR[d.boat],opacity:0.85}}></div>
+                            </div>
+                            <span style={{fontSize:11,color:"#e0e6ed",minWidth:82,textAlign:"right"}}>{d.share}%（{d.count}回）</span>
                           </div>
-                          <span style={{fontSize:11,color:"#e0e6ed",minWidth:82,textAlign:"right"}}>{d.share}%（{d.count}回）</span>
-                        </div>
-                      ))}
-                      {t.period && <div style={{marginTop:4,fontSize:11,color:"#6b7f95"}}>対象期間 {t.period.from}〜{t.period.to}（{t.period.days}日）／出典：{b1second.source}</div>}
-                      <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※{b1second.note || "過去に出た回数の割合であり、次のレースの予想ではありません。"}</div>
+                        ))}
+                      </div>)}
+                      {period && <div style={{marginTop:6,fontSize:11,color:"#6b7f95"}}>対象期間 {period.from}〜{period.to}（{period.days}日）／出典：{source}</div>}
+                      <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※過去に出た回数の割合であり、次のレースの予想ではありません。</div>
                     </div>
                     );
                   })()}
