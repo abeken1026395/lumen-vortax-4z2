@@ -42,13 +42,31 @@ jobs:
           END: ${{ github.event.inputs.END }}
         run: python scripts/buildPayoutsSummary.py
 
+      # 24場 3連単の最多出目（払戻CSVのcombo集計・新規取得なし）
+      - name: build trifecta top (24 venues)
+        continue-on-error: true
+        run: python scripts/buildTrifectaTop.py
+
+      # 24場 1号艇1着時の2着内訳（払戻CSVのcombo集計・新規取得なし）
+      - name: build boat1 second breakdown (24 venues)
+        continue-on-error: true
+        run: python scripts/buildBoat1Second.py
+
+      # 24場 優勝戦の出目ランキング（公式番組で優勝戦を特定＋払戻CSVのcombo）
+      - name: build championship-race combos (24 venues)
+        continue-on-error: true
+        env:
+          START: ${{ github.event.inputs.START }}
+          END: ${{ github.event.inputs.END }}
+        run: python scripts/buildChampRace.py
+
       - name: commit
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/payouts/summary.json
+          git add docs/payouts/summary.json docs/payouts/trifectaTop.json docs/payouts/boat1Second.json docs/payouts/champRace.json
           git diff --cached --quiet && echo "no changes" && exit 0
-          git commit -m "update payouts summary"
+          git commit -m "update payouts summary / trifecta top / boat1 second / championship combos"
           git pull --rebase origin main
           git push origin main
