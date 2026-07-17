@@ -40,6 +40,7 @@ function App() {
   const [fanIntro, setFanIntro] = useState(false);
   const [yosouya, setYosouya] = useState(null);
   const [yOpen, setYOpen] = useState(null);
+  const [trifecta, setTrifecta] = useState(null);
 
   useEffect(() => {
     fetch("../announcers/announcers.json?v=" + Date.now())
@@ -58,6 +59,10 @@ function App() {
       .then(r => r.json())
       .then(setYosouya)
       .catch(() => setYosouya(null));
+    fetch("../payouts/trifectaTop.json?v=" + Date.now())
+      .then(r => r.json())
+      .then(setTrifecta)
+      .catch(() => setTrifecta(null));
   }, []);
   const ancByVenue = (name) => (announcers || []).filter(a => (a.venues||[]).includes(name));
 
@@ -153,6 +158,17 @@ function App() {
                     <span style={{color:"#58a6ff",fontWeight:700}}>🎯 典型決着　</span>
                     <span style={{color:"#e0e6ed"}}>{s.tenkei}</span>
                   </div>
+                  {trifecta && trifecta.venues && trifecta.venues[s.code] && (() => {
+                    const t = trifecta.venues[s.code];
+                    return (
+                    <div style={{marginBottom:8,background:"#161a26",border:"1px solid #2f3a52",borderRadius:8,padding:"8px 10px"}}>
+                      <span style={{color:"#9fb5c9",fontWeight:700}}>📊 過去に最も多く出た3連単　</span>
+                      <span style={{color:"#e0e6ed"}}><b style={{color:"#ffd166",fontSize:15}}>{t.combo}</b>（{t.count}回／全{t.races}戦・{t.share}%）</span>
+                      {t.period && <div style={{marginTop:4,fontSize:11,color:"#6b7f95"}}>対象期間 {t.period.from}〜{t.period.to}（{t.period.days}日）／出典：{trifecta.source}</div>}
+                      <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※{trifecta.note || "過去に出た回数であり、次のレースの予想ではありません。"}</div>
+                    </div>
+                    );
+                  })()}
                   <div style={{marginBottom:8,background:ARARE_COLOR[s.arare]+"15",border:"1px solid "+ARARE_COLOR[s.arare]+"55",borderRadius:8,padding:"8px 10px"}}>
                     <span style={{color:ARARE_COLOR[s.arare],fontWeight:700}}>⚠ 荒れるサイン　</span>
                     <span style={{color:"#e0e6ed"}}>{s.sign}</span>

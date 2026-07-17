@@ -1,0 +1,344 @@
+{
+  "title": "3連単 最多出目（過去実績）",
+  "source": "公式競走成績（3連単払戻の集計）",
+  "note": "過去に出た回数であり、次のレースの予想ではありません。",
+  "venueCount": 24,
+  "venues": {
+    "13": {
+      "stadium": "尼崎",
+      "jcd": 13,
+      "slug": "amagasaki",
+      "combo": "1-2-3",
+      "count": 130,
+      "races": 1945,
+      "share": 6.7,
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/08",
+        "days": 163
+      }
+    },
+    "21": {
+      "stadium": "芦屋",
+      "jcd": 21,
+      "slug": "ashiya",
+      "combo": "1-2-3",
+      "count": 155,
+      "races": 2367,
+      "share": 6.5,
+      "period": {
+        "from": "2025/07/18",
+        "to": "2026/07/06",
+        "days": 198
+      }
+    },
+    "11": {
+      "stadium": "びわこ",
+      "jcd": 11,
+      "slug": "biwako",
+      "combo": "1-2-3",
+      "count": 145,
+      "races": 2262,
+      "share": 6.4,
+      "period": {
+        "from": "2025/07/18",
+        "to": "2026/07/10",
+        "days": 189
+      }
+    },
+    "03": {
+      "stadium": "江戸川",
+      "jcd": 3,
+      "slug": "edogawa",
+      "combo": "1-2-3",
+      "count": 111,
+      "races": 2040,
+      "share": 5.4,
+      "period": {
+        "from": "2025/07/20",
+        "to": "2026/06/29",
+        "days": 173
+      }
+    },
+    "22": {
+      "stadium": "福岡",
+      "jcd": 22,
+      "slug": "fukuoka",
+      "combo": "1-2-3",
+      "count": 178,
+      "races": 2363,
+      "share": 7.5,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 197
+      }
+    },
+    "07": {
+      "stadium": "蒲郡",
+      "jcd": 7,
+      "slug": "gamagori",
+      "combo": "1-2-3",
+      "count": 180,
+      "races": 2323,
+      "share": 7.7,
+      "period": {
+        "from": "2025/07/19",
+        "to": "2026/07/06",
+        "days": 194
+      }
+    },
+    "06": {
+      "stadium": "浜名湖",
+      "jcd": 6,
+      "slug": "hamanako",
+      "combo": "1-2-3",
+      "count": 176,
+      "races": 2505,
+      "share": 7.0,
+      "period": {
+        "from": "2025/07/17",
+        "to": "2026/07/10",
+        "days": 209
+      }
+    },
+    "04": {
+      "stadium": "平和島",
+      "jcd": 4,
+      "slug": "heiwajima",
+      "combo": "1-2-3",
+      "count": 103,
+      "races": 1898,
+      "share": 5.4,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/07",
+        "days": 159
+      }
+    },
+    "23": {
+      "stadium": "唐津",
+      "jcd": 23,
+      "slug": "karatsu",
+      "combo": "1-2-3",
+      "count": 175,
+      "races": 2153,
+      "share": 8.1,
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/15",
+        "days": 180
+      }
+    },
+    "01": {
+      "stadium": "桐生",
+      "jcd": 1,
+      "slug": "kiryu",
+      "combo": "1-2-3",
+      "count": 139,
+      "races": 2477,
+      "share": 5.6,
+      "period": {
+        "from": "2025/07/05",
+        "to": "2026/07/16",
+        "days": 209
+      }
+    },
+    "16": {
+      "stadium": "児島",
+      "jcd": 16,
+      "slug": "kojima",
+      "combo": "1-2-3",
+      "count": 144,
+      "races": 2146,
+      "share": 6.7,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 179
+      }
+    },
+    "15": {
+      "stadium": "丸亀",
+      "jcd": 15,
+      "slug": "marugame",
+      "combo": "1-2-3",
+      "count": 171,
+      "races": 2358,
+      "share": 7.3,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 199
+      }
+    },
+    "10": {
+      "stadium": "三国",
+      "jcd": 10,
+      "slug": "mikuni",
+      "combo": "1-2-3",
+      "count": 129,
+      "races": 2183,
+      "share": 5.9,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 184
+      }
+    },
+    "17": {
+      "stadium": "宮島",
+      "jcd": 17,
+      "slug": "miyajima",
+      "combo": "1-2-3",
+      "count": 184,
+      "races": 2416,
+      "share": 7.6,
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/01",
+        "days": 202
+      }
+    },
+    "14": {
+      "stadium": "鳴門",
+      "jcd": 14,
+      "slug": "naruto",
+      "combo": "1-2-3",
+      "count": 114,
+      "races": 2155,
+      "share": 5.3,
+      "period": {
+        "from": "2025/07/19",
+        "to": "2026/07/10",
+        "days": 182
+      }
+    },
+    "24": {
+      "stadium": "大村",
+      "jcd": 24,
+      "slug": "omura",
+      "combo": "1-2-3",
+      "count": 206,
+      "races": 2391,
+      "share": 8.6,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/09",
+        "days": 204
+      }
+    },
+    "19": {
+      "stadium": "下関",
+      "jcd": 19,
+      "slug": "shimonoseki",
+      "combo": "1-2-3",
+      "count": 158,
+      "races": 2103,
+      "share": 7.5,
+      "period": {
+        "from": "2025/07/17",
+        "to": "2026/07/10",
+        "days": 178
+      }
+    },
+    "12": {
+      "stadium": "住之江",
+      "jcd": 12,
+      "slug": "suminoe",
+      "combo": "1-2-3",
+      "count": 188,
+      "races": 2344,
+      "share": 8.0,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/08",
+        "days": 196
+      }
+    },
+    "05": {
+      "stadium": "多摩川",
+      "jcd": 5,
+      "slug": "tamagawa",
+      "combo": "1-2-3",
+      "count": 151,
+      "races": 2263,
+      "share": 6.7,
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/09",
+        "days": 189
+      }
+    },
+    "02": {
+      "stadium": "戸田",
+      "jcd": 2,
+      "slug": "toda",
+      "combo": "1-2-3",
+      "count": 125,
+      "races": 2231,
+      "share": 5.6,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/12",
+        "days": 186
+      }
+    },
+    "08": {
+      "stadium": "常滑",
+      "jcd": 8,
+      "slug": "tokoname",
+      "combo": "1-2-3",
+      "count": 178,
+      "races": 2478,
+      "share": 7.2,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 207
+      }
+    },
+    "18": {
+      "stadium": "徳山",
+      "jcd": 18,
+      "slug": "tokuyama",
+      "combo": "1-2-3",
+      "count": 224,
+      "races": 2532,
+      "share": 8.8,
+      "period": {
+        "from": "2025/06/30",
+        "to": "2026/07/16",
+        "days": 211
+      }
+    },
+    "09": {
+      "stadium": "津",
+      "jcd": 9,
+      "slug": "tsu",
+      "combo": "1-2-3",
+      "count": 182,
+      "races": 2243,
+      "share": 8.1,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 188
+      }
+    },
+    "20": {
+      "stadium": "若松",
+      "jcd": 20,
+      "slug": "wakamatsu",
+      "combo": "1-2-3",
+      "count": 175,
+      "races": 2193,
+      "share": 8.0,
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 187
+      }
+    }
+  }
+}
