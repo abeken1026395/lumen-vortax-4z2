@@ -80,9 +80,10 @@ def fmt(ymd):
 
 def main():
     start_s = os.environ.get("START", "").strip() or "20250715"
-    end_s = os.environ.get("END", "").strip() or "20260716"
     start = datetime.date(int(start_s[:4]), int(start_s[4:6]), int(start_s[6:8]))
-    end = datetime.date(int(end_s[:4]), int(end_s[4:6]), int(end_s[6:8]))
+    end_s = os.environ.get("END", "").strip()
+    end = (datetime.date(int(end_s[:4]), int(end_s[4:6]), int(end_s[6:8]))
+           if end_s else datetime.date.today() - datetime.timedelta(days=1))
 
     combo_map = load_combo_map()
 
