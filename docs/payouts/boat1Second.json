@@ -1,0 +1,968 @@
+{
+  "title": "1号艇が1着だったときの2着内訳（過去実績）",
+  "source": "公式競走成績（3連単払戻の集計）",
+  "note": "過去に出た回数の割合であり、次のレースの予想ではありません。",
+  "venueCount": 24,
+  "venues": {
+    "13": {
+      "stadium": "尼崎",
+      "jcd": 13,
+      "slug": "amagasaki",
+      "races": 1945,
+      "firstBoat1": 1169,
+      "firstBoat1Rate": 60.1,
+      "second": [
+        {
+          "boat": 2,
+          "count": 386,
+          "share": 33.0
+        },
+        {
+          "boat": 3,
+          "count": 322,
+          "share": 27.5
+        },
+        {
+          "boat": 4,
+          "count": 222,
+          "share": 19.0
+        },
+        {
+          "boat": 5,
+          "count": 142,
+          "share": 12.1
+        },
+        {
+          "boat": 6,
+          "count": 97,
+          "share": 8.3
+        }
+      ],
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/08",
+        "days": 163
+      }
+    },
+    "21": {
+      "stadium": "芦屋",
+      "jcd": 21,
+      "slug": "ashiya",
+      "races": 2367,
+      "firstBoat1": 1414,
+      "firstBoat1Rate": 59.7,
+      "second": [
+        {
+          "boat": 2,
+          "count": 419,
+          "share": 29.6
+        },
+        {
+          "boat": 3,
+          "count": 415,
+          "share": 29.3
+        },
+        {
+          "boat": 4,
+          "count": 300,
+          "share": 21.2
+        },
+        {
+          "boat": 5,
+          "count": 193,
+          "share": 13.6
+        },
+        {
+          "boat": 6,
+          "count": 87,
+          "share": 6.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/18",
+        "to": "2026/07/06",
+        "days": 198
+      }
+    },
+    "11": {
+      "stadium": "びわこ",
+      "jcd": 11,
+      "slug": "biwako",
+      "races": 2262,
+      "firstBoat1": 1192,
+      "firstBoat1Rate": 52.7,
+      "second": [
+        {
+          "boat": 2,
+          "count": 415,
+          "share": 34.8
+        },
+        {
+          "boat": 3,
+          "count": 339,
+          "share": 28.4
+        },
+        {
+          "boat": 4,
+          "count": 216,
+          "share": 18.1
+        },
+        {
+          "boat": 5,
+          "count": 140,
+          "share": 11.7
+        },
+        {
+          "boat": 6,
+          "count": 82,
+          "share": 6.9
+        }
+      ],
+      "period": {
+        "from": "2025/07/18",
+        "to": "2026/07/10",
+        "days": 189
+      }
+    },
+    "03": {
+      "stadium": "江戸川",
+      "jcd": 3,
+      "slug": "edogawa",
+      "races": 2040,
+      "firstBoat1": 947,
+      "firstBoat1Rate": 46.4,
+      "second": [
+        {
+          "boat": 2,
+          "count": 313,
+          "share": 33.1
+        },
+        {
+          "boat": 3,
+          "count": 268,
+          "share": 28.3
+        },
+        {
+          "boat": 4,
+          "count": 158,
+          "share": 16.7
+        },
+        {
+          "boat": 5,
+          "count": 142,
+          "share": 15.0
+        },
+        {
+          "boat": 6,
+          "count": 66,
+          "share": 7.0
+        }
+      ],
+      "period": {
+        "from": "2025/07/20",
+        "to": "2026/06/29",
+        "days": 173
+      }
+    },
+    "22": {
+      "stadium": "福岡",
+      "jcd": 22,
+      "slug": "fukuoka",
+      "races": 2363,
+      "firstBoat1": 1352,
+      "firstBoat1Rate": 57.2,
+      "second": [
+        {
+          "boat": 2,
+          "count": 499,
+          "share": 36.9
+        },
+        {
+          "boat": 3,
+          "count": 398,
+          "share": 29.4
+        },
+        {
+          "boat": 4,
+          "count": 233,
+          "share": 17.2
+        },
+        {
+          "boat": 5,
+          "count": 164,
+          "share": 12.1
+        },
+        {
+          "boat": 6,
+          "count": 58,
+          "share": 4.3
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 197
+      }
+    },
+    "07": {
+      "stadium": "蒲郡",
+      "jcd": 7,
+      "slug": "gamagori",
+      "races": 2323,
+      "firstBoat1": 1311,
+      "firstBoat1Rate": 56.4,
+      "second": [
+        {
+          "boat": 2,
+          "count": 461,
+          "share": 35.2
+        },
+        {
+          "boat": 3,
+          "count": 390,
+          "share": 29.7
+        },
+        {
+          "boat": 4,
+          "count": 251,
+          "share": 19.1
+        },
+        {
+          "boat": 5,
+          "count": 131,
+          "share": 10.0
+        },
+        {
+          "boat": 6,
+          "count": 78,
+          "share": 5.9
+        }
+      ],
+      "period": {
+        "from": "2025/07/19",
+        "to": "2026/07/06",
+        "days": 194
+      }
+    },
+    "06": {
+      "stadium": "浜名湖",
+      "jcd": 6,
+      "slug": "hamanako",
+      "races": 2505,
+      "firstBoat1": 1324,
+      "firstBoat1Rate": 52.9,
+      "second": [
+        {
+          "boat": 2,
+          "count": 459,
+          "share": 34.7
+        },
+        {
+          "boat": 3,
+          "count": 347,
+          "share": 26.2
+        },
+        {
+          "boat": 4,
+          "count": 234,
+          "share": 17.7
+        },
+        {
+          "boat": 5,
+          "count": 191,
+          "share": 14.4
+        },
+        {
+          "boat": 6,
+          "count": 93,
+          "share": 7.0
+        }
+      ],
+      "period": {
+        "from": "2025/07/17",
+        "to": "2026/07/10",
+        "days": 209
+      }
+    },
+    "04": {
+      "stadium": "平和島",
+      "jcd": 4,
+      "slug": "heiwajima",
+      "races": 1898,
+      "firstBoat1": 867,
+      "firstBoat1Rate": 45.7,
+      "second": [
+        {
+          "boat": 2,
+          "count": 255,
+          "share": 29.4
+        },
+        {
+          "boat": 3,
+          "count": 240,
+          "share": 27.7
+        },
+        {
+          "boat": 4,
+          "count": 187,
+          "share": 21.6
+        },
+        {
+          "boat": 5,
+          "count": 123,
+          "share": 14.2
+        },
+        {
+          "boat": 6,
+          "count": 62,
+          "share": 7.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/07",
+        "days": 159
+      }
+    },
+    "23": {
+      "stadium": "唐津",
+      "jcd": 23,
+      "slug": "karatsu",
+      "races": 2153,
+      "firstBoat1": 1184,
+      "firstBoat1Rate": 55.0,
+      "second": [
+        {
+          "boat": 2,
+          "count": 409,
+          "share": 34.5
+        },
+        {
+          "boat": 3,
+          "count": 348,
+          "share": 29.4
+        },
+        {
+          "boat": 4,
+          "count": 207,
+          "share": 17.5
+        },
+        {
+          "boat": 5,
+          "count": 137,
+          "share": 11.6
+        },
+        {
+          "boat": 6,
+          "count": 83,
+          "share": 7.0
+        }
+      ],
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/15",
+        "days": 180
+      }
+    },
+    "01": {
+      "stadium": "桐生",
+      "jcd": 1,
+      "slug": "kiryu",
+      "races": 2477,
+      "firstBoat1": 1203,
+      "firstBoat1Rate": 48.6,
+      "second": [
+        {
+          "boat": 2,
+          "count": 412,
+          "share": 34.2
+        },
+        {
+          "boat": 3,
+          "count": 363,
+          "share": 30.2
+        },
+        {
+          "boat": 4,
+          "count": 195,
+          "share": 16.2
+        },
+        {
+          "boat": 5,
+          "count": 158,
+          "share": 13.1
+        },
+        {
+          "boat": 6,
+          "count": 75,
+          "share": 6.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/05",
+        "to": "2026/07/16",
+        "days": 209
+      }
+    },
+    "16": {
+      "stadium": "児島",
+      "jcd": 16,
+      "slug": "kojima",
+      "races": 2146,
+      "firstBoat1": 1198,
+      "firstBoat1Rate": 55.8,
+      "second": [
+        {
+          "boat": 2,
+          "count": 404,
+          "share": 33.7
+        },
+        {
+          "boat": 3,
+          "count": 310,
+          "share": 25.9
+        },
+        {
+          "boat": 4,
+          "count": 242,
+          "share": 20.2
+        },
+        {
+          "boat": 5,
+          "count": 144,
+          "share": 12.0
+        },
+        {
+          "boat": 6,
+          "count": 98,
+          "share": 8.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 179
+      }
+    },
+    "15": {
+      "stadium": "丸亀",
+      "jcd": 15,
+      "slug": "marugame",
+      "races": 2358,
+      "firstBoat1": 1302,
+      "firstBoat1Rate": 55.2,
+      "second": [
+        {
+          "boat": 2,
+          "count": 472,
+          "share": 36.3
+        },
+        {
+          "boat": 3,
+          "count": 333,
+          "share": 25.6
+        },
+        {
+          "boat": 4,
+          "count": 260,
+          "share": 20.0
+        },
+        {
+          "boat": 5,
+          "count": 142,
+          "share": 10.9
+        },
+        {
+          "boat": 6,
+          "count": 95,
+          "share": 7.3
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 199
+      }
+    },
+    "10": {
+      "stadium": "三国",
+      "jcd": 10,
+      "slug": "mikuni",
+      "races": 2183,
+      "firstBoat1": 1110,
+      "firstBoat1Rate": 50.8,
+      "second": [
+        {
+          "boat": 2,
+          "count": 371,
+          "share": 33.4
+        },
+        {
+          "boat": 3,
+          "count": 310,
+          "share": 27.9
+        },
+        {
+          "boat": 4,
+          "count": 219,
+          "share": 19.7
+        },
+        {
+          "boat": 5,
+          "count": 134,
+          "share": 12.1
+        },
+        {
+          "boat": 6,
+          "count": 76,
+          "share": 6.8
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 184
+      }
+    },
+    "17": {
+      "stadium": "宮島",
+      "jcd": 17,
+      "slug": "miyajima",
+      "races": 2416,
+      "firstBoat1": 1374,
+      "firstBoat1Rate": 56.9,
+      "second": [
+        {
+          "boat": 2,
+          "count": 466,
+          "share": 33.9
+        },
+        {
+          "boat": 3,
+          "count": 397,
+          "share": 28.9
+        },
+        {
+          "boat": 4,
+          "count": 260,
+          "share": 18.9
+        },
+        {
+          "boat": 5,
+          "count": 163,
+          "share": 11.9
+        },
+        {
+          "boat": 6,
+          "count": 88,
+          "share": 6.4
+        }
+      ],
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/01",
+        "days": 202
+      }
+    },
+    "14": {
+      "stadium": "鳴門",
+      "jcd": 14,
+      "slug": "naruto",
+      "races": 2155,
+      "firstBoat1": 1033,
+      "firstBoat1Rate": 47.9,
+      "second": [
+        {
+          "boat": 2,
+          "count": 340,
+          "share": 32.9
+        },
+        {
+          "boat": 3,
+          "count": 295,
+          "share": 28.6
+        },
+        {
+          "boat": 4,
+          "count": 216,
+          "share": 20.9
+        },
+        {
+          "boat": 5,
+          "count": 111,
+          "share": 10.7
+        },
+        {
+          "boat": 6,
+          "count": 71,
+          "share": 6.9
+        }
+      ],
+      "period": {
+        "from": "2025/07/19",
+        "to": "2026/07/10",
+        "days": 182
+      }
+    },
+    "24": {
+      "stadium": "大村",
+      "jcd": 24,
+      "slug": "omura",
+      "races": 2391,
+      "firstBoat1": 1468,
+      "firstBoat1Rate": 61.4,
+      "second": [
+        {
+          "boat": 2,
+          "count": 510,
+          "share": 34.7
+        },
+        {
+          "boat": 3,
+          "count": 444,
+          "share": 30.2
+        },
+        {
+          "boat": 4,
+          "count": 242,
+          "share": 16.5
+        },
+        {
+          "boat": 5,
+          "count": 175,
+          "share": 11.9
+        },
+        {
+          "boat": 6,
+          "count": 97,
+          "share": 6.6
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/09",
+        "days": 204
+      }
+    },
+    "19": {
+      "stadium": "下関",
+      "jcd": 19,
+      "slug": "shimonoseki",
+      "races": 2103,
+      "firstBoat1": 1274,
+      "firstBoat1Rate": 60.6,
+      "second": [
+        {
+          "boat": 2,
+          "count": 392,
+          "share": 30.8
+        },
+        {
+          "boat": 3,
+          "count": 401,
+          "share": 31.5
+        },
+        {
+          "boat": 4,
+          "count": 232,
+          "share": 18.2
+        },
+        {
+          "boat": 5,
+          "count": 147,
+          "share": 11.5
+        },
+        {
+          "boat": 6,
+          "count": 102,
+          "share": 8.0
+        }
+      ],
+      "period": {
+        "from": "2025/07/17",
+        "to": "2026/07/10",
+        "days": 178
+      }
+    },
+    "12": {
+      "stadium": "住之江",
+      "jcd": 12,
+      "slug": "suminoe",
+      "races": 2344,
+      "firstBoat1": 1326,
+      "firstBoat1Rate": 56.6,
+      "second": [
+        {
+          "boat": 2,
+          "count": 442,
+          "share": 33.3
+        },
+        {
+          "boat": 3,
+          "count": 391,
+          "share": 29.5
+        },
+        {
+          "boat": 4,
+          "count": 249,
+          "share": 18.8
+        },
+        {
+          "boat": 5,
+          "count": 147,
+          "share": 11.1
+        },
+        {
+          "boat": 6,
+          "count": 97,
+          "share": 7.3
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/08",
+        "days": 196
+      }
+    },
+    "05": {
+      "stadium": "多摩川",
+      "jcd": 5,
+      "slug": "tamagawa",
+      "races": 2263,
+      "firstBoat1": 1215,
+      "firstBoat1Rate": 53.7,
+      "second": [
+        {
+          "boat": 2,
+          "count": 410,
+          "share": 33.7
+        },
+        {
+          "boat": 3,
+          "count": 315,
+          "share": 25.9
+        },
+        {
+          "boat": 4,
+          "count": 234,
+          "share": 19.3
+        },
+        {
+          "boat": 5,
+          "count": 163,
+          "share": 13.4
+        },
+        {
+          "boat": 6,
+          "count": 93,
+          "share": 7.7
+        }
+      ],
+      "period": {
+        "from": "2025/07/16",
+        "to": "2026/07/09",
+        "days": 189
+      }
+    },
+    "02": {
+      "stadium": "戸田",
+      "jcd": 2,
+      "slug": "toda",
+      "races": 2231,
+      "firstBoat1": 964,
+      "firstBoat1Rate": 43.2,
+      "second": [
+        {
+          "boat": 2,
+          "count": 334,
+          "share": 34.6
+        },
+        {
+          "boat": 3,
+          "count": 251,
+          "share": 26.0
+        },
+        {
+          "boat": 4,
+          "count": 185,
+          "share": 19.2
+        },
+        {
+          "boat": 5,
+          "count": 125,
+          "share": 13.0
+        },
+        {
+          "boat": 6,
+          "count": 69,
+          "share": 7.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/12",
+        "days": 186
+      }
+    },
+    "08": {
+      "stadium": "常滑",
+      "jcd": 8,
+      "slug": "tokoname",
+      "races": 2478,
+      "firstBoat1": 1405,
+      "firstBoat1Rate": 56.7,
+      "second": [
+        {
+          "boat": 2,
+          "count": 437,
+          "share": 31.1
+        },
+        {
+          "boat": 3,
+          "count": 414,
+          "share": 29.5
+        },
+        {
+          "boat": 4,
+          "count": 245,
+          "share": 17.4
+        },
+        {
+          "boat": 5,
+          "count": 194,
+          "share": 13.8
+        },
+        {
+          "boat": 6,
+          "count": 115,
+          "share": 8.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 207
+      }
+    },
+    "18": {
+      "stadium": "徳山",
+      "jcd": 18,
+      "slug": "tokuyama",
+      "races": 2532,
+      "firstBoat1": 1571,
+      "firstBoat1Rate": 62.0,
+      "second": [
+        {
+          "boat": 2,
+          "count": 589,
+          "share": 37.5
+        },
+        {
+          "boat": 3,
+          "count": 456,
+          "share": 29.0
+        },
+        {
+          "boat": 4,
+          "count": 281,
+          "share": 17.9
+        },
+        {
+          "boat": 5,
+          "count": 155,
+          "share": 9.9
+        },
+        {
+          "boat": 6,
+          "count": 90,
+          "share": 5.7
+        }
+      ],
+      "period": {
+        "from": "2025/06/30",
+        "to": "2026/07/16",
+        "days": 211
+      }
+    },
+    "09": {
+      "stadium": "津",
+      "jcd": 9,
+      "slug": "tsu",
+      "races": 2243,
+      "firstBoat1": 1289,
+      "firstBoat1Rate": 57.5,
+      "second": [
+        {
+          "boat": 2,
+          "count": 459,
+          "share": 35.6
+        },
+        {
+          "boat": 3,
+          "count": 343,
+          "share": 26.6
+        },
+        {
+          "boat": 4,
+          "count": 234,
+          "share": 18.2
+        },
+        {
+          "boat": 5,
+          "count": 148,
+          "share": 11.5
+        },
+        {
+          "boat": 6,
+          "count": 105,
+          "share": 8.1
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 188
+      }
+    },
+    "20": {
+      "stadium": "若松",
+      "jcd": 20,
+      "slug": "wakamatsu",
+      "races": 2193,
+      "firstBoat1": 1266,
+      "firstBoat1Rate": 57.7,
+      "second": [
+        {
+          "boat": 2,
+          "count": 407,
+          "share": 32.1
+        },
+        {
+          "boat": 3,
+          "count": 384,
+          "share": 30.3
+        },
+        {
+          "boat": 4,
+          "count": 239,
+          "share": 18.9
+        },
+        {
+          "boat": 5,
+          "count": 132,
+          "share": 10.4
+        },
+        {
+          "boat": 6,
+          "count": 104,
+          "share": 8.2
+        }
+      ],
+      "period": {
+        "from": "2025/07/15",
+        "to": "2026/07/10",
+        "days": 187
+      }
+    }
+  }
+}

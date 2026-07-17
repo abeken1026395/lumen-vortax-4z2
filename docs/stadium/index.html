@@ -41,6 +41,7 @@ function App() {
   const [yosouya, setYosouya] = useState(null);
   const [yOpen, setYOpen] = useState(null);
   const [trifecta, setTrifecta] = useState(null);
+  const [b1second, setB1second] = useState(null);
 
   useEffect(() => {
     fetch("../announcers/announcers.json?v=" + Date.now())
@@ -63,7 +64,12 @@ function App() {
       .then(r => r.json())
       .then(setTrifecta)
       .catch(() => setTrifecta(null));
+    fetch("../payouts/boat1Second.json?v=" + Date.now())
+      .then(r => r.json())
+      .then(setB1second)
+      .catch(() => setB1second(null));
   }, []);
+  const BOAT_COLOR = { 2:"#9aa4b3", 3:"#f85149", 4:"#58a6ff", 5:"#ffd166", 6:"#3fb950" };
   const ancByVenue = (name) => (announcers || []).filter(a => (a.venues||[]).includes(name));
 
   const areas = useMemo(() => [...new Set(R.stadiums.map(s => s.area))], []);
@@ -166,6 +172,27 @@ function App() {
                       <span style={{color:"#e0e6ed"}}><b style={{color:"#ffd166",fontSize:15}}>{t.combo}</b>（{t.count}回／全{t.races}戦・{t.share}%）</span>
                       {t.period && <div style={{marginTop:4,fontSize:11,color:"#6b7f95"}}>対象期間 {t.period.from}〜{t.period.to}（{t.period.days}日）／出典：{trifecta.source}</div>}
                       <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※{trifecta.note || "過去に出た回数であり、次のレースの予想ではありません。"}</div>
+                    </div>
+                    );
+                  })()}
+                  {b1second && b1second.venues && b1second.venues[s.code] && (() => {
+                    const t = b1second.venues[s.code];
+                    const mx = Math.max(...t.second.map(d => d.share), 1);
+                    return (
+                    <div style={{marginBottom:8,background:"#161a26",border:"1px solid #2f3a52",borderRadius:8,padding:"8px 10px"}}>
+                      <span style={{color:"#9fb5c9",fontWeight:700}}>🚤 1号艇が1着だったレースの2着内訳（過去実績）</span>
+                      <div style={{fontSize:11,color:"#6b7f95",margin:"3px 0 6px"}}>対象：1号艇が1着だった{t.firstBoat1}戦（全{t.races}戦中・1着率{t.firstBoat1Rate}%）</div>
+                      {t.second.map(d => (
+                        <div key={d.boat} style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                          <span style={{fontSize:11,fontWeight:700,color:BOAT_COLOR[d.boat],minWidth:44}}>{d.boat}号艇</span>
+                          <div style={{flex:1,height:12,background:"#0b1219",borderRadius:6,overflow:"hidden"}}>
+                            <div style={{width:(d.share/mx*100)+"%",height:"100%",background:BOAT_COLOR[d.boat],opacity:0.85}}></div>
+                          </div>
+                          <span style={{fontSize:11,color:"#e0e6ed",minWidth:82,textAlign:"right"}}>{d.share}%（{d.count}回）</span>
+                        </div>
+                      ))}
+                      {t.period && <div style={{marginTop:4,fontSize:11,color:"#6b7f95"}}>対象期間 {t.period.from}〜{t.period.to}（{t.period.days}日）／出典：{b1second.source}</div>}
+                      <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※{b1second.note || "過去に出た回数の割合であり、次のレースの予想ではありません。"}</div>
                     </div>
                     );
                   })()}
