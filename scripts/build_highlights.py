@@ -329,11 +329,25 @@ def main():
         # score(diff)で①中心/難解/外主役のトーンを決め、その上に主役艇名を乗せる。
         o4 = sorted([t for t in threats if t['w'] >= 4], key=lambda x: x['w'])
         inn = sorted([t for t in threats if t['w'] < 4], key=lambda x: x['w'])
+        # 見出しの外主役はスコア順（カド⑤が④より上位スコアなら⑤主役文）。判定(hero/verdict)・スコアは不変。
+        o4s = sorted(o4, key=lambda t: -total_power(bo[t['w']-1]))
+        mid_hi_w = [w for w in (2, 3) if hi(mt[w-1])]   # 機力上位の中団②③
         head_w = None
         def _kt_of(w):
             return kim_type(bo[w-1]['登録番号'])
-        # 語調は実測連動：スコアが深いほど強く言い切る（+0.40帯の波乱率18%実測）。
-        # 波乱側はスコア深度と波乱率が相関しない実測のため、断定を強めない。
+        # 述語は「連絡み」寄り（実測: 波乱④は1着20.6%/3着内61.1%＝勝ち切りは薄く連絡みが実態）。
+        # 決まり手×場特性で分岐。語感刷新分は新ID(H4-6/M8-10/N1)で検証追跡できるよう振り直す。
+        def _out_pred(t, strong):
+            w = t['w']; kt = _kt_of(w)
+            if kt == 'makuri' and (ba in NARROW or ba in MAKURI):
+                return ('のまくりが狭水面で連を脅かす', 'H4' if strong else 'M8')
+            if kt == 'sashi':
+                return ('のまくり差しが連に食い込む', 'H5' if strong else 'M9')
+            if t.get('mhi'):
+                return ('は機力上位で連軸を脅かす、頭までは薄い', 'H6' if strong else 'M10')
+            if w == 4:
+                return ('はカドから連に押し込む形、勝ち切りは薄い', 'H7' if strong else 'M11')
+            return ('はダッシュから連絡み、連軸を脅かす', 'H8' if strong else 'M12')
         if in_strong and diff >= tk_ba:
             if diff >= 0.30:
                 headline = f"①{nm(in1['氏名'])}の信頼厚し。相手探しの一戦"; hid = 'K1'
@@ -341,44 +355,35 @@ def main():
                 headline = f"①{nm(in1['氏名'])}中心。水面も後押しし、崩れは考えにくい"; hid = 'K2'
             else:
                 headline = f"①{nm(in1['氏名'])}中心。外の一発をどこまで測るか"; hid = 'K3'
-        elif in_weak and diff <= th_ba and o4:
-            w0 = o4[0]; kt0 = _kt_of(w0['w'])
-            if kt0 == 'makuri' and ba in NARROW:
-                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}のまくりが狭水面で一考"; hid = 'H1'
-            elif kt0 == 'sashi':
-                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}のまくり差しを警戒"; hid = 'H2'
-            else:
-                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}の一撃を警戒したい"; hid = 'H3'
-            head_w = w0['w']
-        elif in_strong and verdict == '波乱' and o4:
-            # in_strong水面でも④優勢で波乱判定＝外主役が実態に整合（旧K4矛盾の解消）
-            w0 = o4[0]; kt0 = _kt_of(w0['w'])
-            if kt0 == 'makuri' and ba in NARROW:
-                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}のまくりが狭水面で一考"; hid = 'H1'
-            elif kt0 == 'sashi':
-                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}のまくり差しを警戒"; hid = 'H2'
-            else:
-                headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}の一撃を警戒したい"; hid = 'H3'
+        elif o4 and ((in_weak and diff <= th_ba) or (in_strong and verdict == '波乱')):
+            # 波乱×外主役（①不安 or in_strongでも④優勢）。述語は連絡み寄り。カド⑤優位なら⑤主役。
+            w0 = o4s[0]; suf, hid = _out_pred(w0, True)
+            headline = f"①に不安。{K[w0['w']-1]}{w0['nm']}{suf}"
             head_w = w0['w']
         elif in_strong:
             headline = f"①{nm(in1['氏名'])}の逃げが軸。外の一発をどこまで測るか"; hid = 'K4'
         elif in_weak and o4:
-            w0 = o4[0]; kt0 = _kt_of(w0['w'])
-            if kt0 == 'sashi':
-                headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}のまくり差しが主役候補"; hid = 'M1'
-            elif kt0 == 'makuri':
-                headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}のまくりが主役候補"; hid = 'M2'
-            else:
-                headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}のダッシュ一撃を測る一戦"; hid = 'M3'
+            # 混戦寄り×外主役。連絡み寄りの主役候補文。カド⑤優位なら⑤主役。
+            w0 = o4s[0]; suf, hid = _out_pred(w0, False)
+            headline = f"①に不安、{K[w0['w']-1]}{w0['nm']}{suf}"
             head_w = w0['w']
+        elif in_weak and mid_hi_w:
+            # 機力上位の中団②③が連に突け入る（実装テーブル：中団警戒）
+            mw = mid_hi_w[0]
+            headline = f"①に不安、{K[mw-1]}{nm(bo[mw-1]['氏名'])}の機力上位が中団から連に突け入る"; hid = 'N1'
+            head_w = mw
         elif in_weak and inn:
             headline = f"①に不安、{K[inn[0]['w']-1]}{inn[0]['nm']}の差しが突け入る一戦"; hid = 'M4'
             head_w = inn[0]['w']
         elif in_weak:
             headline = "①に不安、外の仕掛け待ちで波乱含み"; hid = 'M5'
         elif o4:
-            headline = f"①の出方ひとつ、{K[o4[0]['w']-1]}{o4[0]['nm']}のまくりと連動"; hid = 'M6'
-            head_w = o4[0]['w']
+            w0 = o4s[0]
+            if w0.get('mhi'):
+                headline = f"①の出方ひとつ、{K[w0['w']-1]}{w0['nm']}の機力上位が連に絡む余地"; hid = 'M13'
+            else:
+                headline = f"①の出方ひとつ、{K[w0['w']-1]}{w0['nm']}のまくりが連に絡む余地"; hid = 'M6'
+            head_w = w0['w']
         else:
             headline = "軸を絞りにくい難解戦。展示のSで傾きを見たい"; hid = 'M7'
 
