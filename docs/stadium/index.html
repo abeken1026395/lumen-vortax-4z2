@@ -42,6 +42,8 @@ function App() {
   const [yOpen, setYOpen] = useState(null);
   const [trifecta, setTrifecta] = useState(null);
   const [b1second, setB1second] = useState(null);
+  const [champ, setChamp] = useState(null);
+  const [champOpen, setChampOpen] = useState(null);
 
   useEffect(() => {
     fetch("../announcers/announcers.json?v=" + Date.now())
@@ -68,6 +70,10 @@ function App() {
       .then(r => r.json())
       .then(setB1second)
       .catch(() => setB1second(null));
+    fetch("../payouts/champRace.json?v=" + Date.now())
+      .then(r => r.json())
+      .then(setChamp)
+      .catch(() => setChamp(null));
   }, []);
   const BOAT_COLOR = { 2:"#9aa4b3", 3:"#f85149", 4:"#58a6ff", 5:"#ffd166", 6:"#3fb950" };
   const ancByVenue = (name) => (announcers || []).filter(a => (a.venues||[]).includes(name));
@@ -189,6 +195,34 @@ function App() {
                           </div>
                         ))}
                       </div>)}
+                      {champ && champ.venues && champ.venues[s.code] && (() => {
+                        const c = champ.venues[s.code];
+                        const cmax = c.ranking.length ? c.ranking[0].count : 1;
+                        const isCO = champOpen === s.code;
+                        return (
+                        <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid #24304a"}}>
+                          <div onClick={e=>{e.stopPropagation();setChampOpen(isCO?null:s.code);}} style={{display:"flex",alignItems:"center",cursor:"pointer",gap:6,flexWrap:"wrap"}}>
+                            <span style={{color:"#ffd166",fontWeight:700}}>🏆 優勝戦の出目ランキング</span>
+                            <span style={{fontSize:11,color:"#6b7f95"}}>過去{c.total}戦</span>
+                            <span style={{marginLeft:"auto",fontSize:11,color:"#caa23f"}}>{isCO?"▲ 閉じる":"▼ 見る"}</span>
+                          </div>
+                          {isCO && (<div style={{marginTop:6}}>
+                            {c.ranking.slice(0,8).map((d,i) => (
+                              <div key={d.combo} style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                                <span style={{fontSize:11,color:"#6b7f95",minWidth:16,textAlign:"right"}}>{i+1}</span>
+                                <span style={{fontSize:13,fontWeight:700,color:"#e0e6ed",minWidth:52}}>{d.combo}</span>
+                                <div style={{flex:1,height:10,background:"#0b1219",borderRadius:5,overflow:"hidden"}}>
+                                  <div style={{width:(d.count/cmax*100)+"%",height:"100%",background:"#caa23f",opacity:0.85}}></div>
+                                </div>
+                                <span style={{fontSize:11,color:"#e0e6ed",minWidth:60,textAlign:"right"}}>{d.count}回・{d.share}%</span>
+                              </div>
+                            ))}
+                            {c.ranking.length > 8 && <div style={{fontSize:11,color:"#6b7f95",marginTop:2}}>ほか{c.ranking.length-8}種の出目（各{c.ranking[8].count}回以下）</div>}
+                            <div style={{marginTop:4,fontSize:11,color:"#6b7f95"}}>優勝戦{c.total}戦（{c.period.from}〜{c.period.to}）で実際に出た出目の集計。優勝戦は各節1回のため対象数は少なめです。</div>
+                          </div>)}
+                        </div>
+                        );
+                      })()}
                       {period && <div style={{marginTop:6,fontSize:11,color:"#6b7f95"}}>対象期間 {period.from}〜{period.to}（{period.days}日）／出典：{source}</div>}
                       <div style={{marginTop:4,fontSize:11,color:"#c98a8a"}}>※過去に出た回数の割合であり、次のレースの予想ではありません。</div>
                     </div>
