@@ -3,12 +3,16 @@ name: update kiryu payouts
 on:
   workflow_dispatch:
     inputs:
-      YM:
-        description: '収集する年月 YYYYMM（空欄で今日から遡る）'
+      START:
+        description: '収集開始日 YYYYMMDD（空欄で既定 20250715）'
+        required: false
+        default: ''
+      END:
+        description: '収集終了日 YYYYMMDD（空欄で昨日=JST）'
         required: false
         default: ''
   schedule:
-    - cron: '20 15 * * *'   # JST 翌0:20（結果確定後）
+    - cron: '20 15 * * *'   # JST 翌0:20（結果確定後・他場と分離）
 
 permissions:
   contents: write
@@ -20,7 +24,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 30
+    env:
+      TZ: Asia/Tokyo   # 日付境界をJSTに固定（昨日=完全確定日のみ収集）
     steps:
       - uses: actions/checkout@v4
 
@@ -28,14 +34,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: install deps
-        run: pip install lhafile
-
-      - name: scrape kiryu payouts
+      # mbraceはクラウドIP遮断のため使わない。到達可能な非公式ミラー(BoatraceOpenAPI)を参照。
+      - name: scrape kiryu payouts (API source)
         continue-on-error: true
         env:
-          YM: ${{ github.event.inputs.YM }}
-        run: python scripts/scrapeKiryuPayouts.py
+          START: ${{ github.event.inputs.START }}
+          END: ${{ github.event.inputs.END }}
+        run: python scripts/scrapeKiryuPayoutsApi.py
 
       - name: build man rate json
         if: always()

@@ -1,45 +1,46 @@
 name: update tokuyama payouts
 
 on:
-  schedule:
-    - cron: '20 0 * * *'
-    - cron: '20 1 * * *'
   workflow_dispatch:
     inputs:
-      ym:
-        description: '回収する月 (例 202605)。空欄なら過去1年。'
+      START:
+        description: '収集開始日 YYYYMMDD（空欄で既定 20250715）'
         required: false
         default: ''
+      END:
+        description: '収集終了日 YYYYMMDD（空欄で昨日=JST）'
+        required: false
+        default: ''
+  schedule:
+    - cron: '30 15 * * *'   # JST 翌0:30（結果確定後・他場と分離）
 
 permissions:
   contents: write
 
 concurrency:
-  group: boatrace-payouts
+  group: boatrace-tokuyama-payouts
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 30
+    env:
+      TZ: Asia/Tokyo   # 日付境界をJSTに固定（昨日=完全確定日のみ収集）
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: install deps
-        run: pip install lhafile
-
-      - name: scrape payouts
+      # mbraceはクラウドIP遮断のため使わない。到達可能な非公式ミラー(BoatraceOpenAPI)を参照。
+      - name: scrape tokuyama payouts (API source)
         continue-on-error: true
-        timeout-minutes: 300
         env:
-          YM: ${{ github.event.inputs.ym }}
-        run: python scripts/scrapeTokuyamaPayouts.py
+          START: ${{ github.event.inputs.START }}
+          END: ${{ github.event.inputs.END }}
+        run: python scripts/scrapeTokuyamaPayoutsApi.py
 
       - name: build man rate json
         if: always()
@@ -49,12 +50,9 @@ jobs:
         if: always()
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/payouts/
-          if git diff --staged --quiet; then
-            echo "no changes"
-          else
-            git commit -m "update tokuyama payouts"
-            git pull --rebase origin main
-            git push
-          fi
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/payouts/tokuyamaPayouts.csv docs/payouts/tokuyamaManRate.json
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "update tokuyama payouts"
+          git pull --rebase origin main
+          git push origin main
