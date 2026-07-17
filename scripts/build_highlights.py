@@ -344,9 +344,9 @@ def main():
             if kt == 'sashi':
                 return ('のまくり差しが連に食い込む', 'H5' if strong else 'M9')
             if t.get('mhi'):
-                return ('は機力上位で連軸を脅かす、頭までは薄い', 'H6' if strong else 'M10')
+                return ('は機力上位で連軸を脅かす', 'H6' if strong else 'M10')
             if w == 4:
-                return ('はカドから連に押し込む形、勝ち切りは薄い', 'H7' if strong else 'M11')
+                return ('はカドから連に押し込む形', 'H7' if strong else 'M11')
             return ('はダッシュから連絡み、連軸を脅かす', 'H8' if strong else 'M12')
         if in_strong and diff >= tk_ba:
             if diff >= 0.30:
