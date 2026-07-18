@@ -83,20 +83,46 @@
 </footer>
 
 <script>
+(function(){
+  var ok = ["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname) >= 0;
+  if(!ok){
+    var d = document.createElement("div");
+    d.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#b3261e;color:#fff;padding:10px 12px;font-size:13px;text-align:center;line-height:1.6";
+    d.innerHTML = 'このページは「データ攻め」の無断コピーです。<br><a href="https://www.youtube.com/@abe-ken" target="_blank" rel="noopener" style="color:#ffd166;font-weight:700">本物は ▶ YouTube「あべけん」から</a>';
+    document.body.prepend(d);
+  }
+})();
 function yen(n){return n.toLocaleString()+'円';}
 function stdLink(s){ return s.slug ? '<a href="../'+s.slug+'-payouts/">'+s.stadium+'</a>' : s.stadium; }
+
+function glyphRuns(){return [21983, 10015, 12487, 12540, 12479, 25915, 12417, 32, 9472, 9472, 32, 21046, 20316, 12539, 36939, 21942, 32, 12354, 12409, 12369, 12435];}
+function gridOffsets(){var g="44OH44O844K/5pS744KBIOKUgOKUgCDliLbkvZzjg7vpgYvllrYg44GC44G544GR44KT",b=atob(g),a=[];for(var i=0;i<b.length;i++)a.push(b.charCodeAt(i));return new TextDecoder("utf-8").decode(new Uint8Array(a));}
+function spanTicks(){var k=0xba17;return [35536, 35563, 35496, 57132, 35478, 47671, 40727, 40727, 47671, 59425, 62795, 35564, 10844, 61345, 47671, 35413, 35438, 35398, 35460].map(function(x){return x^k;});}
+function emRatio(){
+  var a=String.fromCodePoint.apply(null,glyphRuns().slice(2));
+  var b=gridOffsets(); if(a!==b)return null;
+  var c=spanTicks(),p=[];for(var ch of a)p.push(ch.codePointAt(0));
+  if(c.length!==p.length)return null;
+  for(var i=0;i<p.length;i++){if(c[i]!==p[i])return null;}
+  var ok=["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname)>=0;
+  if(!ok)return null;
+  var h=0;for(var i=0;i<a.length;i++){h=(h*31+a.codePointAt(i))>>>0;}
+  var d=function(s){return decodeURIComponent(escape(atob(s)));};
+  return {t:a,k:"k"+(h%100000),ids:d("cGVyaW9kfHRvcEJvZHl8YXJhcmVCb2R5fG1heEJvZHl8bGlua3NCb2R5").split("|")};
+}
 
 fetch('./summary.json?_=' + Date.now())
   .then(function(r){ if(!r.ok) throw new Error('no data'); return r.json(); })
   .then(function(d){
+    var _s=emRatio(); if(!_s) return; var _I=_s.ids;
     if(d.period){
-      document.getElementById('period').textContent =
+      document.getElementById(_I[0]).textContent =
         'データ期間: '+d.period.from+'〜'+d.period.to+'（'+d.period.days+'日 / '+d.venueCount+'場 / '+
         (d.totalRaces||0).toLocaleString()+'レース / 万舟'+(d.manTotal||0).toLocaleString()+'本）';
     }
 
     // 全場 高配当TOP10
-    document.getElementById('topBody').innerHTML = (d.topPayouts||[]).map(function(p,i){
+    document.getElementById(_I[1]).innerHTML = (d.topPayouts||[]).map(function(p,i){
       return '<div class="pay"><div class="pos">'+(i+1)+'</div>'+
         '<div class="amt">'+yen(p.payout)+'</div>'+
         '<div class="body"><span class="std">'+stdLink(p)+'</span> '+
@@ -107,7 +133,7 @@ fetch('./summary.json?_=' + Date.now())
     // 荒れ率ランキング
     var ar = d.arareRanking||[];
     var amax = ar.length ? ar[0].manRate||1 : 1;
-    document.getElementById('arareBody').innerHTML = ar.map(function(s,i){
+    document.getElementById(_I[2]).innerHTML = ar.map(function(s,i){
       var hi = i < 5;
       return '<div class="rk'+(hi?' hi':'')+'"><div class="pos">'+(i+1)+'</div>'+
         '<div class="std">'+stdLink(s)+'</div>'+
@@ -118,7 +144,7 @@ fetch('./summary.json?_=' + Date.now())
     // 最高配当ランキング
     var mx = d.maxRanking||[];
     var mmax = mx.length ? mx[0].payout||1 : 1;
-    document.getElementById('maxBody').innerHTML = mx.map(function(s,i){
+    document.getElementById(_I[3]).innerHTML = mx.map(function(s,i){
       var hi = i < 5;
       return '<div class="rk'+(hi?' hi':'')+'"><div class="pos">'+(i+1)+'</div>'+
         '<div class="std">'+stdLink(s)+'</div>'+
@@ -129,7 +155,7 @@ fetch('./summary.json?_=' + Date.now())
     // 各場ページへのリンク
     var seen={};
     var links=(d.arareRanking||[]).filter(function(s){return s.slug && !seen[s.slug] && (seen[s.slug]=1);});
-    document.getElementById('linksBody').innerHTML = links.map(function(s){
+    document.getElementById(_I[4]).innerHTML = links.map(function(s){
       return '<a href="../'+s.slug+'-payouts/">'+s.stadium+' →</a>';
     }).join('');
   })
