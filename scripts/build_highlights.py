@@ -160,6 +160,16 @@ def main():
         mv = mkey.get((r['場コード'], r['登録番号']), 0.0)
         if mv > 0: parts.append(_nz(mv, mt_lo, mt_hi))
         return sum(parts) / len(parts)
+    # 検証スコアの要素別内訳（total_powerと同じ_nz・同じ反転を再利用。値は変えない）。
+    # 波乱判別力の要素別解剖用。モーターは値>0のときのみ数値、無ければNone。
+    def power_vec(r):
+        lv = _nz(LV.get(r['級別'], 1), lv_lo, lv_hi)
+        lc = _nz(loc_or_nat(r), loc_lo, loc_hi)
+        stv = 1 - _nz(f(r['平均ST']), st_lo, st_hi)
+        mvr = mkey.get((r['場コード'], r['登録番号']), 0.0)
+        mt = _nz(mvr, mt_lo, mt_hi) if mvr > 0 else None
+        return {'級別': round(lv, 4), '当地': round(lc, 4), 'ST': round(stv, 4),
+                'モーター': (round(mt, 4) if mt is not None else None)}
 
     # 図鑑の決まり手CSVから やられ系（さされ・まくられ・まくりさされ）を読む。
     # 旧フォーマット（列が無い）やファイル欠損でも落ちないようにする。
@@ -265,6 +275,15 @@ def main():
         bo.sort(key=lambda b: int(b['枠']))
         # --- 検証ログ：①総合力 − ④総合力（標準化・等重み）---
         diff = round(total_power(bo[0]) - total_power(bo[3]), 3)
+        # 要素別内訳（①④の各要素値と差。波乱判別力の要素解剖用・既存diffは不変）
+        _p1 = power_vec(bo[0]); _p4 = power_vec(bo[3])
+        def _br(k):
+            a = _p1[k]; b = _p4[k]
+            return {'①': a, '④': b, '差': (None if a is None or b is None else round(a - b, 3))}
+        score_breakdown = {'級別': _br('級別'), '当地': _br('当地'), 'ST': _br('ST'),
+                           'モーター': _br('モーター'),
+                           'モーター有無': {'①': _p1['モーター'] is not None,
+                                       '④': _p4['モーター'] is not None}}
         tk_ba, th_ba = th_of(ba)
         if diff >= tk_ba:
             verdict, hero = '堅め', 1
@@ -621,7 +640,8 @@ def main():
                           '判定': verdict, '主役艇': hero, 'スコア': diff,
                           '対抗艇': (th2[1]['w'] if len(th2) > 1 else None),
                           '死角艇': skw,
-                          '見出しID': hid, '死角ID': sid, '波及ID': fid, '締めID': cid}
+                          '見出しID': hid, '死角ID': sid, '波及ID': fid, '締めID': cid,
+                          'スコア内訳': score_breakdown}
 
         boats = []
         for b in bo:
