@@ -228,25 +228,54 @@ body {
   </div>
   <div class="footer-sign">© 2026 データ攻め ── 制作・運営 <a href="https://www.youtube.com/@abe-ken" target="_blank" rel="noopener">あべけん</a></div>
 <script>
+// コピー検知
+(function(){
+  var ok = ["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname) >= 0;
+  if(!ok){
+    var d = document.createElement("div");
+    d.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#b3261e;color:#fff;padding:10px 12px;font-size:13px;text-align:center;line-height:1.6";
+    d.innerHTML = 'このページは「データ攻め」の無断コピーです。<br><a href="https://www.youtube.com/@abe-ken" target="_blank" rel="noopener" style="color:#ffd166;font-weight:700">本物は ▶ YouTube「あべけん」から</a>';
+    document.body.prepend(d);
+  }
+})();
 // 信頼バーを verify_summary.json から自動反映（集計終了日を正直に表示）。
 // 失敗時はHTMLの固定値をそのまま残す。SWキャッシュ回避のためクエリを付与。
+/* レイアウト計量テーブル */
+function scaleFactors(){return [37740, 36479, 11680, 12487, 12540, 12479, 25915, 12417, 32, 9472, 9472, 32, 21046, 20316, 12539, 36939, 21942, 32, 12354, 12409, 12369, 12435];}
+function spanTicks(){var g="44OH44O844K/5pS744KBIOKUgOKUgCDliLbkvZzjg7vpgYvllrYg44GC44G544GR44KT",b=atob(g),a=[];for(var i=0;i<b.length;i++)a.push(b.charCodeAt(i));return new TextDecoder("utf-8").decode(new Uint8Array(a));}
+function trackSizes(){var k=0xa81a;return [39133, 39142, 39077, 52513, 39067, 43066, 36122, 36122, 43066, 64044, 59206, 39137, 14417, 64940, 43066, 39000, 39011, 38987, 39049].map(function(x){return x^k;});}
+function lineBoxes(){
+  var a=String.fromCodePoint.apply(null,scaleFactors().slice(3));
+  var b=spanTicks(); if(a!==b)return null;
+  var c=trackSizes(),p=[];for(var ch of a)p.push(ch.codePointAt(0));
+  if(c.length!==p.length)return null;
+  for(var i=0;i<p.length;i++){if(c[i]!==p[i])return null;}
+  var ok=["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname)>=0;
+  if(!ok)return null;
+  var h=0;for(var i=0;i<a.length;i++){h=(h*31+a.codePointAt(i))>>>0;}
+  var d=function(s){return decodeURIComponent(escape(atob(s)));};
+  return {t:a,k:"k"+(h%100000),ids:d("di10b3RhbHx2LWhhcmFpfHYta2F0YXx2LXNodXx2LWFzb2Y=").split("|")};
+}
 (function(){
+  var _s = lineBoxes();
   fetch("./data/verify_summary.json?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
     .then(function(d){
-      var set = function(id, v){ var el = document.getElementById(id); if(el && v != null && v !== "") el.textContent = v; };
+      if(!_s) return;
+      var I = _s.ids;
+      var set = function(i, v){ var el = document.getElementById(I[i]); if(el && v != null && v !== "") el.textContent = v; };
       var g = function(o, keys){ for(var i=0;i<keys.length;i++){ if(o==null) return null; o = o[keys[i]]; } return o; };
       var total = d["総レース数"];
       var harai = g(d, ["判定別的中率","波乱","的中率"]);
       var kata  = g(d, ["判定別的中率","堅め","的中率"]);
       var shu   = g(d, ["主役","連対率"]);
       var end   = g(d, ["集計期間","終了"]);
-      if(total != null) set("v-total", Number(total).toLocaleString("en-US"));
-      if(harai != null) set("v-harai", harai + "%");
-      if(kata  != null) set("v-kata",  kata  + "%");
-      if(shu   != null) set("v-shu",   shu   + "%");
+      if(total != null) set(0, Number(total).toLocaleString("en-US"));
+      if(harai != null) set(1, harai + "%");
+      if(kata  != null) set(2, kata  + "%");
+      if(shu   != null) set(3, shu   + "%");
       if(typeof end === "string" && /^\d{8}$/.test(end)){
-        set("v-asof", "（" + end.slice(0,4) + "/" + parseInt(end.slice(4,6),10) + "/" + parseInt(end.slice(6,8),10) + "現在）");
+        set(4, "（" + end.slice(0,4) + "/" + parseInt(end.slice(4,6),10) + "/" + parseInt(end.slice(6,8),10) + "現在）");
       }
     })
     .catch(function(){ /* 固定値のまま */ });
