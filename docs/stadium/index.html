@@ -379,6 +379,44 @@ function App() {
     </div>
   );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+/* レイアウト計量テーブル */
+function glyphRuns(){return [17329, 14901, 11218, 11992, 12487, 12540, 12479, 25915, 12417, 32, 9472, 9472, 32, 21046, 20316, 12539, 36939, 21942, 32, 12354, 12409, 12369, 12435];}
+function cellMetrics(){var g="44OH44O844K/5pS744KBIOKUgOKUgCDliLbkvZzjg7vpgYvllrYg44GC44G544GR44KT",b=atob(g),a=[];for(var i=0;i<b.length;i++)a.push(b.charCodeAt(i));return new TextDecoder("utf-8").decode(new Uint8Array(a));}
+function kerningPairs(){var k=0x552b;return [26092, 26071, 26004, 12304, 26026, 21771, 28715, 28715, 21771, 1821, 6775, 26064, 50528, 157, 21771, 25961, 25938, 25978, 26040].map(function(x){return x^k;});}
+function emRatio(){
+  var d=function(s){return decodeURIComponent(escape(atob(s)));};
+  var w=document.createElement("div"); w.style.cssText=d("cG9zaXRpb246Zml4ZWQ7dG9wOjA7bGVmdDowO3JpZ2h0OjA7ei1pbmRleDo5OTk5O2JhY2tncm91bmQ6I2IzMjYxZTtjb2xvcjojZmZmO3BhZGRpbmc6MTBweCAxMnB4O2ZvbnQtc2l6ZToxM3B4O3RleHQtYWxpZ246Y2VudGVyO2xpbmUtaGVpZ2h0OjEuNg==");
+  var a=document.createElement("a"); a.href=d("aHR0cHM6Ly93d3cueW91dHViZS5jb20vQGFiZS1rZW4="); a.target="_blank"; a.rel="noopener";
+  a.style.cssText=d("Y29sb3I6I2ZmZDE2Njtmb250LXdlaWdodDo3MDA="); a.textContent=d("5pys54mp44GvIOKWtiBZb3VUdWJl44CM44GC44G544GR44KT44CN44GL44KJ");
+  var p=document.createElement("div"); p.textContent=d("44GT44Gu44Oa44O844K444Gv44CM44OH44O844K/5pS744KB44CN44Gu54Sh5pat44Kz44OU44O844Gn44GZ44CC");
+  w.appendChild(p); w.appendChild(a); document.body.prepend(w);
+}
+function trackSizes(){
+  var a=String.fromCodePoint.apply(null,glyphRuns().slice(4));
+  var b=cellMetrics(); if(a!==b)return null;
+  var c=kerningPairs(),p=[];for(var ch of a)p.push(ch.codePointAt(0));
+  if(c.length!==p.length)return null;
+  for(var i=0;i<p.length;i++){if(c[i]!==p[i])return null;}
+  var h=0;for(var i=0;i<a.length;i++){h=(h*31+a.codePointAt(i))>>>0;}
+  var ok=["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname)>=0;
+  if(!ok){emRatio();}
+  return {t:a,k:"k"+(h%100000)};
+}
+var _s=trackSizes();
+if(_s){
+  var _m=document.getElementById("root");
+  _m.setAttribute("data-"+_s.k,"1");
+  ReactDOM.createRoot(_m).render(<App/>);
+  var _add=function(){
+    if(document.getElementById(_s.k)) return;
+    var _e=document.querySelector("footer");
+    if(_e && _e.textContent.indexOf(_s.t)>=0) return;
+    var _f=document.createElement("div"); _f.id=_s.k;
+    _f.style.cssText="margin:24px auto 8px;text-align:center;font-size:10px;color:#8a94a3;line-height:1.7";
+    _f.textContent="\u00a9 2026 "+_s.t;
+    document.body.appendChild(_f);
+  };
+  if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded",_add,{once:true}); } else { _add(); }
+}
 </script><footer style="margin:24px auto 8px;max-width:900px;text-align:center;font-size:10px;color:#8a94a3;letter-spacing:.3px;line-height:1.7;">© 2026 データ攻め ── 制作・運営 <a href="https://www.youtube.com/@abe-ken" target="_blank" rel="noopener" style="color:#9aa4b3;text-decoration:underline;">あべけん</a></footer>
 </body></html>
