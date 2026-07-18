@@ -8,3 +8,8 @@ data/kfiles/*.part
 
 # 自動実行(dailyMotorUsage.ps1)のログ・ロック
 scripts/logs/
+
+# verifyDashboard exe生成物（バイナリはコミットしない）
+dist/
+build/
+*.spec

@@ -1,0 +1,3 @@
+# scripts/verifyDashboard.py（verify判定精度ダッシュボード・第1層）の依存
+# GUIは Python3標準の tkinter。グラフのみ matplotlib を使用（pandas不要）。
+matplotlib
