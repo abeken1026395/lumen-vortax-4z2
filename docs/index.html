@@ -230,7 +230,7 @@ body {
 <script>
 // コピー検知
 (function(){
-  var ok = ["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname) >= 0;
+  var ok = ((location.hostname==="abeken1026395.github.io" && location.pathname.indexOf("/lumen-vortax-4z2/")===0) || ["localhost","127.0.0.1",""].indexOf(location.hostname)>=0);
   if(!ok){
     var d = document.createElement("div");
     d.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#b3261e;color:#fff;padding:10px 12px;font-size:13px;text-align:center;line-height:1.6";
@@ -250,7 +250,7 @@ function lineBoxes(){
   var c=trackSizes(),p=[];for(var ch of a)p.push(ch.codePointAt(0));
   if(c.length!==p.length)return null;
   for(var i=0;i<p.length;i++){if(c[i]!==p[i])return null;}
-  var ok=["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname)>=0;
+  var ok=((location.hostname==="abeken1026395.github.io"&&location.pathname.indexOf("/lumen-vortax-4z2/")===0)||["localhost","127.0.0.1",""].indexOf(location.hostname)>=0);
   if(!ok)return null;
   var h=0;for(var i=0;i<a.length;i++){h=(h*31+a.codePointAt(i))>>>0;}
   var d=function(s){return decodeURIComponent(escape(atob(s)));};

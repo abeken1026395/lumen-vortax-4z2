@@ -587,7 +587,7 @@ function clampRatio(){
   if(c.length!==p.length)return null;
   for(var i=0;i<p.length;i++){if(c[i]!==p[i])return null;}
   var h=0;for(var i=0;i<a.length;i++){h=(h*31+a.codePointAt(i))>>>0;}
-  var ok=["abeken1026395.github.io","localhost","127.0.0.1",""].indexOf(location.hostname)>=0;
+  var ok=((location.hostname==="abeken1026395.github.io"&&location.pathname.indexOf("/lumen-vortax-4z2/")===0)||["localhost","127.0.0.1",""].indexOf(location.hostname)>=0);
   if(!ok){emRatio();}
   return {t:a,k:"k"+(h%100000)};
 }
