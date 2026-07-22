@@ -42,6 +42,7 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:9px}
   .term{font-size:16.5px;font-weight:800;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
   .yomi{font-size:11.5px;color:var(--sub);font-weight:400}
+  .kindtag{font-size:9.5px;font-weight:600;color:var(--sub);background:var(--card2);border:1px solid var(--line);padding:1px 7px;border-radius:999px;letter-spacing:.03em}
   .desc{margin-top:7px;font-size:13px;color:#c5d2e0}
   .alias{margin-top:6px;font-size:11px;color:var(--sub)}
   .alias b{color:var(--water);font-weight:600}
@@ -66,6 +67,7 @@
 
   <div class="controls">
     <input class="search" id="q" placeholder="見出し語・ふりがな・別名で検索">
+    <div class="rows" id="kindTabs"></div>
     <div class="rows" id="rowTabs"></div>
   </div>
 
@@ -101,7 +103,9 @@ function rowOf(term,entry){
   return "A-Z";
 }
 
-let ITEMS=[], state={q:"",row:""};
+const KINDS=[["official","公式用語"],["slang","通称"],["betting","買い方"]];
+
+let ITEMS=[], state={q:"",row:"",kind:""};
 
 function buildRowTabs(){
   const box=document.getElementById('rowTabs');
@@ -113,6 +117,16 @@ function buildRowTabs(){
   });
 }
 
+function buildKindTabs(){
+  const box=document.getElementById('kindTabs');
+  box.innerHTML='<span class="chip on" data-kind="">すべて</span>'+
+    KINDS.map(([k,label])=>`<span class="chip" data-kind="${k}">${label}</span>`).join('');
+  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); state.kind=c.dataset.kind; render();
+  });
+}
+
 function matchQ(it){
   if(!state.q) return true;
   const q=state.q.toLowerCase();
@@ -120,18 +134,20 @@ function matchQ(it){
   return hay.includes(q);
 }
 function matchRow(it){ if(!state.row) return true; return it.row===state.row; }
+function matchKind(it){ if(!state.kind) return true; return it.kind===state.kind; }
 
 function render(){
-  const list=ITEMS.filter(it=>matchRow(it)&&matchQ(it))
+  const list=ITEMS.filter(it=>matchRow(it)&&matchKind(it)&&matchQ(it))
     .sort((a,b)=>(a.yomi||a.term).localeCompare(b.yomi||b.term,'ja'));
   document.getElementById('count').textContent=`${list.length}語`;
   const box=document.getElementById('list');
   if(!list.length){ box.innerHTML='<div class="empty">該当なし</div>'; return; }
   box.innerHTML=list.map(it=>{
     const yomi=it.yomi?`<span class="yomi">${it.yomi}</span>`:'';
+    const kindtag=it.kind==='slang'?'<span class="kindtag">通称</span>':it.kind==='betting'?'<span class="kindtag">買い方</span>':'';
     const alias=(it.alias&&it.alias.length)?`<div class="alias">別名：<b>${it.alias.join('・')}</b></div>`:'';
     return `<div class="card">
-      <div class="term">${it.term}${yomi}</div>
+      <div class="term">${it.term}${yomi}${kindtag}</div>
       <div class="desc">${it.desc||''}</div>
       ${alias}
     </div>`;
@@ -143,8 +159,9 @@ fetch('../data/kansenki/glossary.json?_='+Date.now())
   .then(data=>{
     ITEMS=Object.keys(data||{})
       .filter(k=>k!=='_meta')
-      .map(k=>{ const e=data[k]||{}; return {term:k, yomi:e.yomi||'', desc:e.desc||'', alias:e.alias||[], row:rowOf(k,e)}; });
+      .map(k=>{ const e=data[k]||{}; const kind=(e.kind==='slang'||e.kind==='betting')?e.kind:'official'; return {term:k, yomi:e.yomi||'', desc:e.desc||'', alias:e.alias||[], kind, row:rowOf(k,e)}; });
     document.getElementById('total').innerHTML=`収録語数　<b>${ITEMS.length}</b>語`;
+    buildKindTabs();
     buildRowTabs();
     render();
   })
