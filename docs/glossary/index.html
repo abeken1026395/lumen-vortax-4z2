@@ -44,6 +44,7 @@
   .yomi{font-size:11.5px;color:var(--sub);font-weight:400}
   .kindtag{font-size:9.5px;font-weight:600;color:var(--sub);background:var(--card2);border:1px solid var(--line);padding:1px 7px;border-radius:999px;letter-spacing:.03em}
   .desc{margin-top:7px;font-size:13px;color:#c5d2e0}
+  .example{margin-top:6px;font-size:11.5px;color:var(--sub)}
   .alias{margin-top:6px;font-size:11px;color:var(--sub)}
   .alias b{color:var(--water);font-weight:600}
   .empty{color:var(--sub);text-align:center;padding:30px 0;font-size:14px}
@@ -146,9 +147,11 @@ function render(){
     const yomi=it.yomi?`<span class="yomi">${it.yomi}</span>`:'';
     const kindtag=it.kind==='slang'?'<span class="kindtag">通称</span>':it.kind==='betting'?'<span class="kindtag">買い方</span>':'';
     const alias=(it.alias&&it.alias.length)?`<div class="alias">別名：<b>${it.alias.join('・')}</b></div>`:'';
+    const example=it.example?`<div class="example">例：${it.example}</div>`:'';
     return `<div class="card">
       <div class="term">${it.term}${yomi}${kindtag}</div>
       <div class="desc">${it.desc||''}</div>
+      ${example}
       ${alias}
     </div>`;
   }).join('');
@@ -159,7 +162,7 @@ fetch('../data/kansenki/glossary.json?_='+Date.now())
   .then(data=>{
     ITEMS=Object.keys(data||{})
       .filter(k=>k!=='_meta')
-      .map(k=>{ const e=data[k]||{}; const kind=(e.kind==='slang'||e.kind==='betting')?e.kind:'official'; return {term:k, yomi:e.yomi||'', desc:e.desc||'', alias:e.alias||[], kind, row:rowOf(k,e)}; });
+      .map(k=>{ const e=data[k]||{}; const kind=(e.kind==='slang'||e.kind==='betting')?e.kind:'official'; return {term:k, yomi:e.yomi||'', desc:e.desc||'', alias:e.alias||[], example:e.example||'', kind, row:rowOf(k,e)}; });
     document.getElementById('total').innerHTML=`収録語数　<b>${ITEMS.length}</b>語`;
     buildKindTabs();
     buildRowTabs();

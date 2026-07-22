@@ -1,11 +1,12 @@
 """glossary.json のセルフ検証。
 
 - JSONとして壊れていないか
-- "_meta" と既存212語のキー・yomi・desc・kind・alias(追記のみ許可)が変更前と一致するか
-- 既存212語の kind が変更・後付けされていないか（元がkind無しならkind無しのまま）
-- 全エントリが {yomi(str), desc(str), kind(任意 official/slang/betting), alias(任意 list[str])} の形か
-- 追加語descに禁止語（煽り・射幸表現）が含まれていないか（見出し語自体は対象外）
-- 追加語descに数値混入（%／％）が無いか（警告）
+- "_meta" と既存284語のキー・yomi・desc・kind・alias(追記のみ許可)が変更前と一致するか
+- 既存284語の kind が変更・後付けされていないか（元がkind無しならkind無しのまま）
+- 全エントリが {yomi(str), desc(str), kind(任意 official/slang/betting),
+  alias(任意 list[str]), example(任意 str)} の形か
+- 追加語desc・全エントリのexampleに禁止語（煽り・射幸表現）が含まれていないか（見出し語自体は対象外）
+- 追加語desc・全エントリのexampleに数値混入（%／％）が無いか（警告）
 - キー重複・alias衝突がないか
 """
 import json
@@ -285,6 +286,7 @@ def main():
     alias_owner = {}
     warnings = []
     kind_counts = {"official": 0, "slang": 0, "betting": 0}
+    example_count = 0
     for key, entry in data.items():
         if key == "_meta":
             continue
@@ -296,6 +298,9 @@ def main():
             fail(f"{key} の yomi が str でない/空")
         if not isinstance(desc, str) or not desc:
             fail(f"{key} の desc が str でない/空")
+        example = entry.get("example")
+        if example is not None and not isinstance(example, str):
+            fail(f"{key} の example が str でない")
         alias = entry.get("alias")
         if alias is not None:
             if not isinstance(alias, list) or not all(isinstance(a, str) for a in alias):
@@ -321,6 +326,15 @@ def main():
                 if mark in desc:
                     warnings.append(f"WARN: {key} の desc に数値記号 '{mark}' が含まれている（構成比の捏造でないか要確認）")
 
+        if example:
+            example_count += 1
+            for word in FORBIDDEN_WORDS:
+                if word in example:
+                    fail(f"{key} の example に禁止語 '{word}' が含まれている")
+            for mark in NUMBER_MARKS:
+                if mark in example:
+                    warnings.append(f"WARN: {key} の example に数値記号 '{mark}' が含まれている（構成比の捏造でないか要確認）")
+
     for w in warnings:
         print(w)
 
@@ -328,6 +342,7 @@ def main():
     print(
         f"OK: 全チェック通過。総語数={len(all_keys)}（既存{len(ORIGINAL_ENTRIES)} + 追加{added}）"
         f" / kind内訳: official={kind_counts['official']}, slang={kind_counts['slang']}, betting={kind_counts['betting']}"
+        f" / example付き={example_count}語"
     )
 
 
