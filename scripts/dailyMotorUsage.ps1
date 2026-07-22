@@ -1,4 +1,4 @@
-# dailyMotorUsage.ps1
+﻿# dailyMotorUsage.ps1
 # Kファイル差分収集 →(A) motorUsage.json 再生成 / (B) motorParts.json モーターNo空欄の後追い補填
 #   → 変更があればコミット＆push。fetchKfiles を共有し重複DLを避けた1本化。
 # Windowsタスクスケジューラから毎日1回実行される想定（登録: scripts/registerDailyMotorUsage.ps1）。
