@@ -13,3 +13,6 @@ scripts/logs/
 dist/
 build/
 *.spec
+
+# Kファイル成果物のローカル保管（commitしない）
+localdata/
