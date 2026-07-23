@@ -141,6 +141,15 @@ def main():
         mot = []
     mkey = {(m['場コード'], m['登録番号']): f(m['モーター2連対率']) for m in mot}
 
+    # 選手別①1着率（buildRacerInRate.py 出力）。下振れ要因の事実提示に使う（スコアには非関与）。
+    try:
+        with open(os.path.join('docs', 'data', 'racerInRate.json'), encoding='utf-8') as _rf:
+            _inrate = json.load(_rf).get('racers', {})
+    except Exception:
+        _inrate = {}
+    # ①着外率20%以上の場（jcd）：02戸田/14鳴門/04平和島/01桐生/03江戸川/10三国
+    _DOWN_VENUES = {'01', '02', '03', '04', '10', '14'}
+
     # --- 検証スコア用 正規化（当日全出走者でmin-max・等重み）---
     def loc_or_nat(r):
         l = f(r['当地勝率']); return l if l > 0 else f(r['全国勝率'])
@@ -637,8 +646,22 @@ def main():
                 'F': int(b['F数']) >= 1, '鋭ST': st > 0 and st <= 0.15,
                 '当地優位': loc > 0 and loc > nat,
                 'さされ率': y.get('さされ率'), 'まくられ率': y.get('まくられ率'),
-                'まくりさされ率': y.get('まくりさされ率'), 'イン数': y.get('イン数')
+                'まくりさされ率': y.get('まくりさされ率'), 'イン数': y.get('イン数'),
+                'inWinRate': (_inrate.get(b['登録番号']) or {}).get('rate')  # 追加:①1着率(null許容)
             })
+
+        # ①(bo[0])の下振れ要因の事実提示（スコア・判定には非関与・追加のみ）。
+        #   条件1 ①のinWinRate<15（nullは判定対象外）／条件2 ①の機力<25／条件3 当場が①着外率20%以上
+        _df_items = []
+        _in1_rate = (_inrate.get(bo[0]['登録番号']) or {}).get('rate')
+        if _in1_rate is not None and _in1_rate < 15:
+            _df_items.append("①の1着率 {}%".format(_in1_rate))
+        _in1_mtr = bo[0]['_mtr'] if (use_m and bo[0]['_mtr'] > 0) else None
+        if _in1_mtr is not None and _in1_mtr < 25:
+            _df_items.append("①のモーター2連率 {}%".format(round(_in1_mtr, 1)))
+        if bo[0]['場コード'] in _DOWN_VENUES:
+            _df_items.append("当場は①着外率20%以上（{}）".format(ba))
+        downFactors = {'count': len(_df_items), 'items': _df_items}
 
         out_entry = {
             '場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
@@ -646,7 +669,8 @@ def main():
             '節名': bo[0].get('節名', ''), '企画名': bo[0].get('企画名', ''),
             '日目': bo[0].get('日目', ''),
             '波乱': seeds, 'イン堅': in_strong, 'モーター使用': use_m, 'イン1着率': it,
-            '艇': boats, '見立て': headline, '展開': tenkai, '波及': suji
+            '艇': boats, '見立て': headline, '展開': tenkai, '波及': suji,
+            'downFactors': downFactors  # 追加:①の下振れ要因（事実提示・確率/買い目なし）
         }
         return out_entry, pred_entry
 
