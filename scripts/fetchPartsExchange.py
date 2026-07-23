@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 # fetchPartsExchange.py
 # boatrace.jp公式「直前情報(beforeinfo)」から各レース各艇の部品交換・展示タイム・チルト・
-# プロペラ変更・体重を収集し、docs/data/motorParts.json に時系列 append 蓄積する
+# プロペラ変更・体重に加え、展示ST(tenjiST)・展示進入コース(tenjiCourse)・安定板(anteiban)を
+# 収集し、docs/data/motorParts.json に時系列 append 蓄積する
 # （モーター整備履歴のカルテ化・前節1位機/motorHistoryと同思想）。
+#
+# 追加3項目（既存フィールドは無改変・追加のみ。現物HTMLで掲載確認済み）:
+#   tenjiST      … スタート展示のST（'.04' 'F.01' 等の生文字列。F等の記号を潰さない）。艇単位。
+#   tenjiCourse  … スタート展示の進入コース（枠なりなら枠=コース、前づけ時のみ差異）。艇単位。
+#   anteiban     … 安定板の使用有無（レース単位。使用時「安定板使用」／未使用は空文字）。
+#   いずれも取得できない場合は空文字（既存の欠損表現に合わせる）。
 #
 # 取得元（本体ドメイン。各場サブドメインと異なりActionsから到達可能な想定）:
 #   https://www.boatrace.jp/owpc/pc/race/beforeinfo?rno={1-12}&jcd={01-24}&hd={YYYYMMDD}
@@ -126,6 +133,52 @@ def parse_beforeinfo(html):
             "部品交換": parts,
         })
     return out
+
+
+def parse_start_exhibition(html):
+    """スタート展示（table.is-w238／見出し「スタート展示」）から
+    艇番 -> {"course": コース, "st": 展示ST} を返す。
+    構造（公式beforeinfoの実DOM。手順1で現物確認済み）:
+      thead: 「スタート展示」／「コース｜並び｜ST」
+      tbody: <tr>×6。行順（上→下）＝コース1..6。各行の
+        span.table1_boatImage1Number（is-type{N}）＝そのコースに入った艇番、
+        span.table1_boatImage1Time＝展示ST（'.04' 'F.01' 等。F等の記号込みの生文字列）。
+    枠なりなら艇番=コース、前づけ時のみ差異（＝1号艇飛び条件①の実測）。
+    見出しやテーブルが取れない（＝展示未公開等）場合は空dict。ST未記載は空文字。
+    class名に依存しすぎないよう、見出しテキストから親tableを辿って特定する。"""
+    soup = BeautifulSoup(html, "html.parser")
+    head = soup.find(string=lambda s: s and "スタート展示" in s)
+    if not head:
+        return {}
+    table = head.find_parent("table")
+    if not table:
+        return {}
+    result = {}
+    course = 0
+    for tr in table.select("tbody tr"):
+        num = tr.find("span", class_="table1_boatImage1Number")
+        if not num:
+            continue
+        toban = num.get_text(strip=True)
+        if not re.fullmatch(r"[1-6]", toban):
+            continue
+        course += 1
+        tm = tr.find("span", class_="table1_boatImage1Time")
+        st = tm.get_text(strip=True) if tm else ""
+        result[toban] = {"course": str(course), "st": st}
+    return result
+
+
+def parse_anteiban(html):
+    """安定板の使用有無（レース単位）を返す。使用時のみ
+    span.label2（div.title16_titleLabels__add2020内）に「安定板使用」ラベルが出る。
+    使用レースは「安定板使用」、未使用レース（ラベル自体が無い）は空文字を返す。
+    ハルシネーション防止のため、ラベル文言が読めた場合のみその文字列を返す。"""
+    soup = BeautifulSoup(html, "html.parser")
+    node = soup.find(string=lambda s: s and "安定板" in s)
+    if not node:
+        return ""
+    return re.sub(r"\s+", "", node.strip())
 
 
 def _looks_numeric(s):
@@ -340,6 +393,8 @@ def main():
             continue
         fetched_races += 1
         vname = JCD_NAME.get(jcd, "")
+        st_map = parse_start_exhibition(html)   # 艇番->{course,st}（レース単位で1回）
+        anteiban = parse_anteiban(html)         # 安定板（レース単位。未使用は空文字）
         for row in rows:
             assert_row_sane(jcd, rno, row)  # 列オフセット異常を検知したら即失敗（既存ファイル未書換）
             if not str(row["展示タイム"]).strip():
@@ -365,6 +420,9 @@ def main():
                 "チルト": row["チルト"],
                 "プロペラ": row["プロペラ"],
                 "体重": row["体重"],
+                "tenjiST": st_map.get(row["枠"], {}).get("st", ""),
+                "tenjiCourse": st_map.get(row["枠"], {}).get("course", ""),
+                "anteiban": anteiban,
                 "出典URL": url,
                 "取得日時": datetime.datetime.now(JST).strftime("%Y-%m-%d %H:%M"),
             }
