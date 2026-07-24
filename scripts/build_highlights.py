@@ -149,6 +149,12 @@ def main():
         _inrate = {}
     # ①着外率20%以上の場（jcd）：02戸田/14鳴門/04平和島/01桐生/03江戸川/10三国
     _DOWN_VENUES = {'01', '02', '03', '04', '10', '14'}
+    # ①が崩れる時の「崩れ方」場別分布（buildCollapsePattern.py 出力）。事実提示のみ・スコア非関与。
+    try:
+        with open(os.path.join('docs', 'data', 'collapsePattern.json'), encoding='utf-8') as _cf:
+            _collapse = json.load(_cf).get('venues', {})
+    except Exception:
+        _collapse = {}
 
     # --- 検証スコア用 正規化（当日全出走者でmin-max・等重み）---
     def loc_or_nat(r):
@@ -663,6 +669,21 @@ def main():
             _df_items.append("当場は①着外率20%以上（{}）".format(ba))
         downFactors = {'count': len(_df_items), 'items': _df_items}
 
+        # ①が崩れる時の「崩れ方」場別分布（当場・過去1年の実数。①着外レースの内訳）。
+        #   確率/買い目/予想ではない。母数不足(patterns=null)の場は top=null。追加のみ・スコア非関与。
+        _cp = _collapse.get(bo[0]['場コード'])
+        if _cp:
+            _cp_pats = _cp.get('patterns')
+            collapse = {
+                'top': (_cp_pats[0] if _cp_pats else None),
+                'patterns': (_cp_pats[:3] if _cp_pats else None),  # 表示用 上位3（母数不足はnull）
+                'n': _cp.get('n'),
+                'inOutRate': _cp.get('inOutRate'),
+                'kimariteSum': _cp.get('kimariteSum') or {}
+            }
+        else:
+            collapse = None
+
         out_entry = {
             '場名': ba, '場コード': bo[0]['場コード'], 'レース': rc,
             '締切時刻': bo[0].get('締切時刻', ''),
@@ -670,7 +691,8 @@ def main():
             '日目': bo[0].get('日目', ''),
             '波乱': seeds, 'イン堅': in_strong, 'モーター使用': use_m, 'イン1着率': it,
             '艇': boats, '見立て': headline, '展開': tenkai, '波及': suji,
-            'downFactors': downFactors  # 追加:①の下振れ要因（事実提示・確率/買い目なし）
+            'downFactors': downFactors,  # 追加:①の下振れ要因（事実提示・確率/買い目なし）
+            'collapse': collapse  # 追加:①の崩れ方（場別実数・確率/買い目なし。①着外レースの内訳）
         }
         return out_entry, pred_entry
 

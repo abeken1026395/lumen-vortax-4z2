@@ -81,6 +81,14 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .downfactor .df-list{margin:6px 0 0;padding-left:16px}
 .downfactor .df-list li{margin:2px 0;color:#a9c6dd}
 .downfactor .df-ref{margin-top:6px;font-size:10px;color:#7d94a8;opacity:.85}
+/* ①の崩れ方（誰がどの手で崩すか・当場過去1年の実数。①着外レースの内訳） */
+.collapse-fact{margin-top:8px;font-size:11px;color:#8aa0b4;background:#0f1a26;border:1px solid #23364a;border-left:3px solid #33465c;border-radius:8px;padding:8px 10px;line-height:1.6}
+.collapse-fact .cf-h{font-weight:700;color:#a9c6dd}
+.collapse-fact .cf-sub{font-weight:400;font-size:10px;color:#7d94a8;margin-left:4px}
+.collapse-fact .cf-list{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px 12px}
+.collapse-fact .cf-p{white-space:nowrap}
+.collapse-fact .cf-p b{color:#c9d9e8;font-weight:700}
+.collapse-fact .cf-note{margin-top:6px;font-size:10px;color:#7d94a8;opacity:.85}
 .wk{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
 .wk1{background:var(--w1);color:#000}.wk2{background:var(--w2);color:#fff}.wk3{background:var(--w3);color:#fff}.wk4{background:var(--w4);color:#fff}.wk5{background:var(--w5);color:#000}.wk6{background:var(--w6);color:#fff}
 .lv{font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;flex-shrink:0}
@@ -399,6 +407,7 @@ function renderCard(r, ctx){
       <div class="tenkai"><div class="t">展開の筋</div>${r['展開'].map(p=>`<p>${p}</p>`).join('')}</div>
       <div class="suji"><b>波及の連鎖</b>：${r['波及']}</div>
       ${downFactorHtml(r)}
+      ${collapseHtml(r)}
       ${!r['モーター使用']?`<div class="warn">※当節モーター成績は集計前のため、機力は判定から除外しています。</div>`:''}
     </div>
   </div>`;
@@ -633,6 +642,20 @@ function downFactorHtml(r){
   const list = n>0 ? `<ul class="df-list">${items.map(it=>`<li>${it}</li>`).join('')}</ul>` : '';
   const ref = `<div class="df-ref">過去1年、該当${dispN}つのレースの①着外率は${REF[dispN]}（全体19.2%）</div>`;
   return `<div class="downfactor">${head}${list}${ref}</div>`;
+}
+
+// ①が崩れるときの「崩れ方」（誰がどの手で崩すか）を当場・過去1年の実数で提示する。
+// build_highlights が各レースに付ける collapse{top,patterns[],n,inOutRate,kimariteSum} を読むだけ。
+// 確率・買い目・予想は出さない。【誤読防止・必須】「①が着外だったレースの内訳」である旨を必ず明記
+// （全レースに対する発生率と混同させない）。新規タイマーは追加しない・下振れ要因の直後に配置。
+function collapseHtml(r){
+  const cp = r && r['collapse'];
+  if(!cp) return '';                          // 未搭載の旧データは非表示（後方互換）
+  const pats = cp['patterns'];
+  if(!pats || !pats.length) return '';        // 母数不足（patterns=null）の場は非表示
+  const lines = pats.map(p=>`<span class="cf-p"><b>${p.boat}号艇の${p.kimarite}</b> ${Math.round(p.pct)}%</span>`).join('');
+  const note = `※①が着外だった${cp.n}レースの内訳。①が着外になるのは全体の${cp.inOutRate}%`;
+  return `<div class="collapse-fact"><div class="cf-h">①が崩れるときの形<span class="cf-sub">（当場・過去1年）</span></div><div class="cf-list">${lines}</div><div class="cf-note">${note}</div></div>`;
 }
 
 function bProfHTML(no, boat){
