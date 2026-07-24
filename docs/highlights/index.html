@@ -74,6 +74,13 @@ h1{font-size:22px;font-weight:800;margin-top:4px;display:flex;align-items:baseli
 .bp-kinmotor .tsu{color:#8aa0b0}
 .bp-kinmotor .few{color:#e0a56a;font-size:9px;margin-left:4px}
 .bp-kinmotor .none{color:#8aa0b0}
+/* ①の下振れ要因（事実提示・見立て本文とは視覚的に分離／本文グレー・バッジは枠線化） */
+.downfactor{margin-top:10px;font-size:11px;color:#8aa0b4;background:#0f1a26;border:1px solid #23364a;border-left:3px solid #33465c;border-radius:8px;padding:8px 10px;line-height:1.6}
+.downfactor .df-n{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:transparent;color:#c9a86a;border:1px solid rgba(255,209,102,.32);margin-left:6px}
+.downfactor .df-none{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:transparent;color:#8aa0b0;border:1px solid #33465c;margin-left:6px}
+.downfactor .df-list{margin:6px 0 0;padding-left:16px}
+.downfactor .df-list li{margin:2px 0;color:#a9c6dd}
+.downfactor .df-ref{margin-top:6px;font-size:10px;color:#7d94a8;opacity:.85}
 .wk{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
 .wk1{background:var(--w1);color:#000}.wk2{background:var(--w2);color:#fff}.wk3{background:var(--w3);color:#fff}.wk4{background:var(--w4);color:#fff}.wk5{background:var(--w5);color:#000}.wk6{background:var(--w6);color:#fff}
 .lv{font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:4px;flex-shrink:0}
@@ -391,6 +398,7 @@ function renderCard(r, ctx){
       <div class="boats">${r['艇'].map(b=>boatRow(b, r['場名'])).join('')}</div>
       <div class="tenkai"><div class="t">展開の筋</div>${r['展開'].map(p=>`<p>${p}</p>`).join('')}</div>
       <div class="suji"><b>波及の連鎖</b>：${r['波及']}</div>
+      ${downFactorHtml(r)}
       ${!r['モーター使用']?`<div class="warn">※当節モーター成績は集計前のため、機力は判定から除外しています。</div>`:''}
     </div>
   </div>`;
@@ -608,6 +616,24 @@ function render(){
   refreshDeadlineState();
 }
 if(!window.__dlTimer){ window.__dlTimer=setInterval(refreshDeadlineState, 60000); }  // 1分毎に締切表示を更新（タイマー1本）
+
+// ①(進入コース1)の下振れ要因を「事実提示」として表示する（確率・買い目は出さない）。
+// build_highlights が各レースに付ける downFactors {count, items[]} を読むだけ。新規タイマーは追加しない。
+// 初期化・1分タイマー・L2署名配線より後に定義（関数巻き上げでレース描画から呼べる）。
+function downFactorHtml(r){
+  const df = r && r['downFactors'];
+  if(!df) return '';                         // downFactors 未搭載の旧データは非表示（後方互換）
+  const n = df['count']||0;
+  const items = df['items']||[];
+  const dispN = n>=2 ? 2 : n;                // 参考実績は 0/1/2個で出し分け（3個以上は2個扱い）
+  const REF = {0:'11.9%', 1:'27.2%', 2:'33.1%'};
+  const head = n>0
+    ? `①の下振れ要因<b class="df-n">${n}つ該当</b>`
+    : `①の下振れ要因<span class="df-none">該当なし</span>`;
+  const list = n>0 ? `<ul class="df-list">${items.map(it=>`<li>${it}</li>`).join('')}</ul>` : '';
+  const ref = `<div class="df-ref">過去1年、該当${dispN}つのレースの①着外率は${REF[dispN]}（全体19.2%）</div>`;
+  return `<div class="downfactor">${head}${list}${ref}</div>`;
+}
 
 function bProfHTML(no, boat){
   const p=PROF[no];
