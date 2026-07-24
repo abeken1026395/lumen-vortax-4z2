@@ -57,6 +57,13 @@ function Invoke-Step($what, [scriptblock]$block) {
     return $out
 }
 
+# 生成済み記事(articles/<pubdate>-<jcd>.json)の jcd 一覧を返す（レジューム判定用）。
+function Get-DoneJcds {
+    @(Get-ChildItem -Path (Join-Path $ArticlesDir ("{0}-*.json" -f $Pubdate)) -ErrorAction SilentlyContinue |
+        ForEach-Object { [regex]::Match($_.Name, '-(\d{2})\.json$').Groups[1].Value } |
+        Where-Object { $_ })
+}
+
 # --- 同時実行防止 --------------------------------------------------------
 if (Test-Path $LockFile) {
     $old = Get-Content $LockFile -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -107,32 +114,53 @@ try {
     # --- d) スタイル決定（位置引数フォーム） ----------------------------
     Invoke-Step 'assign_styles.py' { & $Py scripts\assign_styles.py $SourceRel } | Out-Null
 
-    # --- e) 執筆（headless claude・未執筆場のみ・push しない） -----------
+    # --- e) 執筆（headless claude・未執筆場のみ・push しない・レジューム最大3試行） ---
+    #   max-turns 到達等で claude が途中終了(rc≠0)しても throw しない（旧実装はここで
+    #   生成済みの記事を丸ごと捨てていた）。生成済み分を活かし、不足場のみを対象に
+    #   再実行する（初回＋再試行2回＝最大3試行）。既に生成済みの場は対象から外す＝再執筆しない。
     $runbook = Get-Content $RunbookPath -Raw -Encoding utf8
-    $toWriteStr = ($toWrite -join ' ')
-    $header = "掲載日=$Pubdate。執筆対象の場コード(jcd)は次のみ: $toWriteStr。この対象場だけを執筆し、既存記事のある場は絶対に上書きしない。PR作成・push・mergeは行わない（公開はスクリプトが行う）。以下のランブックに厳密に従うこと。"
-    $prompt = $header + "`r`n`r`n" + $runbook   # runbook はデータとして連結（再解釈させない）
     $claudeOut = Join-Path $env:TEMP ("claude_out_{0}.json" -f $Pubdate)
-    Log "claude 実行開始（model=claude-sonnet-5, max-turns=60, acceptEdits）"
-    $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    & $Claude -p $prompt `
-        --append-system-prompt-file $RulesPath `
-        --allowedTools "Read,Write,Edit,Bash(python scripts/assign_styles.py*),Bash(python scripts/lintKansenki.py*),Bash(python scripts/kansenki_pubplan.py*)" `
-        --permission-mode acceptEdits `
-        --max-turns 60 `
-        --model claude-sonnet-5 `
-        --output-format json 2>&1 | Out-File -FilePath $claudeOut -Encoding utf8
-    $claudeRc = $LASTEXITCODE
-    $ErrorActionPreference = $prev
-    try {
-        $cj = Get-Content $claudeOut -Raw -Encoding utf8 | ConvertFrom-Json
-        Log ("claude 完了 rc={0} cost_usd={1} session={2}" -f $claudeRc, $cj.total_cost_usd, $cj.session_id)
-    } catch {
-        Log ("claude 完了 rc={0}（JSON解析不可・出力先 {1}）" -f $claudeRc, $claudeOut)
+    $maxAttempts = 3
+    $claudeRc = 0
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        $done = @(Get-DoneJcds)
+        $remaining = @($toWrite | Where-Object { $_ -notin $done })
+        if ($remaining.Count -eq 0) { Log "全対象が生成済み → claude実行不要"; break }
+        $targetStr = ($remaining -join ' ')
+        $header = "掲載日=$Pubdate。執筆対象の場コード(jcd)は次のみ: $targetStr。この対象場だけを執筆し、既存記事のある場は絶対に上書きしない。PR作成・push・mergeは行わない（公開はスクリプトが行う）。以下のランブックに厳密に従うこと。"
+        $prompt = $header + "`r`n`r`n" + $runbook   # runbook はデータとして連結（再解釈させない）
+        Log ("claude 実行開始（試行 {0}/{1}・対象{2}場=[{3}]・model=claude-sonnet-5, max-turns=200, acceptEdits）" -f $attempt, $maxAttempts, $remaining.Count, $targetStr)
+        $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+        & $Claude -p $prompt `
+            --append-system-prompt-file $RulesPath `
+            --allowedTools "Read,Write,Edit,Bash(python scripts/assign_styles.py*),Bash(python scripts/lintKansenki.py*),Bash(python scripts/kansenki_pubplan.py*)" `
+            --permission-mode acceptEdits `
+            --max-turns 200 `
+            --model claude-sonnet-5 `
+            --output-format json 2>&1 | Out-File -FilePath $claudeOut -Encoding utf8
+        $claudeRc = $LASTEXITCODE
+        $ErrorActionPreference = $prev
+        try {
+            $cj = Get-Content $claudeOut -Raw -Encoding utf8 | ConvertFrom-Json
+            Log ("claude 完了 rc={0} cost_usd={1} session={2}" -f $claudeRc, $cj.total_cost_usd, $cj.session_id)
+        } catch {
+            Log ("claude 完了 rc={0}（JSON解析不可・出力先 {1}）" -f $claudeRc, $claudeOut)
+        }
+        $doneAfter = @(Get-DoneJcds)
+        $after = @($toWrite | Where-Object { $_ -notin $doneAfter })
+        if ($after.Count -eq 0) { Log ("全{0}場の生成を確認" -f $toWrite.Count); break }
+        $progressed = ($after.Count -lt $remaining.Count)
+        if ($attempt -lt $maxAttempts) {
+            if (-not $progressed -and $claudeRc -eq 0) {
+                Log ("進捗なし・rc=0 → 再試行しない（未生成 {0}場=[{1}]）" -f $after.Count, ($after -join ' ')); break
+            }
+            Log ("未生成 {0}場=[{1}]（rc={2}）→ 再実行 {3}/{4}" -f $after.Count, ($after -join ' '), $claudeRc, ($attempt + 1), $maxAttempts)
+        } else {
+            Log ("最大試行到達。未生成 {0}場=[{1}]（rc={2}）" -f $after.Count, ($after -join ' '), $claudeRc)
+        }
     }
-    if ($claudeRc -ne 0) { throw "claude 実行が非ゼロ終了 (rc=$claudeRc)。認証失効/失敗の可能性。今回は書かず持ち越し。" }
 
-    # --- f) 検査: 各記事 lint → FAIL は削除（持ち越し）。その後 coverage ---
+    # --- f) 検査: 各記事 lint → FAIL は削除（持ち越し）。PASS分は必ず公開する ---
     $written = @(Get-ChildItem -Path (Join-Path $ArticlesDir ("{0}-*.json" -f $Pubdate)) -ErrorAction SilentlyContinue)
     if ($written.Count -eq 0) { Log "生成物なし → 公開なし（持ち越し）。正常終了。"; exit 0 }
     $keep = @()
@@ -148,13 +176,12 @@ try {
     }
     Log ("lint 結果: PASS {0}場 / 生成 {1}場" -f $keep.Count, $written.Count)
     if ($keep.Count -eq 0) { Log "全対象 lint FAIL → 公開なし（持ち越し）。正常終了。"; exit 0 }
-    Invoke-Step 'lint --coverage' { & $Py scripts\lintKansenki.py --coverage $Pubdate } | Out-Null
 
-    # --- g) 公開: PASS 記事だけ add → commit → pull --rebase → push ------
+    # --- g) 公開: lint PASS 記事は途中終了でも必ず add → commit → pull --rebase → push ---
     Invoke-Step 'git add' { & $Git add $keep } | Out-Null
     $staged = & $Git diff --staged --name-only
     if (-not $staged) { Log "差分なし（公開なし）。正常終了。"; exit 0 }
-    $msg = "kansenki: $Pubdate 掲載分 観戦記 +$($keep.Count)場（local・場単位・lint全場PASS）"
+    $msg = "kansenki: $Pubdate 掲載分 観戦記 +$($keep.Count)場（local・場単位・lint PASS分）"
     Invoke-Step 'git commit' { & $Git commit -m $msg } | Out-Null
     try {
         Invoke-Step 'git pull --rebase' { & $Git pull --rebase origin main } | Out-Null
@@ -164,8 +191,18 @@ try {
     }
     Invoke-Step 'git push' { & $Git push origin main } | Out-Null
     $head = (& $Git rev-parse --short HEAD).Trim()
-    Log ("=== 完了: {0}場を push（{1}）===" -f $keep.Count, $head)
-    exit 0
+
+    # --- h) 網羅性の確定（PASS分は公開済み。不足があれば最終行に明記して終了） ---
+    $passJcds = @($keep | ForEach-Object { [regex]::Match($_, '-(\d{2})\.json$').Groups[1].Value })
+    $missing = @($toWrite | Where-Object { $_ -notin $passJcds })
+    if ($missing.Count -eq 0) {
+        Invoke-Native { & $Py scripts\lintKansenki.py --coverage $Pubdate } | Out-Null
+        Log ("=== 完了: {0}場を push（{1}）・全{2}場網羅 ===" -f $keep.Count, $head, $toWrite.Count)
+        exit 0
+    }
+    Log ("{0}場を push（{1}）" -f $keep.Count, $head)
+    Log ("未完了：{0}場が未コミット（jcd=[{1}]）。手動穴埋めが必要" -f $missing.Count, ($missing -join ' '))
+    exit 1
 }
 catch {
     Log ("ERROR: {0}" -f $_.Exception.Message)
